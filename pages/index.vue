@@ -1,7 +1,7 @@
 <template>
-    <div>
-        Это главная страница
-    </div>
+  <LandingHeroSection />
+  <LandingFeaturesSection />
+  <LandingCtaSection />
 </template>
 
 <script setup lang="ts">

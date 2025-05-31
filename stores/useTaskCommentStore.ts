@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
 import { useApiErrorHandler } from "~/utils/apiErrorHandler";
 import { useToast } from "vue-toastification";
-import type { CreateTaskCommentRequest, TaskCommentDto, UpdateTaskCommentRequest } from "~/types/project/taskComment.types";
 import { taskCommentServiceFactory } from "~/services/project/taskCommentServiceFactory";
+import type { CreateTaskCommentRequest, UpdateTaskCommentRequest } from "~/types/request.types";
+import type { TaskCommentDto } from "~/types/response.types";
 
-export const useProjectRoleClaimsStore = defineStore(
+export const useTaskCommentStore = defineStore(
   "taskComment",
   () => {
     const toast = useToast();

@@ -1,8 +1,9 @@
 import { defineStore } from "pinia";
 import { useToast } from "vue-toastification";
 import { skillServiceFactory } from "~/services/identity/skillsServiceFactory";
-import type { CreateSkillRequest, Skill, UpdateSkillRequest } from "~/types/identity/skill.types";
 import { useApiErrorHandler } from "~/utils/apiErrorHandler";
+import type { CreateSkillRequest, UpdateSkillRequest } from "~/types/request.types";
+import type { Skill } from "~/types/response.types";
 
 export const useSkillStore = defineStore("skill", () => {
   const toast = useToast();

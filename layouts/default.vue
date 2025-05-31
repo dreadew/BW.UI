@@ -1,10 +1,11 @@
 <template>
     <UContainer>
-        <HeroNavigation />
-        <slot />
+      <CommonNavigation />
+      <slot />
+      <CommonFooter />
     </UContainer>
 </template>
 
 <script lang="ts">
-import { HeroNavigation, UContainer } from '#components';
+import { CommonNavigation, CommonFooter, UContainer } from '#components';
 </script>

@@ -154,16 +154,16 @@ export const useUserStore = defineStore("user", () => {
       (message: WebNotificationDto) => {
         switch (message.level) {
           case NotificationLevel.Success:
-            toast.add(message.message);
+            toast.add({ title: message.message, color: 'primary', position: 'top-right' });
             break;
           case NotificationLevel.Info:
-            toast.add(message.message);
+            toast.add({ title: message.message, color: 'primary', position: 'top-right' });
             break;
           case NotificationLevel.Warning:
-            toast.add(message.message);
+            toast.add({ title: message.message, color: 'warning', position: 'top-right' });
             break;
           case NotificationLevel.Error:
-            toast.add(message.message);
+            toast.add({ title: message.message, color: 'danger', position: 'top-right' });
             break;
         }
       }

@@ -2,7 +2,8 @@ import { defineStore } from "pinia";
 import { projectThreadServiceFactory } from "~/services/project/projectThreadServiceFactory";
 import { useToast } from "vue-toastification";
 import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import type { CreateProjectThreadRequest, ProjectThreadDto, UpdateProjectThreadRequest } from "~/types/project/projectThread.types";
+import type { CreateProjectThreadRequest, UpdateProjectThreadRequest } from "~/types/request.types";
+import type { ProjectThreadDto } from "~/types/response.types";
 
 export const useProjectThreadStore = defineStore("projectThread", () => {
   const toast = useToast();

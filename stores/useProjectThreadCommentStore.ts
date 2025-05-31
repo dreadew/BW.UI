@@ -2,7 +2,8 @@ import { defineStore } from "pinia";
 import { projectThreadCommentServiceFactory } from "~/services/project/projectThreadCommentServiceFactory";
 import { useToast } from "vue-toastification";
 import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import type { CreateProjectThreadCommentRequest, ProjectThreadCommentDto, UpdateProjectThreadCommentRequest } from "~/types/project/projectThreadComment.types";
+import type { CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest } from "~/types/request.types";
+import type { ProjectThreadCommentDto } from "~/types/response.types";
 
 export const useProjectThreadCommentStore = defineStore(
   "projectThreadComment",

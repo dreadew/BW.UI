@@ -1,8 +1,9 @@
 import { defineStore } from "pinia";
 import { roleServiceFactory } from "~/services/identity/roleServiceFactory";
+import { useApiErrorHandler } from "#imports";
 import { useToast } from "vue-toastification";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import type { CreateUserRoleRequest, UpdateUserRoleRequest, UserRole } from "~/types/identity/userRole.types";
+import type { CreateUserRoleRequest, UpdateUserRoleRequest } from "~/types/request.types";
+import type { UserRole } from "~/types/response.types";
 
 export const useRoleStore = defineStore("role", () => {
   const toast = useToast();
@@ -105,12 +106,12 @@ export const useRoleStore = defineStore("role", () => {
     }
   }
 
-  return { 
-    roles, 
-    isLoading, 
-    error, 
+  return {
+    roles,
+    isLoading,
+    error,
     list,
-    get, 
+    get,
     create,
     update,
     deleteRole,

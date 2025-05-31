@@ -2,10 +2,8 @@ import { defineStore } from "pinia";
 import { roleClaimServiceFactory } from "~/services/identity/roleClaimServiceFactory";
 import { useToast } from "vue-toastification";
 import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import type {
-  CreateUserRoleClaimsRequest,
-  UserRoleClaim,
-} from "~/types/identity/userRoleClaim.types";
+import type { CreateUserRoleClaimsRequest } from "~/types/request.types";
+import type { UserRoleClaim } from "~/types/response.types";
 
 export const useRoleClaimStore = defineStore("roleClaim", () => {
   const toast = useToast();
