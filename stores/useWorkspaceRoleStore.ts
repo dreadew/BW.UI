@@ -2,8 +2,8 @@ import { workspaceRoleServiceFactory } from "~/services/workspace/workspaceRoleS
 import type {
   CreateWorkspaceRoleRequest,
   UpdateWorkspaceRoleRequest,
-  WorkspaceRole,
-} from "~/types/workspace/workspaceRole.types";
+} from "~/types/request.types";
+import type { WorkspaceRole } from "~/types/response.types";
 
 export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
   const roles = ref<WorkspaceRole[]>([]);

@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { sectionServiceFactory } from "~/services/project/sectionServiceFactory";
-import { useToast } from "vue-toastification";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import type { CreateSectionRequest, SectionDto, UpdateSectionRequest } from "~/types/project/section.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
+import type { CreateSectionRequest, UpdateSectionRequest } from "~/types/request.types";
+import type { SectionDto } from "~/types/response.types";
 
 export const useSectionStore = defineStore("section", () => {
   const toast = useToast();
@@ -105,13 +105,13 @@ export const useSectionStore = defineStore("section", () => {
     }
   }
 
-  return { 
-    sections, 
-    isLoading, 
-    error, 
+  return {
+    sections,
+    isLoading,
+    error,
     listByProject,
     get,
-    create, 
+    create,
     update,
     deleteSection,
     restore,

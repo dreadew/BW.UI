@@ -5,11 +5,10 @@ import type {
   CreateProjectRequest,
   DeleteProjectRequest,
   DeleteUserRequest,
-  ProjectDto,
   UpdateProjectRequest,
-} from "~/types/project/project.types";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
+} from "~/types/request.types";
+import type { ProjectDto } from "~/types/response.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useProjectStore = defineStore("project", () => {
   const toast = useToast();

@@ -2,13 +2,11 @@ import { defineStore } from "pinia";
 import { taskDirectoryServiceFactory } from "~/services/project/taskDirectoryServiceFactory";
 import type {
   CreateTaskDirectoryRequest,
-  TaskDirectoryArtifactDto,
-  TaskDirectoryDto,
+  DeleteFileRequest,
   UpdateTaskDirectoryRequest,
-} from "~/types/project/taskDirectory.types";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
-import type { DeleteFileRequest } from "~/types/file.types";
+} from "~/types/request.types";
+import type { TaskDirectoryArtifactDto, TaskDirectoryDto } from "~/types/response.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
   const toast = useToast();

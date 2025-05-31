@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
-import { useToast } from "vue-toastification";
 import { skillServiceFactory } from "~/services/identity/skillsServiceFactory";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 import type { CreateSkillRequest, UpdateSkillRequest } from "~/types/request.types";
 import type { Skill } from "~/types/response.types";
 
@@ -16,7 +15,7 @@ export const useSkillStore = defineStore("skill", () => {
   async function list() {
     isLoading.value = true;
     try {
-      const res = await skillServiceFactory 
+      const res = await skillServiceFactory
         .list()
         .execute();
       if (!res || res.length === 0) {
@@ -106,11 +105,11 @@ export const useSkillStore = defineStore("skill", () => {
     }
   }
 
-  return { 
-    skills, 
-    isLoading, 
-    error, 
-    list, 
+  return {
+    skills,
+    isLoading,
+    error,
+    list,
     get,
     create,
     update,

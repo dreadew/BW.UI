@@ -12,7 +12,6 @@
 </template>
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { toTypedSchema } from '@vee-validate/zod'
 import { createSectionRequestSchema } from '~/schemas/generated.schema'
 const props = defineProps({
   open: Boolean,
@@ -25,7 +24,7 @@ const formState = ref({
   projectId: props.projectId || '',
   name: ''
 })
-const formSchema = toTypedSchema(createSectionRequestSchema)
+const formSchema = createSectionRequestSchema;
 watch(() => props.open, (val) => { if (!val) formState.value = { projectId: props.projectId || '', name: '' } })
 const onSubmit = () => emit('submit', formState.value)
 </script>

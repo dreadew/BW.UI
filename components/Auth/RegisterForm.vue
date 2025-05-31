@@ -1,5 +1,5 @@
 <template>
-  <UForm :state="state" @submit="onSubmit" :schema="schema" class="space-y-4">
+  <UForm :schema="schema" :state="state" @submit="onSubmit" class="space-y-4">
     <UFormField label="Логин" name="username" required>
       <UInput required class="w-full" v-model="state.username" placeholder="Введите логин" size="xl" autofocus />
     </UFormField>
@@ -49,12 +49,11 @@ import { ref } from 'vue'
 import { useUserStore } from '~/stores/useUserStore'
 import { storeToRefs } from 'pinia'
 import { signUpRequestSchema } from '~/schemas/generated.schema'
-import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { useRouter } from '#app'
 import { PHONE_NUMBER } from '~/constants/regexp.constants'
 
-const emit = defineEmits(['openLogin']);
+const emit = defineEmits(['openLogin', 'successRegister']);
 const props = defineProps({
   asModal: {
     type: Boolean,
@@ -79,8 +78,14 @@ const state = reactive<Partial<z.output<typeof schema>>>({
 
 const onSubmit = async () => {
   const { agree, ...userData } = state;
-  const success = await userStore.register(userData)
-  if (success) router.push('/login')
+  const success = await userStore.register(userData);
+  if (success) {
+    if (props.asModal) {
+      router.push('/auth/sign-in');
+      return;
+    }
+    emit('successRegister');
+  }
 }
 
 const onLoginClick = () => {

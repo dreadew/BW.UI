@@ -78,7 +78,6 @@ import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useWorkspacePositionStore } from '~/stores/useWorkspacePositionStore'
 import { createWorkspacePositionRequestSchema, updateWorkspacePositionRequestSchema } from '~/schemas/generated.schema'
-import { toTypedSchema } from '@vee-validate/zod'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
 
@@ -93,8 +92,8 @@ const openDeleteModal = ref(false)
 const selectedPosition = ref<any>(null)
 const formState = ref<any>({ name: '' })
 const formLoading = ref(false)
-const createFormSchema = toTypedSchema(createWorkspacePositionRequestSchema)
-const editFormSchema = toTypedSchema(updateWorkspacePositionRequestSchema)
+const createFormSchema = createWorkspacePositionRequestSchema;
+const editFormSchema = updateWorkspacePositionRequestSchema;
 const columns = [
     { accessorKey: 'id', header: 'ID', cell: ({ row }) => row.original.id },
     { accessorKey: 'name', header: 'Название', cell: ({ row }) => row.original.name },

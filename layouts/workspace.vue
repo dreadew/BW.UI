@@ -8,7 +8,7 @@
                 </div>
             </div>
             <main class="flex-1 p-6">
-                <ProjectSidebar />
+                <!-- <ProjectSidebar /> -->
                 <!-- основной контент страницы -->
                 <slot />
             </main>
@@ -17,8 +17,6 @@
 </template>
 
 <script setup lang="ts">
-import UiHeading from '~/components/Ui/Heading.vue'
-import ProjectSidebar from '~/components/Project/ProjectSidebar.vue'
 import { useRoute } from 'vue-router'
 import { computed, ref } from 'vue'
 import { useColorMode } from '@vueuse/core'

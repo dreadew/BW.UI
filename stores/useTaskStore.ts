@@ -4,12 +4,10 @@ import type {
   AddTaskAssigneeRequest,
   CreateTaskRequest,
   RemoveTaskAssigneeRequest,
-  TaskDto,
-  TaskPositionDto,
   UpdateTaskRequest,
-} from "~/types/project/task.types";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
+} from "~/types/request.types";
+import type { TaskDto, TaskPositionDto } from "~/types/response.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useTaskStore = defineStore("task", () => {
   const toast = useToast();
@@ -32,11 +30,11 @@ export const useTaskStore = defineStore("task", () => {
       const res = await taskServiceFactory
         .listByProject(projectId, {})
         .execute();
-      
+
       if (!res || res.length === 0) {
         return;
       }
-      
+
       tasks.value = res;
     } catch (err) {
       errorHandler.handleError(err);
@@ -53,11 +51,11 @@ export const useTaskStore = defineStore("task", () => {
       const res = await taskServiceFactory
         .listBySection(sectionId, {})
         .execute();
-      
+
       if (!res || res.length === 0) {
         return;
       }
-      
+
       tasks.value = res;
     } catch (err) {
       errorHandler.handleError(err);

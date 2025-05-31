@@ -77,7 +77,6 @@ import { ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSkillStore } from '~/stores/useSkillStore'
 import { createSkillRequestSchema, updateSkillRequestSchema } from '~/schemas/generated.schema'
-import { toTypedSchema } from '@vee-validate/zod'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
 
@@ -90,8 +89,8 @@ const openDeleteModal = ref(false)
 const selectedSkill = ref<any>(null)
 const formState = ref<any>({ name: '' })
 const formLoading = ref(false)
-const createFormSchema = toTypedSchema(createSkillRequestSchema)
-const editFormSchema = toTypedSchema(updateSkillRequestSchema)
+const createFormSchema = createSkillRequestSchema;
+const editFormSchema = updateSkillRequestSchema;
 const columns = [
     { accessorKey: 'id', header: 'ID', cell: ({ row }) => row.original.id },
     { accessorKey: 'name', header: 'Название', cell: ({ row }) => row.original.name },

@@ -58,8 +58,6 @@
 import { ref, computed } from 'vue'
 import { useProjectStore } from '~/stores/useProjectStore'
 import { storeToRefs } from 'pinia'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
 import { createProjectRequestSchema } from '~/schemas/generated.schema'
 
 const projectStore = useProjectStore()
@@ -72,7 +70,7 @@ const formLoading = ref(false)
 const formState = ref({ name: '', workspaceId: '' })
 const projectToDelete = ref(null)
 
-const createFormSchema = toTypedSchema(createProjectRequestSchema)
+const createFormSchema = createProjectRequestSchema;
 
 const filteredProjects = computed(() => {
   if (!search.value) return projects.value

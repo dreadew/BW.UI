@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <section class="py-24 h-screen w-full">
+  <section class="py-24 w-full">
     <div class="container space-y-16">
       <div class="flex flex-col gap-4 text-center">
         <UiHeading size="4xl" class="tracking-tight sm:text-6xl">

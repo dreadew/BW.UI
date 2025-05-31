@@ -52,7 +52,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '~/stores/useWorkspaceStore'
 import { updateWorkspaceRequestSchema } from '~/schemas/generated.schema'
-import { toTypedSchema } from '@vee-validate/zod'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
 
@@ -66,7 +65,7 @@ const openEditModal = ref(false)
 const openDeleteModal = ref(false)
 const formState = ref<any>({ name: '' })
 const formLoading = ref(false)
-const editFormSchema = toTypedSchema(updateWorkspaceRequestSchema)
+const editFormSchema = updateWorkspaceRequestSchema;
 
 watch(openEditModal, (open) => {
     if (open && workspace.value) {

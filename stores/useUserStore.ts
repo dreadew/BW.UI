@@ -56,7 +56,11 @@ export const useUserStore = defineStore("user", () => {
     storedUserId.value = "";
     await connection.value?.stop();
 
-    toast.success("Вы успешно вышли из аккаунта");
+    toast.add({
+      title: 'Успех!',
+      description: 'Вы успешно вышли из аккаунта',
+      color: 'success'
+    });
   }
 
   async function fetchCurrentUser() {
@@ -112,9 +116,9 @@ export const useUserStore = defineStore("user", () => {
     //const { isValid, errors } = await validate(signInRequestSchema, credentials);
 
     //if (!isValid) {
-      //validationErrors.value = errors || {};
-      //isLoading.value = false;
-      //return false;
+    //validationErrors.value = errors || {};
+    //isLoading.value = false;
+    //return false;
     //}
 
     try {
@@ -154,16 +158,16 @@ export const useUserStore = defineStore("user", () => {
       (message: WebNotificationDto) => {
         switch (message.level) {
           case NotificationLevel.Success:
-            toast.add({ title: message.message, color: 'primary', position: 'top-right' });
+            toast.add({ title: message.message, color: 'primary' });
             break;
           case NotificationLevel.Info:
-            toast.add({ title: message.message, color: 'primary', position: 'top-right' });
+            toast.add({ title: message.message, color: 'primary' });
             break;
           case NotificationLevel.Warning:
-            toast.add({ title: message.message, color: 'warning', position: 'top-right' });
+            toast.add({ title: message.message, color: 'warning' });
             break;
           case NotificationLevel.Error:
-            toast.add({ title: message.message, color: 'danger', position: 'top-right' });
+            toast.add({ title: message.message, color: 'error' });
             break;
         }
       }

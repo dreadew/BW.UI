@@ -2,11 +2,10 @@ import { defineStore } from "pinia";
 import { taskActivityServiceFactory } from "~/services/project/taskActivityServiceFactory";
 import type {
   CreateTaskActivityRequest,
-  TaskActivityDto,
   UpdateTaskActivityRequest,
-} from "~/types/project/taskActivity.types";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
+} from "~/types/request.types";
+import type { TaskActivityDto } from "~/types/response.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useTaskActivityStore = defineStore("taskActivity", () => {
   const toast = useToast();

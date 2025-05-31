@@ -1,16 +1,14 @@
 import { defineStore } from "pinia";
 import { workspaceServiceFactory } from "~/services/workspace/workspaceServiceFactory";
-import type { DeleteFileRequest } from "~/types/file.types";
-import type {
-  Workspace,
-  UpdateWorkspaceRequest,
-  CreateWorkspaceRequest,
-} from "~/types/workspace/workspace.types";
 import type {
   InviteWorkspaceUserRequest,
   UpdateWorkspaceUserRequest,
   DeleteWorkspaceUserRequest,
-} from "~/types/workspace/workspaceUser.types";
+  UpdateWorkspaceRequest,
+  CreateWorkspaceRequest,
+  DeleteFileRequest,
+} from "~/types/request.types";
+import type { Workspace } from "~/types/response.types";
 
 export const useWorkspaceStore = defineStore("Workspace", () => {
   const workspaces = ref<Workspace[]>([]);

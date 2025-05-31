@@ -97,7 +97,6 @@ import { ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoleStore } from '~/stores/useRoleStore'
 import { createUserRoleRequestSchema, updateUserRoleRequestSchema } from '~/schemas/generated.schema'
-import { toTypedSchema } from '@vee-validate/zod'
 import { DateUtils } from '~/utils/date.utils'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
@@ -119,8 +118,8 @@ const selectedRole = ref<any>(null)
 const formState = ref<any>({ name: '' })
 const formLoading = ref(false)
 
-const createFormSchema = toTypedSchema(createUserRoleRequestSchema)
-const editFormSchema = toTypedSchema(updateUserRoleRequestSchema)
+const createFormSchema = createUserRoleRequestSchema;
+const editFormSchema = updateUserRoleRequestSchema;
 
 const columns = [
     {

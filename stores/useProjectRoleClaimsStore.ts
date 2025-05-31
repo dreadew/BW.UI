@@ -2,11 +2,10 @@ import { defineStore } from "pinia";
 import { projectRoleClaimsServiceFactory } from "~/services/project/projectRoleClaimsServiceFactory";
 import type {
   CreateProjectRoleClaimsRequest,
-  ProjectRoleClaimsDto,
   UpdateProjectRoleClaimsRequest,
-} from "~/types/project/projectRoleClaimsService.types";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
+} from "~/types/request.types";
+import type { ProjectRoleClaimsDto } from "~/types/response.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useProjectRoleClaimsStore = defineStore(
   "projectRoleClaims",
@@ -43,7 +42,7 @@ export const useProjectRoleClaimsStore = defineStore(
         isLoading.value = false;
       }
     }
-    
+
     async function get(id: string) {
       isLoading.value = true;
 

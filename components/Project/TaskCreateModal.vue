@@ -24,7 +24,6 @@
 </template>
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { toTypedSchema } from '@vee-validate/zod'
 import { createTaskRequestSchema } from '~/schemas/generated.schema'
 const props = defineProps({
   open: Boolean,
@@ -39,7 +38,7 @@ const formState = ref({
   startedDate: '',
   endDate: ''
 })
-const formSchema = toTypedSchema(createTaskRequestSchema)
+const formSchema = createTaskRequestSchema;
 watch(() => props.open, (val) => { if (!val) formState.value = { id: '', name: '', isArchived: false, startedDate: '', endDate: '' } })
 const onSubmit = () => emit('submit', formState.value)
 </script>

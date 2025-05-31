@@ -77,7 +77,6 @@ import { ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoleClaimStore } from '~/stores/useRoleClaimStore'
 import { createUserRoleClaimsRequestSchema, updateUserRoleClaimsRequestSchema } from '~/schemas/generated.schema'
-import { toTypedSchema } from '@vee-validate/zod'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
 
@@ -90,8 +89,8 @@ const openDeleteModal = ref(false)
 const selectedClaim = ref<any>(null)
 const formState = ref<any>({ value: '' })
 const formLoading = ref(false)
-const createFormSchema = toTypedSchema(createUserRoleClaimsRequestSchema)
-const editFormSchema = toTypedSchema(updateUserRoleClaimsRequestSchema)
+const createFormSchema = createUserRoleClaimsRequestSchema;
+const editFormSchema = updateUserRoleClaimsRequestSchema;
 const columns = [
     { accessorKey: 'id', header: 'ID', cell: ({ row }) => row.original.id },
     { accessorKey: 'value', header: 'Значение', cell: ({ row }) => row.original.value },

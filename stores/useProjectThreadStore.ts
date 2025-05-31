@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { projectThreadServiceFactory } from "~/services/project/projectThreadServiceFactory";
-import { useToast } from "vue-toastification";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 import type { CreateProjectThreadRequest, UpdateProjectThreadRequest } from "~/types/request.types";
 import type { ProjectThreadDto } from "~/types/response.types";
 
@@ -106,15 +105,15 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
     }
   }
 
-  return { 
-    threads, 
-    isLoading, 
-    error, 
+  return {
+    threads,
+    isLoading,
+    error,
     list,
     get,
-    create, 
+    create,
     update,
     deleteThread,
-    restore 
+    restore
   };
 });

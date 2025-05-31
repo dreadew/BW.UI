@@ -2,11 +2,10 @@ import { defineStore } from "pinia";
 import { taskEvaluationServiceFactory } from "~/services/project/taskEvaluationServiceFactory";
 import type {
   CreateTaskEvaluationRequest,
-  TaskEvaluationDto,
   UpdateTaskEvaluationRequest,
-} from "~/types/project/taskEvaluation.types";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
+} from "~/types/request.types";
+import type { TaskEvaluationDto } from "~/types/response.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useTaskEvaluationStore = defineStore("taskEvaluation", () => {
   const toast = useToast();
@@ -123,7 +122,7 @@ export const useTaskEvaluationStore = defineStore("taskEvaluation", () => {
     } finally {
       isLoading.value = false;
     }
-  } 
+  }
 
   return {
     evaluations,

@@ -2,11 +2,10 @@ import { defineStore } from "pinia";
 import { projectRoleServiceFactory } from "~/services/project/projectRoleServiceFactory";
 import type {
   CreateProjectRoleRequest,
-  ProjectRoleDto,
   UpdateProjectRoleRequest,
-} from "~/types/project/projectRole.types";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
+} from "~/types/request.types";
+import type { ProjectRoleDto } from "~/types/response.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useProjectRoleStore = defineStore("projectRole", () => {
   const toast = useToast();

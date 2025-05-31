@@ -1,5 +1,5 @@
 <template>
-  <UForm :state="state" @submit="onSubmit" :schema="schema" class="space-y-4">
+  <UForm :schema="schema" :state="state" @submit="onSubmit" class="space-y-4">
     <UFormField label="Логин" name="username" required>
       <UInput required class="w-full" v-model="state.username" placeholder="Введите логин" size="xl" autofocus />
     </UFormField>
@@ -23,10 +23,9 @@ import { ref } from 'vue'
 import { useUserStore } from '~/stores/useUserStore'
 import { storeToRefs } from 'pinia'
 import { signInRequestSchema } from '~/schemas/generated.schema'
-import { toTypedSchema } from '@vee-validate/zod'
 import { useRouter } from '#app'
 
-const emit = defineEmits(['openRegister']);
+const emit = defineEmits(['openRegister', 'successAuth']);
 const props = defineProps({
   asModal: {
     type: Boolean,
@@ -37,12 +36,15 @@ const props = defineProps({
 const userStore = useUserStore()
 const { isLoading } = storeToRefs(userStore)
 const state = ref({ username: '', password: '', rememberMe: false })
-const schema = toTypedSchema(signInRequestSchema)
+const schema = signInRequestSchema; 
 const router = useRouter()
 
 const onSubmit = async () => {
-  const success = await userStore.login(state.value)
-  if (success) router.push('/')
+  const success = await userStore.login(state.value);
+  if (success) {
+    router.push('/');
+    emit('successAuth');
+  }
 }
 
 const onRegisterClick = () => {

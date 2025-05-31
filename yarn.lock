@@ -593,6 +593,13 @@
     "@floating-ui/utils" "^0.2.9"
     vue-demi ">=0.13.0"
 
+"@iconify-json/lucide@^1.2.45":
+  version "1.2.45"
+  resolved "https://registry.yarnpkg.com/@iconify-json/lucide/-/lucide-1.2.45.tgz#1af8b3193b3d85d2712d5b78c26495573669b11d"
+  integrity sha512-izW3wk7Ll5HgNMc/m41eOKXb7nL1zFxXZdMyBOtqdwusHXPr8IWSC/ReSgWgxUF3xyNwiQsso5Ppkta2wsUrPg==
+  dependencies:
+    "@iconify/types" "*"
+
 "@iconify/collections@^1.0.548":
   version "1.0.553"
   resolved "https://registry.yarnpkg.com/@iconify/collections/-/collections-1.0.553.tgz#94d30e6f94cc9704e0eab198aecf5eed858e6e3f"

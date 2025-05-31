@@ -69,7 +69,6 @@ import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceDirectoryStore } from '~/stores/useWorkspaceDirectoryStore'
 import { createWorkspaceDirectoryRequestSchema, updateWorkspaceDirectoryRequestSchema } from '~/schemas/generated.schema'
-import { toTypedSchema } from '@vee-validate/zod'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
 
@@ -84,8 +83,8 @@ const openDeleteModal = ref(false)
 const selectedDirectory = ref<any>(null)
 const formState = ref<any>({ name: '' })
 const formLoading = ref(false)
-const createFormSchema = toTypedSchema(createWorkspaceDirectoryRequestSchema)
-const editFormSchema = toTypedSchema(updateWorkspaceDirectoryRequestSchema)
+const createFormSchema = createWorkspaceDirectoryRequestSchema;
+const editFormSchema = updateWorkspaceDirectoryRequestSchema;
 const treeData = computed(() => {
     let data = directories.value
     if (search.value) {

@@ -15,7 +15,6 @@
 </template>
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { toTypedSchema } from '@vee-validate/zod'
 import { createProjectThreadRequestSchema } from '~/schemas/generated.schema'
 const props = defineProps({
   open: Boolean,
@@ -31,7 +30,7 @@ const formState = ref({
   title: '',
   text: ''
 })
-const formSchema = toTypedSchema(createProjectThreadRequestSchema)
+const formSchema = createProjectThreadRequestSchema;
 watch(() => props.open, (val) => { if (!val) formState.value = { projectId: props.projectId || '', fromId: props.fromId || '', title: '', text: '' } })
 const onSubmit = () => emit('submit', formState.value)
 </script>

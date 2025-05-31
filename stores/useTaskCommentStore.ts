@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 import { taskCommentServiceFactory } from "~/services/project/taskCommentServiceFactory";
 import type { CreateTaskCommentRequest, UpdateTaskCommentRequest } from "~/types/request.types";
 import type { TaskCommentDto } from "~/types/response.types";
@@ -40,7 +39,7 @@ export const useTaskCommentStore = defineStore(
         isLoading.value = false;
       }
     }
-    
+
     async function get(id: string) {
       isLoading.value = true;
 
@@ -108,21 +107,21 @@ export const useTaskCommentStore = defineStore(
     }
 
     async function restore(commentId: string) {
-        resetState();
-        isLoading.value = true;
-  
-        try {
-          await taskCommentServiceFactory
-            .restore(commentId)
-            .ensured("Комментарий успешно восстановлен");
-          return true;
-        } catch (err) {
-          errorHandler.handleError(err);
-          return false;
-        } finally {
-          isLoading.value = false;
-        }
+      resetState();
+      isLoading.value = true;
+
+      try {
+        await taskCommentServiceFactory
+          .restore(commentId)
+          .ensured("Комментарий успешно восстановлен");
+        return true;
+      } catch (err) {
+        errorHandler.handleError(err);
+        return false;
+      } finally {
+        isLoading.value = false;
       }
+    }
 
     return {
       comments,

@@ -1,10 +1,10 @@
 import { workspaceDirectoryServiceFactory } from "~/services/workspace/workspaceDirectoryServiceFactory";
-import type { DeleteFileRequest } from "~/types/file.types";
 import type {
   CreateWorkspaceDirectoryRequest,
+  DeleteFileRequest,
   UpdateWorkspaceDirectoryRequest,
-  WorkspaceDirectory,
-} from "~/types/workspace/workspaceDirectory.types";
+} from "~/types/request.types";
+import type { WorkspaceDirectory } from "~/types/response.types";
 
 export const useWorkspaceDirectoryStore = defineStore(
   "WorkspaceDirectory",

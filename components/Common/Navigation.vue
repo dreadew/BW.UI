@@ -3,6 +3,8 @@ import type { NavigationMenuItem } from '@nuxt/ui';
 import { ref } from 'vue';
 import { useColorMode } from '@vueuse/core'
 
+const { isAuthenticated, logout } = useUserStore();
+
 const items = ref<NavigationMenuItem[]>([
   {
     label: 'Главная',
@@ -45,6 +47,14 @@ const items = ref<NavigationMenuItem[]>([
   }
 ]);
 
+const AuthorizedLinks = ref<NavigationMenuItem[]>([
+  {
+    label: 'Профиль',
+    icon: 'i-lucide-user',
+    to: '/profile'
+  }
+])
+
 const showLogin = ref(false);
 const showRegister = ref(false);
 
@@ -68,18 +78,21 @@ const toggleTheme = () => {
 
 <template>
   <div class="border border-secondary/10 bg-secondary/2 rounded-2xl py-2 px-3 my-4 flex items-center gap-4 justify-center">
-    <UNavigationMenu :items="items" class="flex-1" />
+    <UNavigationMenu :items="isAuthenticated ? [...items, ...AuthorizedLinks] : items" class="flex-1" />
     <UToggle v-model="isDark" on-icon="i-lucide-moon" off-icon="i-lucide-sun" @click="toggleTheme" class="mr-2" />
-    <UButton color="primary" variant="soft" @click="showLogin = true">
+    <UButton v-if="!isAuthenticated" color="primary" variant="soft" @click="showLogin = true">
       <UIcon name="i-lucide-log-in" class="mr-1" /> Войти
     </UButton>
-    <UButton color="primary" variant="outline" @click="showRegister = true">
+    <UButton v-if="!isAuthenticated" color="primary" variant="outline" @click="showRegister = true">
       <UIcon name="i-lucide-user-plus" class="mr-1" /> Зарегистрироваться
     </UButton>
-    <UModal v-model:open="showLogin" title="Вход">
+    <UButton v-if="isAuthenticated" color="neutral" variant="subtle" @click="logout" trailing-icon="i-lucide-user-plus">
+      Выйти
+    </UButton>
+    <UModal v-if="!isAuthenticated" v-model:open="showLogin" title="Вход">
       <template #header>
-        <UiHeading level="5">
-          <UIcon name="i-lucide-log-in" class="mr-1" /> Вход в систему
+        <UiHeading class="flex items-center gap-2" level="5">
+          <UIcon name="i-lucide-log-in" /> Вход в систему
         </UiHeading>
       </template>
       <template #description>
@@ -88,13 +101,13 @@ const toggleTheme = () => {
         </UiText>
       </template>
       <template #body>
-        <AuthLoginForm asModal @success="showLogin = false" @openRegister="onOpenRegister" />
+        <AuthLoginForm asModal @success="showLogin = false" @openRegister="onOpenRegister" @success-auth="showLogin = false" />
       </template>
     </UModal>
-    <UModal v-model:open="showRegister" title="Регистрация">
+    <UModal v-if="!isAuthenticated" v-model:open="showRegister" title="Регистрация">
       <template #header>
-        <UiHeading level="5">
-          <UIcon name="i-lucide-user-plus" class="mr-1" /> Регистрация
+        <UiHeading class="flex items-center gap-2" level="5">
+          <UIcon name="i-lucide-user-plus" /> Регистрация
         </UiHeading>
       </template>
       <template #description>
@@ -103,7 +116,7 @@ const toggleTheme = () => {
         </UiText>
       </template>
       <template #body>
-        <AuthRegisterForm asModal @success="showRegister = false" @openLogin="onOpenLogin" />
+        <AuthRegisterForm asModal @success="showRegister = false" @openLogin="onOpenLogin" @success-register="onOpenLogin" />
       </template>
     </UModal>
   </div>

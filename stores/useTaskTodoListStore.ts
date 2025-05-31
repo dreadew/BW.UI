@@ -3,12 +3,11 @@ import { taskTodoListServiceFactory } from "~/services/project/taskTodoListServi
 import type {
   CreateTaskTodoListRequest,
   CreateTaskTodoListItemRequest,
-  TaskTodoListDto,
   UpdateTaskTodoListRequest,
   UpdateTaskTodoListItemRequest,
-} from "~/types/project/taskTodoList.types";
-import { useApiErrorHandler } from "~/utils/apiErrorHandler";
-import { useToast } from "vue-toastification";
+} from "~/types/request.types";
+import type { TaskTodoListDto } from "~/types/response.types";
+import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useTaskTodoListStore = defineStore("taskTodoList", () => {
   const toast = useToast();
@@ -32,12 +31,16 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       const res = await taskTodoListServiceFactory
         .list(taskId)
         .execute();
-      
+
       if (!res || res.length === 0) {
-        toast.info("Список задач пуст");
+        toast.add({
+          title: 'Внимание!',
+          description: 'Список задач пуст',
+          color: 'warning'
+        });
         return;
       }
-      
+
       todoLists.value = res;
     } catch (err) {
       errorHandler.handleError(err);
@@ -49,12 +52,12 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
 
   async function get(todoListId: string) {
     isLoading.value = true;
-    
+
     try {
       return await taskTodoListServiceFactory
         .get(todoListId)
         .execute();
-    } catch(err) {
+    } catch (err) {
       errorHandler.handleError(err);
       return null;
     } finally {
