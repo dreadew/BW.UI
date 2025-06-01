@@ -41,6 +41,8 @@ export const useUserStore = defineStore("user", () => {
     return `${user.value.username}`.trim();
   });
 
+  const userId = computed(() => user.value?.id ?? storedUserId.value ?? tokenManager.getUserId());
+
   function resetState() {
     isLoading.value = false;
     error.value = null;
@@ -355,8 +357,15 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
+  async function ensureUserLoaded() {
+    if (!user.value && (accessToken.value && (storedUserId.value || tokenManager.getUserId()))) {
+      await fetchCurrentUser();
+    }
+  }
+
   return {
     user,
+    userId,
     isLoading,
     error,
     validationErrors,
@@ -366,6 +375,7 @@ export const useUserStore = defineStore("user", () => {
     logout,
     register,
     fetchCurrentUser,
+    ensureUserLoaded,
     updateProfile,
     uploadProfilePhoto,
     // generateVerificationCode,

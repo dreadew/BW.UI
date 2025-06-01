@@ -111,12 +111,21 @@ export interface UpdateSkillRequest {
    * @pattern ^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$
    */
   name: string;
+  /**
+   * @description Признак удаления
+   */
+  isDeleted?: boolean;
 }
 
 /**
  * @description Запрос на роль
  */
 export interface RoleRequest {
+  /**
+   * @description Идентификатор пользователя
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
   /**
    * @description Идентификатор роли
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
@@ -129,6 +138,11 @@ export interface RoleRequest {
  */
 export interface SkillRequest {
   /**
+   * @description Идентификатор пользователя
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
+  /**
    * @description Идентификатор навыка
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
    */
@@ -139,6 +153,11 @@ export interface SkillRequest {
  * @description Запрос на обновление пользователя
  */
 export interface UpdateUserRequest {
+  /**
+   * @description Идентификатор пользователя
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
   /**
    * @description Email
    * @format email
@@ -196,6 +215,11 @@ export interface VerifyUserRequest {
  */
 export interface RecoverPasswordRequest {
   /**
+   * @description Идентификатор
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
+  /**
    * @description Новый пароль
    * @minLength 8
    * @maxLength 32
@@ -241,6 +265,10 @@ export interface UpdateUserRoleRequest {
    * @optional
    */
   name?: string;
+  /**
+   * @description Признак удаления
+   */
+  isDeleted?: boolean;
 }
 
 /**
@@ -318,6 +346,11 @@ export interface CreateUserScheduleRequest {
  * @description Запрос на обновление расписания пользователя
  */
 export interface UpdateUserScheduleRequest {
+  /**
+   * @description Идентификатор расписания
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
   /**
    * @description Дата
    * @optional
@@ -535,7 +568,7 @@ export interface UpdateProjectThreadRequest {
   id: string;
   /**
    * @description Идентификатор автора
-   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}
    */
   fromId: string;
   /**
@@ -666,6 +699,21 @@ export interface CreateTaskRequest {
    * @optional
    */
   endDate?: string;
+  /**
+   * @description Тип приоритета
+   * @optional
+   */
+  priorityTypeId?: string;
+  /**
+   * @description Тип активности
+   * @optional
+   */
+  activityTypeId?: string;
+  /**
+   * @description Тип отношения
+   * @optional
+   */
+  relationTypeId?: string;
 }
 
 /**
@@ -756,11 +804,6 @@ export interface CreateTaskActivityRequest {
    */
   activityId: string;
   /**
-   * @description Идентификатор автора
-   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
-   */
-  fromId: string;
-  /**
    * @description Дата
    */
   date: string;
@@ -791,11 +834,6 @@ export interface UpdateTaskActivityRequest {
    */
   activityId: string;
   /**
-   * @description Идентификатор исполнителя
-   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}
-   */
-  fromId: string;
-  /**
    * @description Часы работы
    */
   workHours: number;
@@ -810,11 +848,6 @@ export interface CreateTaskCommentRequest {
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
    */
   taskId: string;
-  /**
-   * @description Идентификатор автора
-   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
-   */
-  authorId: string;
   /**
    * @description Текст комментария
    * @minLength 1
@@ -831,11 +864,6 @@ export interface UpdateTaskCommentRequest {
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
    */
   id: string;
-  /**
-   * @description Идентификатор автора
-   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
-   */
-  fromId: string;
   /**
    * @description Текст комментария
    * @optional
@@ -1039,12 +1067,22 @@ export interface CreateWorkspaceRequest {
  */
 export interface UpdateWorkspaceRequest {
   /**
+   * @description Идентификатор рабочего пространства
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
+  /**
    * @description Название рабочего пространства
    * @minLength 1
    * @maxLength 128
    * @pattern ^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$
    */
   name: string;
+  /**
+   * @description Признак удаления
+   * @optional
+   */
+  isDeleted?: boolean;
 }
 
 /**
@@ -1070,12 +1108,26 @@ export interface CreateWorkspaceDirectoryRequest {
  */
 export interface UpdateWorkspacePositionRequest {
   /**
+   * @description Идентификатор должности
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
+  /**
+   * @description Идентификатор рабочего пространства
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  workspaceId: string;
+  /**
    * @description Название
    * @minLength 1
    * @maxLength 128
    * @pattern ^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$
    */
   name: string;
+  /**
+   * @description Признак удаления
+   */
+  isDeleted?: boolean;
 }
 
 /**
@@ -1101,12 +1153,22 @@ export interface CreateWorkspaceRoleRequest {
  */
 export interface UpdateWorkspaceRoleRequest {
   /**
+   * @description Идентификатор роли
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
+  /**
    * @description Название роли
    * @minLength 1
    * @maxLength 128
    * @pattern ^[a-zA-Z ]+$
    */
   name: string;
+  /**
+   * @description Признак удаления
+   * @optional
+   */
+  isDeleted?: boolean;
 }
 
 /**
@@ -1132,6 +1194,11 @@ export interface CreateWorkspaceRoleClaimRequest {
  */
 export interface UpdateWorkspaceRoleClaimRequest {
   /**
+   * @description Идентификатор клейма
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  id: string;
+  /**
    * @description Значение claim
    * @minLength 1
    * @maxLength 256
@@ -1145,7 +1212,7 @@ export interface UpdateWorkspaceRoleClaimRequest {
  */
 export interface InviteWorkspaceUserRequest extends Record<string, unknown> {
   /**
-   * @description Идентификатор пользователя
+   * @description Идентификатор рабочего пространства
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
    */
   id: string;
@@ -1154,6 +1221,10 @@ export interface InviteWorkspaceUserRequest extends Record<string, unknown> {
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
    */
   userId: string;
+  /**
+   * @description эл. почта
+   */
+  email: string;
 }
 
 /**
@@ -1161,15 +1232,27 @@ export interface InviteWorkspaceUserRequest extends Record<string, unknown> {
  */
 export interface UpdateWorkspaceUserRequest {
   /**
+   * @description Идентификатор рабочего пространства
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  workspaceId: string;
+  /**
+   * @description Идентификатор пользователя
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  userId: string;
+  /**
    * @description Идентификатор роли
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   * @optional
    */
-  roleId: string;
+  roleId?: string;
   /**
    * @description Идентификатор позиции
-   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   * @optional
    */
-  positionId: string;
+  positionId?: string;
 }
 
 /**
@@ -1180,12 +1263,12 @@ export interface DeleteWorkspaceUserRequest extends Record<string, unknown> {
    * @description Идентификатор пользователя
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}
    */
-  id: string;
+  userId: string;
   /**
-   * @description Идентификатор пользователя
+   * @description Идентификатор рабочего пространства
    * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}
    */
-  userId: string;
+  workspaceId: string;
 }
 
 /**

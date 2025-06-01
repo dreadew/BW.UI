@@ -185,7 +185,7 @@ import UiText from '~/components/Ui/Text.vue'
 import UserSessions from '~/components/Profile/UserSessions.vue'
 
 const userStore = useUserStore()
-const { user, isLoading } = storeToRefs(userStore)
+const { user, userId, isLoading } = storeToRefs(userStore)
 const sessionStore = useSessionStore()
 const { sessions, isLoading: sessionsLoading } = storeToRefs(sessionStore)
 const userScheduleStore = useUserScheduleStore()
@@ -230,7 +230,7 @@ watch(openEdit, (val) => {
 })
 
 watch(
-  () => user.value?.id,
+  () => userId.value,
   async (id) => {
     if (id) {
       await sessionStore.list({ userId: id, limit: sessionsLimit.value, offset: sessionsOffset.value })
@@ -242,32 +242,32 @@ watch(
 
 const loadSessionsNext = async () => {
   sessionsOffset.value += sessionsLimit.value
-  if (user.value?.id) {
-    await sessionStore.list({ userId: user.value.id, limit: sessionsLimit.value, offset: sessionsOffset.value })
+  if (userId.value) {
+    await sessionStore.list({ userId: userId.value, limit: sessionsLimit.value, offset: sessionsOffset.value })
   }
 }
 const loadSessionsPrev = async () => {
   sessionsOffset.value = Math.max(0, sessionsOffset.value - sessionsLimit.value)
-  if (user.value?.id) {
-    await sessionStore.list({ userId: user.value.id, limit: sessionsLimit.value, offset: sessionsOffset.value })
+  if (userId.value) {
+    await sessionStore.list({ userId: userId.value, limit: sessionsLimit.value, offset: sessionsOffset.value })
   }
 }
 
 const loadScheduleNext = async () => {
   scheduleOffset.value += scheduleLimit.value
-  if (user.value?.id) {
-    await userScheduleStore.findByUser(user.value.id, { limit: scheduleLimit.value, offset: scheduleOffset.value })
+  if (userId.value) {
+    await userScheduleStore.findByUser(userId.value, { limit: scheduleLimit.value, offset: scheduleOffset.value })
   }
 }
 const loadSchedulePrev = async () => {
   scheduleOffset.value = Math.max(0, scheduleOffset.value - scheduleLimit.value)
-  if (user.value?.id) {
-    await userScheduleStore.findByUser(user.value.id, { limit: scheduleLimit.value, offset: scheduleOffset.value })
+  if (userId.value) {
+    await userScheduleStore.findByUser(userId.value, { limit: scheduleLimit.value, offset: scheduleOffset.value })
   }
 }
 
 watch(
-  () => user.value?.id,
+  () => userId.value,
   () => {
     sessionsOffset.value = 0
     scheduleOffset.value = 0
@@ -275,8 +275,11 @@ watch(
 )
 
 const onEditProfile = async () => {
-  if (!user.value) return
-  await userStore.updateProfile(user.value.id, editState.value)
+  if (!userId.value) return
+  await userStore.updateProfile(userId.value, {
+    id: userId.value,
+    ...editState.value
+  })
   openEdit.value = false
 }
 
@@ -286,10 +289,10 @@ const onFileChange = (e: Event) => {
 }
 
 const onUploadAvatar = async () => {
-  if (!user.value || !avatarFile.value) return
+  if (!userId.value || !avatarFile.value) return
   isAvatarLoading.value = true
   try {
-    await userStore.uploadProfilePhoto(user.value.id, avatarFile.value)
+    await userStore.uploadProfilePhoto(userId.value, avatarFile.value)
     openAvatarModal.value = false
     avatarFile.value = null
   } finally {
@@ -298,8 +301,8 @@ const onUploadAvatar = async () => {
 }
 
 const onDeleteAvatar = async () => {
-  if (!user.value) return
-  await userStore.deleteProfilePhoto(user.value.id)
+  if (!userId.value) return
+  await userStore.deleteProfilePhoto(userId.value)
 }
 
 const onLogout = async () => {
@@ -309,8 +312,8 @@ const onLogout = async () => {
 
 const revokeSession = async (sessionId: string) => {
   await sessionStore.revoke({ id: sessionId })
-  if (user.value?.id) {
-    await sessionStore.list({ userId: user.value.id, limit: sessionsLimit.value, offset: sessionsOffset.value })
+  if (userId.value) {
+    await sessionStore.list({ userId: userId.value, limit: sessionsLimit.value, offset: sessionsOffset.value })
   }
 }
 
@@ -325,12 +328,12 @@ function openScheduleDeleteModal(sch: any) {
 }
 
 const onCreateSchedule = async () => {
-  if (!user.value) return
+  if (!userId.value) return
   await userScheduleStore.createUserSchedule({
-    userId: user.value.id,
+    userId: userId.value,
     ...scheduleFormState.value
   })
-  await userScheduleStore.findByUser(user.value.id, { limit: scheduleLimit.value, offset: scheduleOffset.value })
+  await userScheduleStore.findByUser(userId.value, { limit: scheduleLimit.value, offset: scheduleOffset.value })
   openScheduleCreate.value = false
   scheduleFormState.value = { date: '', startAt: '', endAt: '' }
 }
@@ -338,9 +341,10 @@ const onCreateSchedule = async () => {
 const onEditSchedule = async () => {
   if (!selectedSchedule.value) return
   await userScheduleStore.updateUserSchedule(selectedSchedule.value.id, {
+    id: selectedSchedule.value.id,
     ...scheduleFormState.value
   })
-  if (user.value) await userScheduleStore.findByUser(user.value.id, { limit: scheduleLimit.value, offset: scheduleOffset.value })
+  if (userId.value) await userScheduleStore.findByUser(userId.value, { limit: scheduleLimit.value, offset: scheduleOffset.value })
   openScheduleEdit.value = false
   selectedSchedule.value = null
   scheduleFormState.value = { date: '', startAt: '', endAt: '' }
@@ -349,7 +353,7 @@ const onEditSchedule = async () => {
 const onDeleteSchedule = async () => {
   if (!selectedSchedule.value) return
   await userScheduleStore.deleteUserSchedule(selectedSchedule.value.id)
-  if (user.value) await userScheduleStore.findByUser(user.value.id, { limit: scheduleLimit.value, offset: scheduleOffset.value })
+  if (userId.value) await userScheduleStore.findByUser(userId.value, { limit: scheduleLimit.value, offset: scheduleOffset.value })
   openScheduleDelete.value = false
   selectedSchedule.value = null
 }

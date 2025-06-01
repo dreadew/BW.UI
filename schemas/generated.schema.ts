@@ -144,7 +144,7 @@ export const recoverPasswordRequestSchema = z.object({
     .max(32)
     .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
     .describe(
-      "\u041D\u043E\u0432\u044B\u0439 \u043F\u0430\u0440\u043E\u043B\u044C",
+      "\u041D\u043E\u0432\u043B\u0438\u0439 \u043F\u0430\u0440\u043E\u043B\u044C",
     ),
   verificationCode: z
     .string()
@@ -527,7 +527,7 @@ export const createSectionRequestSchema = z.object({
       /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
     )
     .describe(
-      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u0435\u043A\u0442\u0430",
     ),
   name: z
     .string()
@@ -586,6 +586,9 @@ export const createTaskRequestSchema = z.object({
     .describe(
       "\u0414\u0430\u0442\u0430 \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F",
     ),
+  priorityTypeId: z.string().optional().describe("\u0422\u0438\u043F \u043F\u0440\u0438\u043E\u0440\u0438\u0442\u0435\u0442\u0430"),
+  activityTypeId: z.string().optional().describe("\u0422\u0438\u043F \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u0438"),
+  relationTypeId: z.string().optional().describe("\u0422\u0438\u043F \u043E\u0442\u043D\u043E\u0448\u0435\u043D\u0438\u044F"),
 });
 
 export const updateTaskRequestSchema = z.object({
@@ -672,7 +675,7 @@ export const createTaskActivityRequestSchema = z.object({
       /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
     )
     .describe(
-      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u0435\u043A\u0442\u0430",
     ),
   taskId: z
     .string()
@@ -702,7 +705,7 @@ export const createTaskActivityRequestSchema = z.object({
   workHours: z
     .number()
     .min(0)
-    .describe("\u0427\u0430\u0441\u044B \u0440\u0430\u0431\u043E\u0442\u044B"),
+    .describe("\u0427\u0430\u0441\u044B \u043F\u0430\u0440\u0430\u0431\u043E\u0442\u044B"),
 });
 
 export const updateTaskActivityRequestSchema = z.object({
@@ -740,7 +743,7 @@ export const updateTaskActivityRequestSchema = z.object({
     ),
   workHours: z
     .number()
-    .describe("\u0427\u0430\u0441\u044B \u0440\u0430\u0431\u043E\u0442\u044B"),
+    .describe("\u0427\u0430\u0441\u044B \u043F\u0430\u0440\u0430\u0431\u043E\u0442\u044B"),
 });
 
 export const createTaskCommentRequestSchema = z.object({
@@ -1142,7 +1145,7 @@ export const createWorkspacePositionRequestSchema = z.object({
       /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
     )
     .describe(
-      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u0430\u0431\u043E\u0447\u0435\u0433\u043E \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u0430",
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u043B\u0435\u0437\u043D\u043E\u0433\u043E \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u0430",
     ),
 });
 

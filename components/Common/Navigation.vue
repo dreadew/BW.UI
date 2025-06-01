@@ -57,6 +57,16 @@ const AuthorizedLinks = ref<NavigationMenuItem[]>([
     label: 'Профиль',
     icon: 'i-lucide-user',
     to: '/profile'
+  },
+  {
+    label: 'Пространства',
+    icon: 'i-lucide-grid',
+    to: '/workspace'
+  },
+  {
+    label: 'Проекты',
+    icon: 'i-lucide-briefcase',
+    to: '/project'
   }
 ])
 

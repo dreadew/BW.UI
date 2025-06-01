@@ -15,6 +15,7 @@ export interface TokensResponse {
 
 export interface Session {
   id: string;
+  userId: string;
   location: string;
   isRevoked: string;
   createdAt: string;
@@ -24,7 +25,6 @@ export interface Session {
 export interface Skill {
   id: string;
   name: string;
-  isDeleted: boolean;
 }
 
 export interface User {
@@ -40,8 +40,6 @@ export interface User {
   skills: Skill[];
   schedules: UserSchedule[];
   sessions: Session[];
-  createdAt: Date;
-  modifiedAt: Date;
 }
 
 export const NotificationTypes = {
@@ -122,7 +120,6 @@ export interface SectionDto {
   id: string;
   name: string;
   tasks: ShortTaskDto[];
-  isDeleted: boolean;
   createdAt: string;
   modifiedAt?: string;
 }
@@ -142,7 +139,7 @@ export interface TaskDto {
   evaluations: TaskEvaluationDto[];
   relations: TaskRelationDto[];
   comments: TaskCommentDto[];
-  isDeleted: boolean;
+  position: number;
   startedDate?: string;
   endDate?: string;
   createdAt: string;
@@ -164,6 +161,7 @@ export interface ShortTaskDto {
 export interface TaskRelationDto {
   id: string;
   relatedTaskId: string;
+  relationType: RelationTypeDto;
 }
 
 export interface ActivityTypeDto {
@@ -180,7 +178,7 @@ export interface ProjectUserDto {
 export interface TaskAssigneeDto {
   userId: string;
   role: ProjectRoleDto;
-  user?: GrpcUserDto;
+  user?: User;
 }
 
 export interface PriorityTypeDto {
@@ -207,7 +205,6 @@ export interface TaskCommentDto {
   id: string;
   author: ProjectUserDto;
   content: string;
-  isDeleted: boolean;
   createdAt: string;
   modifiedAt?: string;
 }
@@ -226,7 +223,6 @@ export interface TaskDirectoryDto {
   name: string;
   children: TaskDirectoryDto[];
   artifacts: TaskDirectoryArtifactDto[];
-  isDeleted: boolean;
   createdAt: string;
   modifiedAt?: string;
 }
@@ -241,17 +237,14 @@ export interface TaskDirectoryArtifactDto {
 
 export interface TaskEvaluationDto {
   id: string;
-  taskId: string;
   activityType: ActivityTypeDto;
   hours: number;
-  isDeleted: boolean;
   createdAt: string;
   modifiedAt?: string;
 }
 
 export interface TaskTodoListDto {
   id: string;
-  isDeleted: boolean;
   items: TaskTodoListItemDto[];
 }
 
@@ -260,7 +253,6 @@ export interface TaskTodoListItemDto {
   name: string;
   duration: number;
   isCompleted: boolean;
-  isDeleted: boolean;
   completedAt?: string;
   startedDate: string;
   endDate: string;
@@ -279,8 +271,7 @@ export interface Workspace {
   roles: WorkspaceRole[];
   positions: WorkspacePosition[];
   users: WorkspaceUser[];
-  directory: WorkspaceDirectory;
-  isDeleted: boolean;
+  directories: WorkspaceDirectory;
   createdAt: Date;
   modifiedAt: Date;
 }
@@ -288,7 +279,7 @@ export interface Workspace {
 export interface WorkspaceDirectoryArtifact {
   id: string;
   name: string;
-  url: string;
+  path: string;
   createdAt: Date;
   modifiedAt: Date;
 }
@@ -298,7 +289,6 @@ export interface WorkspaceDirectory {
   name: string;
   children: WorkspaceDirectory[];
   artifacts: WorkspaceDirectoryArtifact[];
-  isDeleted: boolean;
   createdAt: Date;
   modifiedAt: Date;
 }
@@ -306,7 +296,6 @@ export interface WorkspaceDirectory {
 export interface WorkspacePosition {
   id: string;
   name: string;
-  isDeleted: boolean;
   createdAt: Date;
   modifiedAt: Date;
 }
@@ -315,7 +304,6 @@ export interface WorkspaceRole {
   id: string;
   name: string;
   claims: WorkspaceRoleClaim[];
-  isDeleted: boolean;
   createdAt: Date;
   modifiedAt: Date;
 }
@@ -329,4 +317,10 @@ export interface WorkspaceUser {
   userId: string;
   role: WorkspaceRole;
   position: WorkspacePosition;
+  user: User;
+}
+
+export interface RelationTypeDto {
+  id: string;
+  name: string;
 }
