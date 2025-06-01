@@ -224,6 +224,8 @@ export interface TaskCommentDto {
 export interface TaskDirectoryDto {
   id: string;
   name: string;
+  children: TaskDirectoryDto[];
+  artifacts: TaskDirectoryArtifactDto[];
   isDeleted: boolean;
   createdAt: string;
   modifiedAt?: string;

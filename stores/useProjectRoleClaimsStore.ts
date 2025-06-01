@@ -6,6 +6,7 @@ import type {
 } from "~/types/request.types";
 import type { ProjectRoleClaimsDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
+import type { PagingParams } from "~/types/api.types";
 
 export const useProjectRoleClaimsStore = defineStore(
   "projectRoleClaims",
@@ -16,19 +17,25 @@ export const useProjectRoleClaimsStore = defineStore(
     const roleClaims = ref<ProjectRoleClaimsDto[]>([]);
     const isLoading = ref(false);
     const error = ref<string | null>(null);
+    const limit = ref(20);
+    const offset = ref(0);
 
     function resetState() {
       isLoading.value = false;
       error.value = null;
     }
 
-    async function list(roleId: string) {
+    async function list(roleId: string, params: PagingParams = {}) {
       resetState();
       isLoading.value = true;
 
       try {
         const res = await projectRoleClaimsServiceFactory
-          .listByRole(roleId)
+          .listByRole(roleId, {
+            limit: params.limit ?? limit.value,
+            offset: params.offset ?? offset.value,
+            ...params,
+          })
           .execute();
         if (!res || res.length === 0) {
           return [];
@@ -47,9 +54,7 @@ export const useProjectRoleClaimsStore = defineStore(
       isLoading.value = true;
 
       try {
-        return await projectRoleClaimsServiceFactory
-          .get(id)
-          .execute();
+        return await projectRoleClaimsServiceFactory.get(id).execute();
       } catch (err) {
         errorHandler.handleError(err);
         return [];
@@ -109,11 +114,29 @@ export const useProjectRoleClaimsStore = defineStore(
       }
     }
 
+    function setPaging(newLimit: number, newOffset: number) {
+      limit.value = newLimit;
+      offset.value = newOffset;
+    }
+
+    function nextPage() {
+      offset.value += limit.value;
+    }
+
+    function prevPage() {
+      offset.value = Math.max(0, offset.value - limit.value);
+    }
+
     return {
       roleClaims,
       isLoading,
       error,
+      limit,
+      offset,
       list,
+      setPaging,
+      nextPage,
+      prevPage,
       get,
       create,
       update,

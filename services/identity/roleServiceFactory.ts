@@ -1,19 +1,17 @@
 import {
   IDENTITY_SERVICE,
 } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { PagingParams, SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type {
-  CreateUserRoleRequest,
-  UpdateUserRoleRequest,
-  UserRole,
-} from "~/types/identity/userRole.types";
+import type { CreateUserRoleRequest, UpdateUserRoleRequest } from "~/types/request.types";
+import type { UserRole } from "~/types/response.types";
 
 export const roleServiceFactory = {
-  list: () =>
+  list: (params: PagingParams = {}) =>
     apiContractBuilderHelper
-      .get("/api/Role/list")
+      .get('/api/Role/list')
       .withService(IDENTITY_SERVICE)
+      .withQueryParams(params)
       .withResponse<UserRole[]>()
       .build(),
 
@@ -26,7 +24,7 @@ export const roleServiceFactory = {
 
   create: (body: CreateUserRoleRequest) =>
     apiContractBuilderHelper
-      .post("/api/Role")
+      .post('/api/Role')
       .withService(IDENTITY_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()

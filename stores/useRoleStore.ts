@@ -3,6 +3,7 @@ import { roleServiceFactory } from "~/services/identity/roleServiceFactory";
 import { useApiErrorHandler } from "#imports";
 import type { CreateUserRoleRequest, UpdateUserRoleRequest } from "~/types/request.types";
 import type { UserRole } from "~/types/response.types";
+import type { PagingParams } from "~/types/api.types";
 
 export const useRoleStore = defineStore("role", () => {
   const toast = useToast();
@@ -11,12 +12,14 @@ export const useRoleStore = defineStore("role", () => {
   const roles: Ref<UserRole[]> = ref([]);
   const isLoading = ref(false);
   const error = ref(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
-  async function list() {
+  async function list(params: PagingParams = {}) {
     isLoading.value = true;
     try {
       const res = await roleServiceFactory
-        .list()
+        .list({ limit: params.limit ?? limit.value, offset: params.offset ?? offset.value, ...params })
         .execute();
       if (!res || res.length === 0) {
         return [];
@@ -105,11 +108,29 @@ export const useRoleStore = defineStore("role", () => {
     }
   }
 
+  function setPaging(newLimit: number, newOffset: number) {
+    limit.value = newLimit;
+    offset.value = newOffset;
+  }
+
+  function nextPage() {
+    offset.value += limit.value;
+  }
+
+  function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value);
+  }
+
   return {
     roles,
     isLoading,
     error,
+    limit,
+    offset,
     list,
+    setPaging,
+    nextPage,
+    prevPage,
     get,
     create,
     update,

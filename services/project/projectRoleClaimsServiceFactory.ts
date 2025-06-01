@@ -4,14 +4,15 @@ import type {
   CreateProjectRoleClaimsRequest,
   UpdateProjectRoleClaimsRequest,
 } from "~/types/request.types";
-import type { SuccessResponse } from "~/types/api.types";
+import type { PagingParams, SuccessResponse } from "~/types/api.types";
 import type { ProjectRoleClaimsDto } from "~/types/response.types";
 
 export const projectRoleClaimsServiceFactory = {
-  listByRole: (roleId: string) =>
+  listByRole: (roleId: string, params: PagingParams) =>
     apiContractBuilderHelper
       .get(`/api/ProjectRoleClaims/by-role/${roleId}`)
       .withService(PROJECT_SERVICE)
+      .withQueryParams(params)
       .withResponse<ProjectRoleClaimsDto[]>()
       .build(),
 

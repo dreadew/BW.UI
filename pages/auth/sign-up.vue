@@ -12,4 +12,5 @@
 definePageMeta({
   layout: 'auth'
 });
+useHead({ title: 'Регистрация' })
 </script>

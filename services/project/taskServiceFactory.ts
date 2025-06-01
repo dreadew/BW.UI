@@ -4,12 +4,10 @@ import type {
   AddTaskAssigneeRequest,
   CreateTaskRequest,
   RemoveTaskAssigneeRequest,
-  TaskDto,
-  TaskPositionDto,
-  TaskRelationDto,
   UpdateTaskRequest,
-} from "~/types/project/task.types";
+} from "~/types/request.types";
 import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { TaskDto, TaskPositionDto, TaskRelationDto } from "~/types/response.types";
 
 export const taskServiceFactory = {
   create: (request: CreateTaskRequest) =>
@@ -27,7 +25,7 @@ export const taskServiceFactory = {
       .withBody(request)
       .withResponse<SuccessResponse>()
       .build(),
-  
+
   get: (taskId: string) =>
     apiContractBuilderHelper
       .get(`/api/Tasks/${taskId}`)
@@ -65,14 +63,14 @@ export const taskServiceFactory = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  addRelatedTask: (request: TaskRelationDto) => 
+  addRelatedTask: (request: TaskRelationDto) =>
     apiContractBuilderHelper.post(`/api/Tasks/${request.id}/related-task`)
       .withService(PROJECT_SERVICE)
       .withBody(request)
       .withResponse<SuccessResponse>()
       .build(),
 
-  deleteRelatedTask: (request: TaskRelationDto) => 
+  deleteRelatedTask: (request: TaskRelationDto) =>
     apiContractBuilderHelper.post(`/api/Tasks/${request.id}/related-task`)
       .withService(PROJECT_SERVICE)
       .withBody(request)

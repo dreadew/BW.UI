@@ -8,6 +8,7 @@ import type {
 } from "~/types/request.types";
 import type { TaskTodoListDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
+import type { PagingParams } from "~/types/api.types";
 
 export const useTaskTodoListStore = defineStore("taskTodoList", () => {
   const toast = useToast();
@@ -17,19 +18,21 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
   const currentTodoList = ref<TaskTodoListDto | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
   function resetState() {
     isLoading.value = false;
     error.value = null;
   }
 
-  async function list(taskId: string) {
+  async function list(taskId: string, params: PagingParams = {}) {
     resetState();
     isLoading.value = true;
 
     try {
       const res = await taskTodoListServiceFactory
-        .list(taskId)
+        .list(taskId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value, ...params })
         .execute();
 
       if (!res || res.length === 0) {
@@ -38,10 +41,11 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
           description: 'Список задач пуст',
           color: 'warning'
         });
-        return;
+        return [];
       }
 
       todoLists.value = res;
+      return res;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
@@ -184,12 +188,30 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
     }
   }
 
+  function setPaging(newLimit: number, newOffset: number) {
+    limit.value = newLimit;
+    offset.value = newOffset;
+  }
+
+  function nextPage() {
+    offset.value += limit.value;
+  }
+
+  function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value);
+  }
+
   return {
     todoLists,
     currentTodoList,
     isLoading,
     error,
+    limit,
+    offset,
     list,
+    setPaging,
+    nextPage,
+    prevPage,
     get,
     createTodoList,
     updateTodoList,

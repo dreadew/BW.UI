@@ -3,6 +3,7 @@ import { projectThreadCommentServiceFactory } from "~/services/project/projectTh
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 import type { CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest } from "~/types/request.types";
 import type { ProjectThreadCommentDto } from "~/types/response.types";
+import type { PagingParams } from "~/types/api.types";
 
 export const useProjectThreadCommentStore = defineStore(
   "projectThreadComment",
@@ -13,12 +14,14 @@ export const useProjectThreadCommentStore = defineStore(
     const comments: Ref<ProjectThreadCommentDto[]> = ref([]);
     const isLoading = ref(false);
     const error = ref(null);
+    const limit = ref(20);
+    const offset = ref(0);
 
-    async function list(threadId: string) {
+    async function list(threadId: string, params: PagingParams = {}) {
       isLoading.value = true;
       try {
         const res = await projectThreadCommentServiceFactory
-          .listByThread(threadId)
+          .listByThread(threadId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value, ...params })
           .execute();
         if (!res || res.length === 0) {
           return [];
@@ -107,11 +110,29 @@ export const useProjectThreadCommentStore = defineStore(
       }
     }
 
+    function setPaging(newLimit: number, newOffset: number) {
+      limit.value = newLimit;
+      offset.value = newOffset;
+    }
+
+    function nextPage() {
+      offset.value += limit.value;
+    }
+
+    function prevPage() {
+      offset.value = Math.max(0, offset.value - limit.value);
+    }
+
     return {
       comments,
       isLoading,
       error,
+      limit,
+      offset,
       list,
+      setPaging,
+      nextPage,
+      prevPage,
       get,
       create,
       update,

@@ -61,7 +61,7 @@
     <div class="pt-6 border-t border-t-secondary/10">
       <UiHeading size="lg" class="mb-4">Соц. сети</UiHeading>
       <div class="flex space-x-4">
-        <UButton v-for="(icon, idx) in icons" :key="idx" icon :to="icon.href" target="_blank" color="gray" variant="ghost" size="lg">
+        <UButton v-for="(icon, idx) in icons" :key="idx" icon :to="icon.href" target="_blank" color="neutral" variant="ghost" size="lg">
           <UIcon :name="icon.name" />
         </UButton>
       </div>

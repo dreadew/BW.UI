@@ -1,17 +1,17 @@
 <template>
   <footer class="border-t border-t-secondary/10 my-12 py-12">
-    <div class="container">
-      <div class="flex flex-col items-center justify-between gap-6 md:flex-row">
+    <div>
+      <div class="flex flex-col items-center justify-between gap-6 lg:flex-row">
         <div>
           <div class="flex items-center gap-2">
-            <UIcon name="i-lucide-hexagon" class="text-primary" />
+            <img src="/assets/img/128.svg" alt="Hexaend Logo" class="h-7 w-7" />
             <UiHeading level="3" size="sm">Hexaend</UiHeading>
           </div>
           <UiText size="sm" class="mt-2">
             © {{ new Date().getFullYear() }} Hexaend. Все права защищены.
           </UiText>
         </div>
-        <div class="flex gap-8">
+        <div class="flex gap-8 flex-wrap">
           <CommonFooterLinksWrapper title="Продукт">
             <template #icon><UIcon name="i-lucide-box" /></template>
             <template #links>

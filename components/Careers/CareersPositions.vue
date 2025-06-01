@@ -51,19 +51,24 @@ const positions = [
       <div class="space-y-6">
         <div v-for="(position, index) in positions" :key="index" class="rounded-lg border border-secondary/10 bg-secondary/2 p-6 shadow-sm">
           <div class="flex flex-wrap items-start justify-between gap-4">
-            <div class="space-y-1">
-              <UiHeading level="3">{{ position.title }}</UiHeading>
-              <div class="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                <UiText>{{ position.department }}</UiText>
-                <UiText>•</UiText>
-                <UiText>{{ position.location }}</UiText>
-                <UiText>•</UiText>
-                <UiText>{{ position.type }}</UiText>
+            <div class="flex items-start gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 mt-1">
+                <UIcon name="i-lucide-briefcase" class="text-primary text-lg" />
+              </div>
+              <div class="space-y-1">
+                <UiHeading level="3">{{ position.title }}</UiHeading>
+                <div class="flex flex-wrap gap-2 text-sm">
+                  <UiText color="neutral">{{ position.department }}</UiText>
+                  <UiText color="neutral">•</UiText>
+                  <UiText color="neutral">{{ position.location }}</UiText>
+                  <UiText color="neutral">•</UiText>
+                  <UiText color="neutral">{{ position.type }}</UiText>
+                </div>
               </div>
             </div>
             <UButton color="primary" variant="subtle">Отправить заявку</UButton>
           </div>
-          <UiText class="mt-4 text-muted-foreground">{{ position.description }}</UiText>
+          <UiText color="neutral" class="mt-4">{{ position.description }}</UiText>
         </div>
       </div>
 

@@ -8,8 +8,6 @@
       <UCard class="mb-6">
         <UiHeading size="lg">{{ project.name }}</UiHeading>
         <UiText>ID: {{ project.id }}</UiText>
-        <UiText>Создано: {{ project.createdAt }}</UiText>
-        <UiText>Описание: {{ project.description }}</UiText>
       </UCard>
       <div class="flex gap-4 mb-4">
         <NuxtLink :to="`/project/${project.id}/threads`">
@@ -45,7 +43,6 @@
           </NuxtLink>
         </UCard>
       </div>
-      <!-- Здесь будут секции, задачи, треды и т.д. -->
     </div>
   </div>
 </template>
@@ -56,17 +53,14 @@ import { useProjectStore } from '~/stores/useProjectStore'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 
+definePageMeta({ layout: 'project' });
+useHead({ title: 'Проект' })
+
 const route = useRoute()
 const projectStore = useProjectStore()
 const { currentProject: project, isLoading } = storeToRefs(projectStore)
 
 onMounted(async () => {
-  await projectStore.getById(route.params.id)
+  await projectStore.get(route.params.id as string)
 })
 </script>
-
-<route>
-{
-  "layout": "workspace"
-}
-</route>

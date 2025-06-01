@@ -1,5 +1,5 @@
 <template>
-  <section class="py-24">
+  <section class="py-12">
     <div>
       <UiHeading size="3xl" class="mb-12 text-center">Ключевые особенности</UiHeading>
       <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

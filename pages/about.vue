@@ -4,6 +4,7 @@ import AboutStory from '~/components/About/AboutStory.vue';
 import AboutValues from '~/components/About/AboutValues.vue';
 import AboutTeam from '~/components/About/AboutTeam.vue';
 import AboutContact from '~/components/About/AboutContact.vue';
+useHead({ title: 'О нас' })
 </script>
 
 <template>

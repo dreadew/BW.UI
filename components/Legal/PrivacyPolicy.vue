@@ -1,9 +1,12 @@
 <template>
   <div class="py-16">
     <div class="mx-auto max-w-3xl">
-      <UiHeading level="1" class="text-4xl font-bold mb-8">
-        Политика конфиденциальности
-      </UiHeading>
+      <div class="flex items-center justify-center text-center gap-3">
+        <UIcon name="i-lucide-lock" class="text-primary text-3xl" />
+        <UiHeading level="1" class="text-4xl font-bold">
+          Политика конфиденциальности
+        </UiHeading>
+      </div>
 
       <div class="space-y-8 prose prose-lg max-w-none text-muted-foreground">
         <UiText>
@@ -144,5 +147,3 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
-</script>

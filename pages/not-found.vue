@@ -3,7 +3,7 @@
         <UCard class="flex flex-col items-center justify-center p-8">
             <UIcon name="i-lucide-alert-triangle" class="text-5xl text-primary mb-4" />
             <UiHeading size="2xl">Страница не найдена</UiHeading>
-            <UiText color="gray" class="mt-2 mb-4">
+            <UiText color="neutral" class="mt-2 mb-4">
               Возможно, вы ошиблись адресом или страница была удалена.
             </UiText>
             <NuxtLink to="/" class="w-full flex justify-end">
@@ -16,4 +16,5 @@
 <script setup lang="ts">
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
+useHead({ title: 'Страница не найдена' })
 </script>

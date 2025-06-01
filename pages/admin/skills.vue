@@ -8,16 +8,19 @@
         <UTable :data="filteredAndSortedSkills" :columns="columns" class="w-full">
             <template #cell(actions)="{ row }">
                 <UButton size="sm" variant="soft" color="primary" @click="onEdit(row.original)">Редактировать</UButton>
-                <UButton size="sm" variant="soft" color="danger" class="ml-2" @click="onDelete(row.original)">Удалить
+                <UButton size="sm" variant="soft" color="error" class="ml-2" @click="onDelete(row.original)">Удалить
                 </UButton>
             </template>
         </UTable>
-        <!-- Create Modal -->
+        <div class="flex gap-2 mt-4">
+            <UButton size="xs" :disabled="offset === 0" @click="prevPage">Назад</UButton>
+            <UButton size="xs" :disabled="skills.length < limit" @click="nextPage">Вперёд</UButton>
+        </div>
         <UModal v-model:open="openCreateModal" title="Создать навык">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Создать навык</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openCreateModal = false"
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openCreateModal = false"
                         size="sm" />
                 </div>
             </template>
@@ -32,12 +35,11 @@
                 </UForm>
             </template>
         </UModal>
-        <!-- Edit Modal -->
         <UModal v-model:open="openEditModal" title="Редактировать навык">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Редактировать навык</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openEditModal = false" size="sm" />
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openEditModal = false" size="sm" />
                 </div>
             </template>
             <template #body>
@@ -51,22 +53,21 @@
                 </UForm>
             </template>
         </UModal>
-        <!-- Delete Confirmation Modal -->
         <UModal v-model:open="openDeleteModal" title="Удаление навыка">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Удаление навыка</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openDeleteModal = false"
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openDeleteModal = false"
                         size="sm" />
                 </div>
             </template>
             <template #body>
-                <UiText color="danger">Вы уверены, что хотите удалить навык "{{ selectedSkill?.name }}"?</UiText>
+                <UiText color="error">Вы уверены, что хотите удалить навык "{{ selectedSkill?.name }}"?</UiText>
             </template>
             <template #footer>
                 <div class="flex justify-end gap-2">
-                    <UButton color="gray" @click="openDeleteModal = false">Отмена</UButton>
-                    <UButton color="danger" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
+                    <UButton color="neutral" @click="openDeleteModal = false">Отмена</UButton>
+                    <UButton color="error" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
                 </div>
             </template>
         </UModal>
@@ -79,7 +80,8 @@ import { useSkillStore } from '~/stores/useSkillStore'
 import { createSkillRequestSchema, updateSkillRequestSchema } from '~/schemas/generated.schema'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
-
+import type { Skill } from '~/types/response.types'
+useHead({ title: 'Навыки' })
 const skillStore = useSkillStore()
 const { skills, isLoading } = storeToRefs(skillStore)
 const search = ref('')
@@ -89,6 +91,8 @@ const openDeleteModal = ref(false)
 const selectedSkill = ref<any>(null)
 const formState = ref<any>({ name: '' })
 const formLoading = ref(false)
+const limit = ref(20)
+const offset = ref(0)
 const createFormSchema = createSkillRequestSchema;
 const editFormSchema = updateSkillRequestSchema;
 const columns = [
@@ -105,12 +109,12 @@ const filteredAndSortedSkills = computed(() => {
     }
     return data
 })
-function onEdit(skill) {
+function onEdit(skill: Skill) {
     selectedSkill.value = skill
     formState.value = { id: skill.id, name: skill.name }
     openEditModal.value = true
 }
-function onDelete(skill) {
+function onDelete(skill: Skill) {
     selectedSkill.value = skill
     openDeleteModal.value = true
 }
@@ -136,6 +140,18 @@ async function onSubmitEdit() {
     formLoading.value = false
     await skillStore.list()
 }
+async function fetchSkills() {
+    await skillStore.list({ limit: limit.value, offset: offset.value, search: search.value })
+}
+function nextPage() {
+    offset.value += limit.value
+    fetchSkills()
+}
+function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value)
+    fetchSkills()
+}
+watch([limit, offset, search], fetchSkills, { immediate: true })
 watch([openCreateModal, openEditModal], ([create, edit]) => {
     if (!create && !edit) {
         formState.value = { name: '' }

@@ -1,11 +1,14 @@
 <template>
   <div class="mx-auto max-w-4xl">
-    <div class="prose prose-slate max-w-none">
-      <UiHeading level="1" size="3xl" weight="bold" class="mb-8">
+    <div class="flex items-center justify-center text-center gap-3">
+      <UIcon name="i-lucide-file-text" class="text-primary text-3xl" />
+      <UiHeading level="1" size="3xl" weight="bold">
         Правила использования
       </UiHeading>
+    </div>
 
-      <UiText color="gray" class="mb-6">
+    <div class="prose prose-slate max-w-none">
+      <UiText color="neutral" class="mb-6">
         Обновлено: 16 марта, 2025
       </UiText>
 
@@ -214,6 +217,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-</script>

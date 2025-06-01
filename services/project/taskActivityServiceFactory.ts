@@ -1,11 +1,8 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type {
-  CreateTaskActivityRequest,
-  TaskActivityDto,
-  UpdateTaskActivityRequest,
-} from "~/types/project/taskActivity.types";
 import type { SuccessResponse } from "~/types/api.types";
+import type { CreateTaskActivityRequest, UpdateTaskActivityRequest } from "~/types/request.types";
+import type { TaskActivityDto } from "~/types/response.types";
 
 export const taskActivityServiceFactory = {
   create: (request: CreateTaskActivityRequest) =>
@@ -26,10 +23,10 @@ export const taskActivityServiceFactory = {
 
   get: (taskActivityId: string) =>
     apiContractBuilderHelper
-        .get(`/api/TaskActivity/${taskActivityId}`)
-        .withService(PROJECT_SERVICE)
-        .withResponse<TaskActivityDto>()
-        .build(),
+      .get(`/api/TaskActivity/${taskActivityId}`)
+      .withService(PROJECT_SERVICE)
+      .withResponse<TaskActivityDto>()
+      .build(),
 
   listByUser: (userId: string) =>
     apiContractBuilderHelper
@@ -37,7 +34,7 @@ export const taskActivityServiceFactory = {
       .withService(PROJECT_SERVICE)
       .withResponse<TaskActivityDto[]>()
       .build(),
-    
+
   listByTask: (taskId: string) =>
     apiContractBuilderHelper
       .get(`/api/TaskActivity/by-task/${taskId}`)

@@ -5,7 +5,8 @@ import type {
   SignInRequest,
   SignUpRequest,
   SkillRequest,
-  UpdateUserRequest
+  UpdateUserRequest,
+  RoleRequest
 } from '~/types/request.types';
 import * as signalR from "@microsoft/signalr";
 import { NotificationLevel, type WebNotificationDto } from "../types/api.types";
@@ -13,11 +14,11 @@ import type { User } from "~/types/response.types";
 import { userServiceFactory } from "~/services/identity/userServiceFactory";
 import { signInRequestSchema, signUpRequestSchema } from "~/schemas/generated.schema";
 import { authServiceFactory } from "~/services/identity/authServiceFactory";
+import { validate } from "~/utils/validation.utils";
 
 export const useUserStore = defineStore("user", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
-  //const { validate } = useValidation();
 
   const user = ref<User | null>(null);
   const isLoading = ref(false);
@@ -113,13 +114,13 @@ export const useUserStore = defineStore("user", () => {
     resetState();
     isLoading.value = true;
 
-    //const { isValid, errors } = await validate(signInRequestSchema, credentials);
+    const { isValid, errors } = await validate(signInRequestSchema, credentials);
 
-    //if (!isValid) {
-    //validationErrors.value = errors || {};
-    //isLoading.value = false;
-    //return false;
-    //}
+    if (!isValid) {
+      validationErrors.value = errors || {};
+      isLoading.value = false;
+      return false;
+    }
 
     try {
       var res = await authServiceFactory
@@ -146,7 +147,7 @@ export const useUserStore = defineStore("user", () => {
     if (!accessToken.value) return;
 
     connection.value = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5000" + "/hubs/notification", {
+      .withUrl("http://100.70.254.29:5000" + "/hubs/notification", {
         accessTokenFactory: () => `Bearer ${accessToken.value!}`,
         withCredentials: true,
       })
@@ -324,6 +325,36 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
+  async function addRole(dto: RoleRequest) {
+    isLoading.value = true;
+    try {
+      await userServiceFactory
+        .addRole(user.value?.id!, dto)
+        .ensured("Роль успешно добавлена!");
+      return true;
+    } catch (err) {
+      errorHandler.handleError(err);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function removeRole(dto: RoleRequest) {
+    isLoading.value = true;
+    try {
+      await userServiceFactory
+        .removeRole(user.value?.id!, dto)
+        .ensured("Роль успешно удалена!");
+      return true;
+    } catch (err) {
+      errorHandler.handleError(err);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -337,13 +368,15 @@ export const useUserStore = defineStore("user", () => {
     fetchCurrentUser,
     updateProfile,
     uploadProfilePhoto,
-    generateVerificationCode,
+    // generateVerificationCode,
     recoverPassword,
     deleteProfilePhoto,
     deleteUser,
     restoreUser,
     addSkill,
     removeSkill,
+    addRole,
+    removeRole,
     resetState,
   };
 });

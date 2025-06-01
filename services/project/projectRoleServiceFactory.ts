@@ -1,11 +1,8 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type {
-  CreateProjectRoleRequest,
-  ProjectRoleDto,
-  UpdateProjectRoleRequest,
-} from "~/types/project/projectRole.types";
 import type { SuccessResponse } from "~/types/api.types";
+import type { CreateProjectRoleRequest, UpdateProjectRoleRequest } from "~/types/request.types";
+import type { ProjectRoleDto } from "~/types/response.types";
 
 export const projectRoleServiceFactory = {
   list: (projectId: string) =>
@@ -44,7 +41,7 @@ export const projectRoleServiceFactory = {
       .withService(PROJECT_SERVICE)
       .withResponse<SuccessResponse>()
       .build(),
-    
+
   restore: (roleId: string) =>
     apiContractBuilderHelper
       .post(`/api/ProjectRoles/${roleId}`)

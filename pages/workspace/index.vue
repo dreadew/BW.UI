@@ -9,7 +9,7 @@
             <UCard class="flex flex-col items-center justify-center p-8">
                 <UIcon name="i-lucide-folder-open" class="text-4xl text-primary mb-2" />
                 <UiHeading size="lg">Нет рабочих пространств</UiHeading>
-                <UiText class="text-gray-500 mt-2">Создайте первое рабочее пространство, чтобы начать работу!</UiText>
+                <UiText color="neutral" class="mt-2">Создайте первое рабочее пространство, чтобы начать работу!</UiText>
             </UCard>
         </div>
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -23,11 +23,14 @@
                     <NuxtLink :to="`/workspace/${ws.id}`">
                         <UButton size="sm" color="primary">Открыть</UButton>
                     </NuxtLink>
-                    <UButton size="sm" color="danger" variant="soft" @click="onDelete(ws)">Удалить</UButton>
+                    <UButton size="sm" color="error" variant="soft" @click="onDelete(ws)">Удалить</UButton>
                 </div>
             </UCard>
         </div>
-        <!-- Create Modal -->
+        <div class="flex gap-2 mt-4">
+            <UButton size="xs" :disabled="offset === 0" @click="prevPage">Назад</UButton>
+            <UButton size="xs" :disabled="workspaces.length < limit" @click="nextPage">Вперёд</UButton>
+        </div>
         <UModal v-model:open="openCreateModal" title="Создать рабочее пространство">
             <template #body>
                 <UForm :state="formState" :schema="createFormSchema" @submit="onSubmitCreate">
@@ -38,15 +41,14 @@
                 </UForm>
             </template>
         </UModal>
-        <!-- Delete Confirmation Modal -->
         <UModal v-model:open="openDeleteModal" title="Удаление рабочего пространства">
             <template #body>
-                <UiText color="danger">Вы уверены, что хотите удалить рабочее пространство "{{ selectedWorkspace?.name
+                <UiText color="error">Вы уверены, что хотите удалить рабочее пространство "{{ selectedWorkspace?.name
                 }}"?</UiText>
             </template>
             <template #footer>
-                <UButton color="gray" @click="openDeleteModal = false">Отмена</UButton>
-                <UButton color="danger" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
+                <UButton color="neutral" @click="openDeleteModal = false">Отмена</UButton>
+                <UButton color="error" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
             </template>
         </UModal>
     </div>
@@ -59,9 +61,10 @@ import { useWorkspaceStore } from '~/stores/useWorkspaceStore'
 import { createWorkspaceRequestSchema } from '~/schemas/generated.schema'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
-
+import type { Workspace } from '~/types/response.types'
+useHead({ title: 'Рабочие пространства' })
 const workspaceStore = useWorkspaceStore()
-const { workspaces, isLoading } = storeToRefs(workspaceStore)
+const { workspaces } = storeToRefs(workspaceStore)
 const search = ref('')
 const openCreateModal = ref(false)
 const openDeleteModal = ref(false)
@@ -69,6 +72,8 @@ const selectedWorkspace = ref<any>(null)
 const formState = ref<any>({ name: '' })
 const formLoading = ref(false)
 const createFormSchema = createWorkspaceRequestSchema;
+const limit = ref(20)
+const offset = ref(0)
 const columns = [
     { accessorKey: 'id', header: 'ID', cell: ({ row }) => row.original.id },
     { accessorKey: 'name', header: 'Название', cell: ({ row }) => row.original.name },
@@ -83,7 +88,7 @@ const filteredWorkspaces = computed(() => {
     }
     return data
 })
-function onDelete(workspace) {
+function onDelete(workspace: Workspace) {
     selectedWorkspace.value = workspace
     openDeleteModal.value = true
 }
@@ -102,6 +107,20 @@ async function onSubmitCreate() {
     formLoading.value = false
     await workspaceStore.list()
 }
+async function fetchWorkspaces() {
+    await workspaceStore.list({ limit: limit.value, offset: offset.value })
+}
+
+function nextPage() {
+    offset.value += limit.value
+    fetchWorkspaces()
+}
+function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value)
+    fetchWorkspaces()
+}
+
+watch([limit, offset], fetchWorkspaces, { immediate: true })
 watch([openCreateModal], ([create]) => {
     if (!create) {
         formState.value = { name: '' }

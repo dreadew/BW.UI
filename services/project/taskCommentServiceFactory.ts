@@ -1,13 +1,15 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
-import type { CreateTaskCommentRequest, TaskCommentDto, UpdateTaskCommentRequest } from "~/types/project/taskComment.types";
+import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { CreateTaskCommentRequest, UpdateTaskCommentRequest } from "~/types/request.types";
+import type { TaskCommentDto } from "~/types/response.types";
 
 export const taskCommentServiceFactory = {
-  listByTask: (taskId: string) =>
+  listByTask: (taskId: string, params: PagingParams) =>
     apiContractBuilderHelper
       .get(`/api/TaskComment/by-task/${taskId}`)
       .withService(PROJECT_SERVICE)
+      .withQueryParams(params)
       .withResponse<TaskCommentDto[]>()
       .build(),
 
@@ -43,8 +45,8 @@ export const taskCommentServiceFactory = {
 
   restore: (commentId: string) =>
     apiContractBuilderHelper
-        .post(`/api/TaskComment/${commentId}`)
-        .withService(PROJECT_SERVICE)
-        .withResponse<SuccessResponse>()
-        .build(),
+      .post(`/api/TaskComment/${commentId}`)
+      .withService(PROJECT_SERVICE)
+      .withResponse<SuccessResponse>()
+      .build(),
 };

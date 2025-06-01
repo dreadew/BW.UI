@@ -33,8 +33,8 @@ export interface IRequestConfig<
 }
 
 export interface PagingParams extends Record<string, unknown> {
-  page?: number;
-  pageSize?: number;
+  limit?: number;
+  offset?: number;
 }
 
 export interface SuccessResponse {

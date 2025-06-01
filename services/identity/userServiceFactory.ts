@@ -8,14 +8,14 @@ import type {
   SuccessResponse,
 } from "~/types/api.types";
 import type {
-  GenerateVerificationCodeRequest,
   RecoverPasswordRequest,
   RoleRequest,
   SkillRequest,
   UpdateUserRequest,
-  User,
-} from "~/types/identity/user.types";
+  GenerateVerificationCodeRequest,
+} from "~/types/request.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
+import type { User } from "~/types/response.types";
 
 export const userServiceFactory = {
   listUsers: (params: PagingParams) =>

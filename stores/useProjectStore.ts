@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { projectServiceFactory } from "~/services/project/projectServiceFactory";
+import type { PagingParams } from "~/types/api.types";
 import type {
   AddUserRequest,
   CreateProjectRequest,
@@ -24,13 +25,13 @@ export const useProjectStore = defineStore("project", () => {
     error.value = null;
   }
 
-  async function listByUser(userId: string) {
+  async function listByUser(userId: string, params: PagingParams) {
     resetState();
     isLoading.value = true;
 
     try {
       const res = await projectServiceFactory
-        .listByUser(userId, {})
+        .listByUser(userId, params)
         .execute();
       if (!res || res.length === 0) {
         return [];
@@ -149,12 +150,11 @@ export const useProjectStore = defineStore("project", () => {
     }
   }
 
-  async function addUser(request: AddUserRequest) {
+  async function addUser(projectId: string, userId: string) {
     isLoading.value = true;
-
     try {
       await projectServiceFactory
-        .addUser(request)
+        .addUser(projectId, userId)
         .ensured("Пользователь успешно добавлен в проект");
     } catch (err) {
       errorHandler.handleError(err);
@@ -164,12 +164,11 @@ export const useProjectStore = defineStore("project", () => {
     }
   }
 
-  async function deleteUser(request: DeleteUserRequest) {
+  async function deleteUser(projectId: string, userId: string) {
     isLoading.value = true;
-
     try {
       await projectServiceFactory
-        .deleteUser(request)
+        .deleteUser(projectId, userId)
         .ensured("Пользователь успешно удален из проекта");
     } catch (err) {
       errorHandler.handleError(err);

@@ -3,6 +3,7 @@ import { skillServiceFactory } from "~/services/identity/skillsServiceFactory";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 import type { CreateSkillRequest, UpdateSkillRequest } from "~/types/request.types";
 import type { Skill } from "~/types/response.types";
+import type { PagingParams } from "~/types/api.types";
 
 export const useSkillStore = defineStore("skill", () => {
   const toast = useToast();
@@ -11,12 +12,14 @@ export const useSkillStore = defineStore("skill", () => {
   const skills: Ref<Skill[]> = ref([]);
   const isLoading = ref(false);
   const error = ref(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
-  async function list() {
+  async function list(params: PagingParams = {}) {
     isLoading.value = true;
     try {
       const res = await skillServiceFactory
-        .list()
+        .list({ limit: params.limit ?? limit.value, offset: params.offset ?? offset.value })
         .execute();
       if (!res || res.length === 0) {
         return [];
@@ -105,11 +108,29 @@ export const useSkillStore = defineStore("skill", () => {
     }
   }
 
+  function setPaging(newLimit: number, newOffset: number) {
+    limit.value = newLimit;
+    offset.value = newOffset;
+  }
+
+  function nextPage() {
+    offset.value += limit.value;
+  }
+
+  function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value);
+  }
+
   return {
     skills,
     isLoading,
     error,
+    limit,
+    offset,
     list,
+    setPaging,
+    nextPage,
+    prevPage,
     get,
     create,
     update,

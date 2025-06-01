@@ -8,16 +8,15 @@
         <UTable :data="filteredAndSortedRoles" :columns="columns" class="w-full">
             <template #cell(actions)="{ row }">
                 <UButton size="sm" variant="soft" color="primary" @click="onEdit(row.original)">Редактировать</UButton>
-                <UButton size="sm" variant="soft" color="danger" class="ml-2" @click="onDelete(row.original)">Удалить
+                <UButton size="sm" variant="soft" color="error" class="ml-2" @click="onDelete(row.original)">Удалить
                 </UButton>
             </template>
         </UTable>
-        <!-- Create Modal -->
         <UModal v-model:open="openCreateModal" title="Создать роль">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Создать роль</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openCreateModal = false"
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openCreateModal = false"
                         size="sm" />
                 </div>
             </template>
@@ -32,12 +31,11 @@
                 </UForm>
             </template>
         </UModal>
-        <!-- Edit Modal -->
         <UModal v-model:open="openEditModal" title="Редактировать роль">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Редактировать роль</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openEditModal = false" size="sm" />
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openEditModal = false" size="sm" />
                 </div>
             </template>
             <template #body>
@@ -51,22 +49,21 @@
                 </UForm>
             </template>
         </UModal>
-        <!-- Delete Confirmation Modal -->
         <UModal v-model:open="openDeleteModal" title="Удаление роли">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Удаление роли</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openDeleteModal = false"
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openDeleteModal = false"
                         size="sm" />
                 </div>
             </template>
             <template #body>
-                <UiText color="danger">Вы уверены, что хотите удалить роль "{{ selectedRole?.name }}"?</UiText>
+                <UiText color="error">Вы уверены, что хотите удалить роль "{{ selectedRole?.name }}"?</UiText>
             </template>
             <template #footer>
                 <div class="flex justify-end gap-2">
-                    <UButton color="gray" @click="openDeleteModal = false">Отмена</UButton>
-                    <UButton color="danger" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
+                    <UButton color="neutral" @click="openDeleteModal = false">Отмена</UButton>
+                    <UButton color="error" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
                 </div>
             </template>
         </UModal>
@@ -80,11 +77,12 @@ import { useWorkspaceRoleStore } from '~/stores/useWorkspaceRoleStore'
 import { createWorkspaceRoleRequestSchema, updateWorkspaceRoleRequestSchema } from '~/schemas/generated.schema'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
-
+import type { WorkspaceRole } from '~/types/response.types'
+useHead({ title: 'Роли рабочего пространства' })
 const route = useRoute()
 const workspaceId = computed(() => route.params.id as string)
 const roleStore = useWorkspaceRoleStore()
-const { roles, isLoading } = storeToRefs(roleStore)
+const { roles } = storeToRefs(roleStore)
 const search = ref('')
 const openCreateModal = ref(false)
 const openEditModal = ref(false)
@@ -108,12 +106,12 @@ const filteredAndSortedRoles = computed(() => {
     }
     return data
 })
-function onEdit(role) {
+function onEdit(role: WorkspaceRole) {
     selectedRole.value = role
     formState.value = { id: role.id, name: role.name }
     openEditModal.value = true
 }
-function onDelete(role) {
+function onDelete(role: WorkspaceRole) {
     selectedRole.value = role
     openDeleteModal.value = true
 }

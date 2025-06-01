@@ -1,9 +1,7 @@
 import { ref } from 'vue'
 
-// Мок-реализация, заменить на реальный API при необходимости
 export function useUserSessions() {
   async function getSessions(userId: string) {
-    // Здесь должен быть реальный запрос к API
     return [
       {
         device: 'MacBook Pro',

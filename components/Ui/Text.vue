@@ -17,8 +17,8 @@ import { computed } from 'vue'
 const colorOptions = {
   primary: 'text-primary',
   secondary: 'text-secondary',
-  gray: 'text-gray-400',
-  danger: 'text-red-600',
+  neutral: 'text-neutral-400',
+  error: 'text-red-600',
   success: 'text-green-600',
 } as const;
 
@@ -35,7 +35,7 @@ const props = defineProps<{
 const baseClass = 'font-sans'
 const sizeClass = computed(() => props.size ? `text-${props.size}` : '')
 const weightClass = computed(() => props.weight ? `font-${props.weight}` : '')
-const colorClass = computed(() => colorOptions[props.color ?? 'gray'])
+const colorClass = computed(() => colorOptions[props.color ?? 'neutral'])
 const alignClass = computed(() => props.align ? `text-${props.align}` : '')
 const customClass = computed(() => props.class)
 </script>

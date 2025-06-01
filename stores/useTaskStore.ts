@@ -8,6 +8,7 @@ import type {
 } from "~/types/request.types";
 import type { TaskDto, TaskPositionDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
+import type { PagingParams } from "~/types/api.types";
 
 export const useTaskStore = defineStore("task", () => {
   const toast = useToast();
@@ -16,49 +17,63 @@ export const useTaskStore = defineStore("task", () => {
   const tasks = ref<TaskDto[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
   function resetState() {
     isLoading.value = false;
     error.value = null;
   }
 
-  async function listByProject(projectId: string) {
+  async function listByProject(projectId: string, params: PagingParams = {}) {
     resetState();
     isLoading.value = true;
 
     try {
       const res = await taskServiceFactory
-        .listByProject(projectId, {})
+        .listByProject(projectId, {
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          ...params,
+        })
         .execute();
 
       if (!res || res.length === 0) {
-        return;
+        return [];
       }
 
       tasks.value = res;
+      return res;
     } catch (err) {
       errorHandler.handleError(err);
+      return [];
     } finally {
       isLoading.value = false;
     }
   }
 
-  async function listBySection(sectionId: string) {
+  async function listBySection(sectionId: string, params: PagingParams = {}) {
     resetState();
     isLoading.value = true;
 
     try {
       const res = await taskServiceFactory
-        .listBySection(sectionId, {})
+        .listBySection(sectionId, {
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          ...params,
+        })
         .execute();
 
       if (!res || res.length === 0) {
-        return;
+        return [];
       }
 
       tasks.value = res;
+      return res;
     } catch (err) {
       errorHandler.handleError(err);
+      return [];
     } finally {
       isLoading.value = false;
     }
@@ -68,9 +83,7 @@ export const useTaskStore = defineStore("task", () => {
     isLoading.value = true;
 
     try {
-      return await taskServiceFactory
-        .get(taskId)
-        .execute();
+      return await taskServiceFactory.get(taskId).execute();
     } catch (err) {
       errorHandler.handleError(err);
       return null;
@@ -84,9 +97,7 @@ export const useTaskStore = defineStore("task", () => {
     isLoading.value = true;
 
     try {
-      await taskServiceFactory
-        .create(request)
-        .ensured("Задача успешно создана");
+      await taskServiceFactory.create(request).ensured("Задача успешно создана");
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -101,9 +112,7 @@ export const useTaskStore = defineStore("task", () => {
     isLoading.value = true;
 
     try {
-      await taskServiceFactory
-        .update(request)
-        .ensured("Задача успешно обновлена");
+      await taskServiceFactory.update(request).ensured("Задача успешно обновлена");
       await get(request.id);
       return true;
     } catch (err) {
@@ -119,9 +128,7 @@ export const useTaskStore = defineStore("task", () => {
     isLoading.value = true;
 
     try {
-      await taskServiceFactory
-        .delete(taskId)
-        .ensured("Задача успешно удалена");
+      await taskServiceFactory.delete(taskId).ensured("Задача успешно удалена");
       await get(taskId);
       return true;
     } catch (err) {
@@ -137,9 +144,7 @@ export const useTaskStore = defineStore("task", () => {
     isLoading.value = true;
 
     try {
-      await taskServiceFactory
-        .restore(taskId)
-        .ensured("Задача успешно восстановлена");
+      await taskServiceFactory.restore(taskId).ensured("Задача успешно восстановлена");
       await get(taskId);
       return true;
     } catch (err) {
@@ -204,12 +209,30 @@ export const useTaskStore = defineStore("task", () => {
     }
   }
 
+  function setPaging(newLimit: number, newOffset: number) {
+    limit.value = newLimit;
+    offset.value = newOffset;
+  }
+
+  function nextPage() {
+    offset.value += limit.value;
+  }
+
+  function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value);
+  }
+
   return {
     tasks,
     isLoading,
     error,
+    limit,
+    offset,
     listByProject,
     listBySection,
+    setPaging,
+    nextPage,
+    prevPage,
     get,
     createTask,
     updateTask,

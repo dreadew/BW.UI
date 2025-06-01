@@ -16,19 +16,21 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
   const artifacts = ref<Record<string, TaskDirectoryArtifactDto[]>>({});
   const isLoading = ref(false);
   const error = ref<string | null>(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
   function resetState() {
     isLoading.value = false;
     error.value = null;
   }
 
-  async function list(taskId: string) {
+  async function list(taskId: string, params: { limit?: number; offset?: number } = {}) {
     resetState();
     isLoading.value = true;
 
     try {
       const res = await taskDirectoryServiceFactory
-        .list(taskId)
+        .list(taskId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value })
         .execute();
       if (!res || res.length === 0) {
         return [];
@@ -159,12 +161,30 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
     }
   }
 
+  function setPaging(newLimit: number, newOffset: number) {
+    limit.value = newLimit;
+    offset.value = newOffset;
+  }
+
+  function nextPage() {
+    offset.value += limit.value;
+  }
+
+  function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value);
+  }
+
   return {
     directories,
     artifacts,
     isLoading,
     error,
+    limit,
+    offset,
     list,
+    setPaging,
+    nextPage,
+    prevPage,
     get,
     create,
     update,

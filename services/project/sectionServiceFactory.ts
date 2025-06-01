@@ -1,7 +1,8 @@
-import type { CreateSectionRequest, SectionDto, UpdateSectionRequest } from "~/types/project/section.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { CreateSectionRequest, UpdateSectionRequest } from "~/types/request.types";
+import type { SectionDto } from "~/types/response.types";
 
 export const sectionServiceFactory = {
   create: (request: CreateSectionRequest) =>
@@ -26,11 +27,12 @@ export const sectionServiceFactory = {
       .withService(PROJECT_SERVICE)
       .withResponse<SectionDto>()
       .build(),
-  
-  listByProject: (projectId: string) =>
+
+  listByProject: (projectId: string, params: PagingParams = {}) =>
     apiContractBuilderHelper
-      .get(`/api/Sections/${projectId}`)
+      .get(`/api/Section/by-project/${projectId}`)
       .withService(PROJECT_SERVICE)
+      .withQueryParams(params)
       .withResponse<SectionDto[]>()
       .build(),
 
@@ -40,7 +42,7 @@ export const sectionServiceFactory = {
       .withService(PROJECT_SERVICE)
       .withResponse<SuccessResponse>()
       .build(),
-      
+
   restore: (id: string) =>
     apiContractBuilderHelper
       .post(`/api/Sections/${id}`)

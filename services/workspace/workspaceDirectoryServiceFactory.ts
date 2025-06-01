@@ -1,16 +1,11 @@
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { SuccessResponse, PagingParams } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { WorkspacePagingParams } from "~/types/workspace/workspace.types";
-import type {
-  WorkspaceDirectory,
-  CreateWorkspaceDirectoryRequest,
-  UpdateWorkspaceDirectoryRequest,
-} from "~/types/workspace/workspaceDirectory.types";
-import type { DeleteFileRequest } from "~/types/file.types";
+import type { CreateWorkspaceDirectoryRequest, UpdateWorkspaceDirectoryRequest, DeleteFileRequest } from "~/types/request.types";
+import type { WorkspaceDirectory } from "~/types/response.types";
 
 export const workspaceDirectoryServiceFactory = {
-  listWorkspaceDirectories: (params: WorkspacePagingParams) =>
+  listWorkspaceDirectories: (params: PagingParams & { workspaceId: string }) =>
     apiContractBuilderHelper
       .get(`/api/WorkspaceDirectory/list`)
       .withService(WORKSPACE_SERVICE)

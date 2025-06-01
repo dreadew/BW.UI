@@ -2,6 +2,7 @@
 import ContactHero from '~/components/Contact/ContactHero.vue';
 import ContactForm from '~/components/Contact/ContactForm.vue';
 import ContactInfo from '~/components/Contact/ContactInfo.vue';
+useHead({ title: 'Контакты' })
 </script>
 
 <template>

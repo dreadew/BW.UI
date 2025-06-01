@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui';
-import { ref } from 'vue';
+import { ref, computed } from 'vue'
 import { useColorMode } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '~/stores/useUserStore'
+import { useRoute } from 'vue-router'
 
-const { isAuthenticated, logout } = useUserStore();
+const userStore = useUserStore()
+const { isAuthenticated } = storeToRefs(userStore)
+const logout = userStore.logout
 
 const items = ref<NavigationMenuItem[]>([
   {
@@ -57,6 +62,7 @@ const AuthorizedLinks = ref<NavigationMenuItem[]>([
 
 const showLogin = ref(false);
 const showRegister = ref(false);
+const isMobileMenuOpen = ref(false)
 
 const onOpenRegister = () => {
   showLogin.value = false;
@@ -68,27 +74,77 @@ const onOpenLogin = () => {
   showLogin.value = true;
 }
 
-const isDark = ref(false)
 const colorMode = useColorMode()
+const isDark = computed({
+  get: () => colorMode.value === 'dark',
+  set: (val: boolean) => { colorMode.value = val ? 'dark' : 'light' }
+})
 const toggleTheme = () => {
   isDark.value = !isDark.value
-  colorMode.value = isDark.value ? 'dark' : 'light'
 }
+
+const route = useRoute()
+
+function isActive(item: NavigationMenuItem): boolean {
+  if (!item.to) return false
+  return route.path === item.to || route.fullPath === item.to
+}
+
+function isChildActive(children: NavigationMenuItem[] = []): boolean {
+  return children.some((child: NavigationMenuItem) => isActive(child))
+}
+
+const computedItems = computed(() => items.value)
 </script>
 
 <template>
-  <div class="border border-secondary/10 bg-secondary/2 rounded-2xl py-2 px-3 my-4 flex items-center gap-4 justify-center">
-    <UNavigationMenu :items="isAuthenticated ? [...items, ...AuthorizedLinks] : items" class="flex-1" />
-    <UToggle v-model="isDark" on-icon="i-lucide-moon" off-icon="i-lucide-sun" @click="toggleTheme" class="mr-2" />
-    <UButton v-if="!isAuthenticated" color="primary" variant="soft" @click="showLogin = true">
-      <UIcon name="i-lucide-log-in" class="mr-1" /> Войти
-    </UButton>
-    <UButton v-if="!isAuthenticated" color="primary" variant="outline" @click="showRegister = true">
-      <UIcon name="i-lucide-user-plus" class="mr-1" /> Зарегистрироваться
-    </UButton>
-    <UButton v-if="isAuthenticated" color="neutral" variant="subtle" @click="logout" trailing-icon="i-lucide-user-plus">
-      Выйти
-    </UButton>
+  <div class="sticky top-4 z-30 backdrop-blur w-full px-0 md:px-0">
+    <div class="border border-secondary/10 rounded-2xl py-2 px-3 my-4 flex items-center gap-4 justify-between relative max-w-7xl mx-auto">
+      <NuxtLink to="/" class="flex items-center gap-2 mr-2 select-none">
+        <img src="/assets/img/128.svg" alt="Hexaend Logo" class="h-8 w-8" />
+      </NuxtLink>
+      <div class="hidden xl:flex flex-1">
+        <UNavigationMenu :items="isAuthenticated ? [...computedItems, ...AuthorizedLinks] : computedItems" class="flex-1" />
+      </div>
+      <div class="flex gap-2 items-center">
+        <UButton v-if="!isAuthenticated" color="primary" variant="soft" @click="showLogin = true" class="hidden xl:flex">
+          <UIcon name="i-lucide-log-in" class="mr-1" /> Войти
+        </UButton>
+        <UButton v-if="!isAuthenticated" color="primary" variant="outline" @click="showRegister = true" class="hidden xl:flex">
+          <UIcon name="i-lucide-user-plus" class="mr-1" /> Зарегистрироваться
+        </UButton>
+        <UButton v-if="isAuthenticated" color="neutral" variant="subtle" @click="logout" trailing-icon="i-lucide-user-plus" class="hidden xl:flex">
+          Выйти
+        </UButton>
+        <USlideover v-model="isMobileMenuOpen" class="xl:hidden">
+          <UButton class="xl:hidden" variant="ghost" color="neutral" icon="i-lucide-menu" aria-label="Закрыть меню" />
+          <template #content>
+            <div class="p-4">
+              <UNavigationMenu :items="isAuthenticated ? [...computedItems, ...AuthorizedLinks] : computedItems" orientation="vertical" />
+              <div class="mt-4 flex flex-col gap-2">
+                <UButton v-if="!isAuthenticated" color="primary" variant="soft" @click="showLogin = true">
+                  <UIcon name="i-lucide-log-in" class="mr-1" /> Войти
+                </UButton>
+                <UButton v-if="!isAuthenticated" color="primary" variant="outline" @click="showRegister = true">
+                  <UIcon name="i-lucide-user-plus" class="mr-1" /> Зарегистрироваться
+                </UButton>
+                <UButton v-if="isAuthenticated" color="neutral" variant="subtle" @click="logout" trailing-icon="i-lucide-user-plus">
+                  Выйти
+                </UButton>
+              </div>
+            </div>
+          </template>
+        </USlideover>
+          <UButton
+            color="neutral"
+            variant="subtle"
+            class="mr-2"
+            :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
+            @click="toggleTheme"
+            aria-label="Переключить тему"
+          />
+      </div>
+    </div>
     <UModal v-if="!isAuthenticated" v-model:open="showLogin" title="Вход">
       <template #header>
         <UiHeading class="flex items-center gap-2" level="5">

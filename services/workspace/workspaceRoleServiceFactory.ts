@@ -1,8 +1,8 @@
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
 import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { WorkspacePagingParams } from "~/types/workspace/workspace.types";
-import type { WorkspaceRole, CreateWorkspaceRoleRequest, UpdateWorkspaceRoleRequest } from "~/types/workspace/workspaceRole.types";
+import type { CreateWorkspaceRoleRequest, UpdateWorkspaceRoleRequest } from "~/types/request.types";
+import type { WorkspacePagingParams, WorkspaceRole } from "~/types/response.types";
 
 export const workspaceRoleServiceFactory = {
     listWorkspaceRoles: (params: WorkspacePagingParams) => apiContractBuilderHelper.get(`/api/WorkspaceRole/list`)
@@ -21,18 +21,18 @@ export const workspaceRoleServiceFactory = {
         .withBody(body)
         .withResponse<SuccessResponse>()
         .build(),
-    
+
     updateWorkspaceRole: (id: string, body: UpdateWorkspaceRoleRequest) => apiContractBuilderHelper.patch(`/api/WorkspaceRole/${id}`)
         .withService(WORKSPACE_SERVICE)
         .withBody(body)
         .withResponse<SuccessResponse>()
         .build(),
-    
+
     deleteWorkspaceRole: (id: string) => apiContractBuilderHelper.delete(`/api/WorkspaceRole/${id}`)
         .withService(WORKSPACE_SERVICE)
         .withResponse<SuccessResponse>()
         .build(),
-    
+
     restoreWorkspaceRole: (id: string) => apiContractBuilderHelper.post(`/api/WorkspaceRole/${id}`)
         .withService(WORKSPACE_SERVICE)
         .withResponse<SuccessResponse>()

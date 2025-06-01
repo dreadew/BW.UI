@@ -2,338 +2,1192 @@
 import { z } from "zod";
 
 export const renewRequestSchema = z.object({
-  refreshToken: z.string(),
   accessToken: z.string(),
+  refreshToken: z.string(),
 });
 
 export const revokeRequestSchema = z.object({
-  id: z.string(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0434\u0438\u0440\u0435\u043A\u0442\u043E\u0440\u0438\u0438",
+    ),
 });
 
 export const signInRequestSchema = z.object({
-  username: z.string(),
-  password: z.string(),
-  rememberMe: z.boolean(),
+  username: z
+    .string()
+    .min(1)
+    .max(24)
+    .regex(/^[a-zA-Z0-9._]+$/)
+    .describe(
+      "\u0418\u043C\u044F \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F",
+    ),
+  password: z
+    .string()
+    .min(8)
+    .max(32)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe("\u041F\u0430\u0440\u043E\u043B\u044C"),
+  rememberMe: z
+    .boolean()
+    .describe(
+      "\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C \u043C\u0435\u043D\u044F",
+    ),
 });
 
 export const signUpRequestSchema = z.object({
-  username: z.string(),
-  email: z.string(),
-  phoneNumber: z.string(),
-  password: z.string(),
+  username: z
+    .string()
+    .min(1)
+    .max(24)
+    .regex(/^[a-zA-Z0-9._]+$/)
+    .describe(
+      "\u0418\u043C\u044F \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F",
+    ),
+  email: z.string().max(100).email().describe("Email"),
+  phoneNumber: z
+    .string()
+    .min(12)
+    .max(12)
+    .regex(/^[+]\d{11}$/)
+    .describe("\u0422\u0435\u043B\u0435\u0444\u043E\u043D"),
+  password: z
+    .string()
+    .min(8)
+    .max(32)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe("\u041F\u0430\u0440\u043E\u043B\u044C"),
 });
 
 export const createSkillRequestSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(2)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043D\u0430\u0432\u044B\u043A\u0430",
+    ),
 });
 
 export const updateSkillRequestSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043D\u0430\u0432\u044B\u043A\u0430",
+    ),
+  name: z
+    .string()
+    .min(2)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043D\u0430\u0432\u044B\u043A\u0430",
+    ),
 });
 
 export const roleRequestSchema = z.object({
-  roleId: z.string(),
+  roleId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u043E\u043B\u0438",
+    ),
 });
 
 export const skillRequestSchema = z.object({
-  skillId: z.string(),
+  skillId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043D\u0430\u0432\u044B\u043A\u0430",
+    ),
 });
 
 export const updateUserRequestSchema = z.object({
-  email: z.string().optional(),
-  phoneNumber: z.string().optional(),
-  password: z.string().optional(),
-  isDeleted: z.boolean().optional(),
+  email: z.string().max(100).email().optional().describe("Email"),
+  phoneNumber: z
+    .string()
+    .min(12)
+    .max(12)
+    .regex(/^[+]\d{11}$/)
+    .optional()
+    .describe("\u0422\u0435\u043B\u0435\u0444\u043E\u043D"),
+  password: z
+    .string()
+    .min(8)
+    .max(32)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .optional()
+    .describe("\u041F\u0430\u0440\u043E\u043B\u044C"),
+  isDeleted: z
+    .boolean()
+    .optional()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F",
+    ),
 });
 
 export const recoverPasswordRequestSchema = z.object({
-  password: z.string(),
-  verificationCode: z.string(),
+  password: z
+    .string()
+    .min(8)
+    .max(32)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe(
+      "\u041D\u043E\u0432\u044B\u0439 \u043F\u0430\u0440\u043E\u043B\u044C",
+    ),
+  verificationCode: z
+    .string()
+    .min(6)
+    .max(6)
+    .regex(/^\d{6}$/)
+    .describe(
+      "\u041A\u043E\u0434 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F",
+    ),
 });
 
 export const createUserRoleRequestSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0440\u043E\u043B\u0438",
+    ),
 });
 
 export const updateUserRoleRequestSchema = z.object({
-  id: z.string(),
-  name: z.string().optional(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u043E\u043B\u0438",
+    ),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z ]+$/)
+    .optional()
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0440\u043E\u043B\u0438",
+    ),
 });
 
 export const createUserRoleClaimsRequestSchema = z.object({
-  roleId: z.string(),
-  claimType: z.string(),
-  claimValue: z.string(),
+  roleId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u043E\u043B\u0438",
+    ),
+  claimType: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z.]+$/)
+    .describe("\u0422\u0438\u043F claim"),
+  claimValue: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(/^[a-zA-Z.]+$/)
+    .describe("\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435 claim"),
 });
 
 export const updateUserRoleClaimsRequestSchema = z.object({
-  claimType: z.string(),
-  claimValue: z.string(),
+  claimType: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z.]+$/)
+    .describe("\u0422\u0438\u043F claim"),
+  claimValue: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(/^[a-zA-Z.]+$/)
+    .describe("\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435 claim"),
 });
 
 export const createUserScheduleRequestSchema = z.object({
-  userId: z.string(),
-  date: z.string(),
-  startAt: z.string(),
-  endAt: z.string(),
+  userId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F",
+    ),
+  date: z.string().min(1).describe("\u0414\u0430\u0442\u0430"),
+  startAt: z
+    .string()
+    .min(1)
+    .describe(
+      "\u0412\u0440\u0435\u043C\u044F \u043D\u0430\u0447\u0430\u043B\u0430",
+    ),
+  endAt: z
+    .string()
+    .min(1)
+    .describe(
+      "\u0412\u0440\u0435\u043C\u044F \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F",
+    ),
 });
 
 export const updateUserScheduleRequestSchema = z.object({
-  date: z.string().optional(),
-  startAt: z.string().optional(),
-  endAt: z.string().optional(),
+  date: z.string().optional().describe("\u0414\u0430\u0442\u0430"),
+  startAt: z
+    .string()
+    .optional()
+    .describe(
+      "\u0412\u0440\u0435\u043C\u044F \u043D\u0430\u0447\u0430\u043B\u0430",
+    ),
+  endAt: z
+    .string()
+    .optional()
+    .describe(
+      "\u0412\u0440\u0435\u043C\u044F \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F",
+    ),
 });
 
 export const createProjectRequestSchema = z.object({
-  workspaceId: z.string(),
-  name: z.string(),
+  workspaceId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u0430\u0431\u043E\u0447\u0435\u0439 \u043E\u0431\u043B\u0430\u0441\u0442\u0438",
+    ),
+  name: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+    ),
 });
 
 export const updateProjectRequestSchema = z.object({
-  projectId: z.string(),
-  name: z.string(),
-  isDeleted: z.boolean().optional(),
+  projectId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+    ),
+  name: z
+    .string()
+    .min(4)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+    ),
+  isDeleted: z
+    .boolean()
+    .optional()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F",
+    ),
 });
 
 export const restoreProjectRequestSchema = z.object({
-  projectId: z.string(),
+  projectId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+    ),
 });
 
 export const addUserRequestSchema = z.object({
-  id: z.string(),
-  userId: z.string(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440",
+    ),
+  userId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F",
+    ),
 });
 
 export const createProjectRoleRequestSchema = z.object({
-  name: z.string(),
-  projectId: z.string(),
+  name: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z0-9]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0440\u043E\u043B\u0438",
+    ),
+  projectId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+    ),
 });
 
 export const updateProjectRoleRequestSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u043E\u043B\u0438",
+    ),
+  name: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z0-9]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0440\u043E\u043B\u0438",
+    ),
 });
 
 export const createProjectRoleClaimsRequestSchema = z.object({
-  value: z.string(),
-  roleId: z.string(),
+  value: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z.]+$/)
+    .describe("\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435 claim"),
+  roleId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u043E\u043B\u0438",
+    ),
 });
 
 export const updateProjectRoleClaimsRequestSchema = z.object({
-  id: z.string(),
-  value: z.string(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 claim",
+    ),
+  value: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z.]+$/)
+    .describe("\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435 claim"),
 });
 
 export const createProjectThreadRequestSchema = z.object({
-  projectId: z.string(),
-  fromId: z.string(),
-  title: z.string(),
-  text: z.string(),
+  projectId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+    ),
+  fromId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u0432\u0442\u043E\u0440\u0430",
+    ),
+  title: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe("\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"),
+  text: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe("\u0422\u0435\u043A\u0441\u0442"),
 });
 
 export const updateProjectThreadRequestSchema = z.object({
-  id: z.string(),
-  fromId: z.string(),
-  title: z.string(),
-  text: z.string(),
-  isDeleted: z.boolean().optional(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0442\u0440\u0435\u0434\u0430",
+    ),
+  fromId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u0432\u0442\u043E\u0440\u0430",
+    ),
+  title: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe("\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"),
+  text: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe("\u0422\u0435\u043A\u0441\u0442"),
+  isDeleted: z
+    .boolean()
+    .optional()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F",
+    ),
 });
 
 export const createProjectThreadCommentRequestSchema = z.object({
-  threadId: z.string(),
-  fromId: z.string(),
-  text: z.string(),
+  threadId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0442\u0440\u0435\u0434\u0430",
+    ),
+  fromId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u0432\u0442\u043E\u0440\u0430",
+    ),
+  text: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe(
+      "\u0422\u0435\u043A\u0441\u0442 \u043A\u043E\u043C\u043C\u0435\u043D\u0442\u0430\u0440\u0438\u044F",
+    ),
 });
 
 export const updateProjectThreadCommentRequestSchema = z.object({
-  threadCommentId: z.string(),
-  text: z.string(),
-  isDeleted: z.boolean().optional(),
+  threadCommentId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043A\u043E\u043C\u043C\u0435\u043D\u0442\u0430\u0440\u0438\u044F",
+    ),
+  text: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .optional()
+    .describe(
+      "\u0422\u0435\u043A\u0441\u0442 \u043A\u043E\u043C\u043C\u0435\u043D\u0442\u0430\u0440\u0438\u044F",
+    ),
+  isDeleted: z
+    .boolean()
+    .optional()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F",
+    ),
 });
 
 export const createSectionRequestSchema = z.object({
-  projectId: z.string(),
-  name: z.string(),
+  projectId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+    ),
+  name: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0441\u0435\u043A\u0446\u0438\u0438",
+    ),
 });
 
 export const updateSectionRequestSchema = z.object({
-  sectionId: z.string(),
-  name: z.string(),
-  isDeleted: z.boolean().optional(),
+  sectionId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0441\u0435\u043A\u0446\u0438\u0438",
+    ),
+  name: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z ]+$/)
+    .optional()
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0441\u0435\u043A\u0446\u0438\u0438",
+    ),
+  isDeleted: z
+    .boolean()
+    .optional()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F",
+    ),
 });
 
 export const createTaskRequestSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  isArchived: z.boolean(),
-  startedDate: z.string(),
-  endDate: z.string(),
+  name: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  isArchived: z
+    .boolean()
+    .describe(
+      "\u0410\u0440\u0445\u0438\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u0430 \u043B\u0438 \u0437\u0430\u0434\u0430\u0447\u0430",
+    ),
+  startedDate: z
+    .string()
+    .optional()
+    .describe("\u0414\u0430\u0442\u0430 \u043D\u0430\u0447\u0430\u043B\u0430"),
+  endDate: z
+    .string()
+    .optional()
+    .describe(
+      "\u0414\u0430\u0442\u0430 \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F",
+    ),
 });
 
 export const updateTaskRequestSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  isArchived: z.boolean(),
-  isDeleted: z.boolean().optional(),
-  startedDate: z.string().optional(),
-  endDate: z.string().optional(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  name: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  isArchived: z
+    .boolean()
+    .describe(
+      "\u0410\u0440\u0445\u0438\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u0430 \u043B\u0438 \u0437\u0430\u0434\u0430\u0447\u0430",
+    ),
+  isDeleted: z
+    .boolean()
+    .optional()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F",
+    ),
+  startedDate: z
+    .string()
+    .optional()
+    .describe("\u0414\u0430\u0442\u0430 \u043D\u0430\u0447\u0430\u043B\u0430"),
+  endDate: z
+    .string()
+    .optional()
+    .describe(
+      "\u0414\u0430\u0442\u0430 \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F",
+    ),
 });
 
 export const addTaskAssigneeRequestSchema = z.object({
-  taskId: z.string(),
-  userId: z.string(),
+  taskId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  userId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F",
+    ),
 });
 
 export const removeTaskAssigneeRequestSchema = z.object({
-  taskId: z.string(),
-  userId: z.string(),
+  taskId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  userId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F",
+    ),
 });
 
 export const createTaskActivityRequestSchema = z.object({
-  projectId: z.string(),
-  taskId: z.string(),
-  activityId: z.string(),
-  fromId: z.string(),
-  date: z.string(),
-  workHours: z.number(),
+  projectId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
+    ),
+  taskId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  activityId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u0438",
+    ),
+  fromId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u0432\u0442\u043E\u0440\u0430",
+    ),
+  date: z.string().describe("\u0414\u0430\u0442\u0430"),
+  workHours: z
+    .number()
+    .min(0)
+    .describe("\u0427\u0430\u0441\u044B \u0440\u0430\u0431\u043E\u0442\u044B"),
 });
 
 export const updateTaskActivityRequestSchema = z.object({
-  taskActivityId: z.string(),
-  taskId: z.string(),
-  activityId: z.string(),
-  fromId: z.string(),
-  workHours: z.number(),
+  taskActivityId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u0438 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  taskId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  activityId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u0438",
+    ),
+  fromId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0438\u0441\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044F",
+    ),
+  workHours: z
+    .number()
+    .describe("\u0427\u0430\u0441\u044B \u0440\u0430\u0431\u043E\u0442\u044B"),
 });
 
 export const createTaskCommentRequestSchema = z.object({
-  taskId: z.string(),
-  authorId: z.string(),
-  content: z.string(),
+  taskId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  authorId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u0432\u0442\u043E\u0440\u0430",
+    ),
+  content: z
+    .string()
+    .min(1)
+    .describe(
+      "\u0422\u0435\u043A\u0441\u0442 \u043A\u043E\u043C\u043C\u0435\u043D\u0442\u0430\u0440\u0438\u044F",
+    ),
 });
 
 export const updateTaskCommentRequestSchema = z.object({
-  id: z.string(),
-  fromId: z.string(),
-  content: z.string().optional(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043A\u043E\u043C\u043C\u0435\u043D\u0442\u0430\u0440\u0438\u044F",
+    ),
+  fromId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u0432\u0442\u043E\u0440\u0430",
+    ),
+  content: z
+    .string()
+    .optional()
+    .describe(
+      "\u0422\u0435\u043A\u0441\u0442 \u043A\u043E\u043C\u043C\u0435\u043D\u0442\u0430\u0440\u0438\u044F",
+    ),
 });
 
 export const createTaskDirectoryRequestSchema = z.object({
-  taskId: z.string(),
-  name: z.string(),
+  taskId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  name: z
+    .string()
+    .regex(/^[a-zA-Z.]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0434\u0438\u0440\u0435\u043A\u0442\u043E\u0440\u0438\u0438",
+    ),
 });
 
 export const updateTaskDirectoryRequestSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  isDeleted: z.boolean().optional(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0434\u0438\u0440\u0435\u043A\u0442\u043E\u0440\u0438\u0438",
+    ),
+  name: z
+    .string()
+    .regex(/^[a-zA-Z.]+$/)
+    .optional()
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0434\u0438\u0440\u0435\u043A\u0442\u043E\u0440\u0438\u0438",
+    ),
+  isDeleted: z
+    .boolean()
+    .optional()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F",
+    ),
 });
 
 export const createTaskEvaluationRequestSchema = z.object({
-  taskId: z.string(),
-  activityId: z.string(),
-  hours: z.number(),
+  taskId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  activityId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u0438",
+    ),
+  hours: z.number().min(0).describe("\u0427\u0430\u0441\u044B"),
 });
 
 export const updateTaskEvaluationRequestSchema = z.object({
-  evaluationId: z.string(),
-  activityId: z.string(),
-  hours: z.number(),
+  evaluationId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043E\u0446\u0435\u043D\u043A\u0438",
+    ),
+  activityId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4]-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u0438",
+    ),
+  hours: z.number().min(0).describe("\u0427\u0430\u0441\u044B"),
 });
 
 export const createTaskTodoListRequestSchema = z.object({
-  taskId: z.string(),
+  taskId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
 });
 
 export const updateTaskTodoListRequestSchema = z.object({
-  id: z.string(),
-  isDeleted: z.boolean().optional(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0441\u043F\u0438\u0441\u043A\u0430 \u0434\u0435\u043B",
+    ),
+  isDeleted: z
+    .boolean()
+    .optional()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F",
+    ),
 });
 
 export const createTaskTodoListItemRequestSchema = z.object({
-  taskTodoListId: z.string(),
-  name: z.string(),
-  duration: z.number(),
-  startedDate: z.string(),
-  endDate: z.string().optional(),
+  taskTodoListId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0441\u043F\u0438\u0441\u043A\u0430 \u0434\u0435\u043B \u0437\u0430\u0434\u0430\u0447\u0438",
+    ),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe("\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"),
+  duration: z
+    .number()
+    .describe(
+      "\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C",
+    ),
+  startedDate: z
+    .string()
+    .min(1)
+    .describe("\u0414\u0430\u0442\u0430 \u043D\u0430\u0447\u0430\u043B\u0430"),
+  endDate: z
+    .string()
+    .optional()
+    .describe(
+      "\u0414\u0430\u0442\u0430 \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F",
+    ),
 });
 
 export const updateTaskTodoListItemRequestSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  duration: z.number(),
-  isCompleted: z.boolean(),
-  completedAt: z.string().optional(),
-  startedDate: z.string(),
-  endDate: z.string().optional(),
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u0430 \u0441\u043F\u0438\u0441\u043A\u0430 \u0434\u0435\u043B",
+    ),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe("\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"),
+  duration: z
+    .number()
+    .describe(
+      "\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C",
+    ),
+  isCompleted: z
+    .boolean()
+    .describe(
+      "\u041F\u0440\u0438\u0437\u043D\u0430\u043A \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u043D\u043E\u0441\u0442\u0438",
+    ),
+  completedAt: z
+    .string()
+    .optional()
+    .describe(
+      "\u0414\u0430\u0442\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0438\u044F",
+    ),
+  startedDate: z
+    .string()
+    .describe("\u0414\u0430\u0442\u0430 \u043D\u0430\u0447\u0430\u043B\u0430"),
+  endDate: z
+    .string()
+    .optional()
+    .describe(
+      "\u0414\u0430\u0442\u0430 \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F",
+    ),
 });
 
 export const createWorkspaceRequestSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0440\u0430\u0431\u043E\u0447\u0435\u0433\u043E \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u0430",
+    ),
 });
 
 export const updateWorkspaceRequestSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0440\u0430\u0431\u043E\u0447\u0435\u0433\u043E \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u0430",
+    ),
 });
 
 export const createWorkspaceDirectoryRequestSchema = z.object({
-  workspaceId: z.string(),
-  name: z.string(),
-});
-
-export const updateWorkspaceDirectoryRequestSchema = z.object({
-  name: z.string(),
-});
-
-export const createWorkspacePositionRequestSchema = z.object({
-  workspaceId: z.string(),
-  name: z.string(),
+  workspaceId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u0430\u0431\u043E\u0447\u0435\u0433\u043E \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u0430",
+    ),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0434\u0438\u0440\u0435\u043A\u0442\u043E\u0440\u0438\u0438",
+    ),
 });
 
 export const updateWorkspacePositionRequestSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe("\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"),
 });
 
 export const createWorkspaceRoleRequestSchema = z.object({
-  workspaceId: z.string(),
-  name: z.string(),
+  workspaceId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u0430\u0431\u043E\u0447\u0435\u0433\u043E \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u0430",
+    ),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0440\u043E\u043B\u0438",
+    ),
 });
 
 export const updateWorkspaceRoleRequestSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe(
+      "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0440\u043E\u043B\u0438",
+    ),
 });
 
 export const createWorkspaceRoleClaimRequestSchema = z.object({
-  roleId: z.string(),
-  value: z.string(),
+  roleId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u043E\u043B\u0438",
+    ),
+  value: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(/^[a-zA-Z.]+$/)
+    .describe("\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435 claim"),
 });
 
 export const updateWorkspaceRoleClaimRequestSchema = z.object({
-  value: z.string(),
+  value: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(/^[a-zA-Z.]+$/)
+    .describe("\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435 claim"),
 });
 
 export const updateWorkspaceUserRequestSchema = z.object({
-  roleId: z.string(),
-  positionId: z.string(),
+  roleId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u043E\u043B\u0438",
+    ),
+  positionId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u0437\u0438\u0446\u0438\u0438",
+    ),
 });
 
 export const uploadFileRequestSchema = z.object({
-  fromId: z.string(),
-  content: z.array(z.number()),
-  fileName: z.string(),
-  contentType: z.string(),
+  fromId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u0435\u043B\u044F",
+    ),
+  content: z
+    .array(z.number())
+    .describe("\u0421\u043E\u0434\u0435\u0440\u0436\u0438\u043C\u043E\u0435"),
+  fileName: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(/^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$/)
+    .describe("\u0418\u043C\u044F \u0444\u0430\u0439\u043B\u0430"),
+  contentType: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z0-9/]+$/)
+    .describe(
+      "\u0422\u0438\u043F \u0441\u043E\u0434\u0435\u0440\u0436\u0438\u043C\u043E\u0433\u043E",
+    ),
+});
+
+export const createWorkspacePositionRequestSchema = z.object({
+  name: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe("\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435 name"),
+  workspaceId: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0440\u0430\u0431\u043E\u0447\u0435\u0433\u043E \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u0430",
+    ),
+});
+
+export const updateWorkspaceDirectoryRequestSchema = z.object({
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u0434\u0438\u0440\u0435\u043A\u0442\u043E\u0440\u0438\u0438",
+    ),
+  name: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-zA-Z ]+$/)
+    .describe("\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435 name"),
 });
 
 const notificationTypesSchema = z.any();
 
 export const verifyUserRequestSchema = z.object({
-  id: z.string(),
-  code: z.string(),
-  type: notificationTypesSchema,
+  id: z
+    .string()
+    .regex(
+      /[a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}/,
+    )
+    .describe(
+      "\u0418\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F",
+    ),
+  code: z
+    .string()
+    .min(6)
+    .max(6)
+    .regex(/^\d{6}$/)
+    .describe(
+      "\u041A\u043E\u0434 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F",
+    ),
+  type: notificationTypesSchema.describe(
+    "\u0422\u0438\u043F \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u044F",
+  ),
 });
 
 export const generateVerificationCodeRequestSchema = z.object({
-  email: z.string(),
+  email: z.string().max(100).email().describe("Email"),
   type: notificationTypesSchema,
 });

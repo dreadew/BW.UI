@@ -1,24 +1,19 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type {
-  CreateTaskTodoListRequest,
-  CreateTaskTodoListItemRequest,
-  TaskTodoListDto,
-  UpdateTaskTodoListRequest,
-  TaskTodoListItemDto,
-  UpdateTaskTodoListItemRequest,
-} from "~/types/project/taskTodoList.types";
-import type { SuccessResponse } from "~/types/api.types";
+import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { CreateTaskTodoListRequest, UpdateTaskTodoListRequest, CreateTaskTodoListItemRequest, UpdateTaskTodoListItemRequest } from "~/types/request.types";
+import type { TaskTodoListDto, TaskTodoListItemDto } from "~/types/response.types";
 
 export const taskTodoListServiceFactory = {
-  list: (taskId: string) =>
+  list: (taskId: string, params: PagingParams) =>
     apiContractBuilderHelper
       .get(`/api/TaskTodoList/by-task/${taskId}`)
       .withService(PROJECT_SERVICE)
+      .withQueryParams(params)
       .withResponse<TaskTodoListDto[]>()
       .build(),
 
-  get: (todoListId: string) => 
+  get: (todoListId: string) =>
     apiContractBuilderHelper.get(`/api/TaskTodoList/${todoListId}`)
       .withService(PROJECT_SERVICE)
       .withResponse<TaskTodoListDto>()

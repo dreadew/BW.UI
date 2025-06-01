@@ -1,13 +1,13 @@
-<script setup lang="ts">
-</script>
-
 <template>
   <section class="py-24 w-full">
-    <div class="container space-y-16">
+    <div class="space-y-16">
       <div class="flex flex-col gap-4 text-center">
-        <UiHeading size="4xl" class="tracking-tight sm:text-6xl">
-          Agile Project Management <br /> который работает для вашей команды
-        </UiHeading>
+        <div class="flex flex-col items-center justify-center gap-3">
+          <UIcon name="i-lucide-rocket" class="text-primary text-4xl mx-auto" />
+          <UiHeading size="4xl" class="tracking-tight sm:text-6xl">
+            Agile Project Management <br /> который работает для вашей команды
+          </UiHeading>
+        </div>
         <UiText size="xl" class="mx-auto max-w-2xl">
           Планируйте, отслеживайте и отправляйте свои проекты с эффективностью и четкостью.
           Hexaend помогает командам любого размера быстрее создавать ценности
@@ -22,7 +22,11 @@
         </div>
       </div>
       <div class="mx-auto mt-24 max-w-5xl">
-        <div class="h-[37rem] w-full rounded-2xl border border-secondary/10 bg-secondary/2" />
+        <img
+          src="/landing/example.jpg"
+          alt="Демонстрация продукта"
+          class="h-[37rem] w-full object-cover rounded-2xl border border-secondary/10 bg-secondary/2"
+        />
       </div>
     </div>
   </section>

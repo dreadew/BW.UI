@@ -11,12 +11,14 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
   const threads: Ref<ProjectThreadDto[]> = ref([]);
   const isLoading = ref(false);
   const error = ref(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
-  async function list(projectId: string) {
+  async function list(projectId: string, params: { limit?: number; offset?: number } = {}) {
     isLoading.value = true;
     try {
       const res = await projectThreadServiceFactory
-        .listByProject(projectId)
+        .listByProject(projectId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value })
         .execute();
       if (!res || res.length === 0) {
         return [];
@@ -29,6 +31,19 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  function setPaging(newLimit: number, newOffset: number) {
+    limit.value = newLimit;
+    offset.value = newOffset;
+  }
+
+  function nextPage() {
+    offset.value += limit.value;
+  }
+
+  function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value);
   }
 
   async function get(id: string) {
@@ -109,7 +124,12 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
     threads,
     isLoading,
     error,
+    limit,
+    offset,
     list,
+    setPaging,
+    nextPage,
+    prevPage,
     get,
     create,
     update,

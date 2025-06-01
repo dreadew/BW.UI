@@ -1,11 +1,8 @@
 import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type {
-  CreateUserScheduleRequest,
-  UpdateUserScheduleRequest,
-  UserSchedule,
-} from "~/types/identity/userSchedule.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { IDENTITY_SERVICE } from "~/constants/services.constants";
+import type { CreateUserScheduleRequest, UpdateUserScheduleRequest } from "~/types/request.types";
+import type { UserSchedule } from "~/types/response.types";
 
 export const userScheduleService = {
   findByUser: (userId: string, params: PagingParams) =>

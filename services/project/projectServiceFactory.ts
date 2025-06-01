@@ -28,7 +28,7 @@ export const projectServiceFactory = {
       .withBody(request)
       .withResponse<SuccessResponse>()
       .build(),
-  
+
   get: (projectId: string) =>
     apiContractBuilderHelper
       .get(`/api/Project/${projectId}`)
@@ -68,17 +68,19 @@ export const projectServiceFactory = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  addUser: (request: AddUserRequest) => apiContractBuilderHelper
-    .post(`/api/Project/${request.id}/add-user`)
-    .withService(PROJECT_SERVICE)
-    .withBody(request)
-    .withResponse<SuccessResponse>()
-    .build(),
+  addUser: (projectId: string, userId: string) =>
+    apiContractBuilderHelper
+      .post(`/api/Project/${projectId}/add-user`)
+      .withService(PROJECT_SERVICE)
+      .withBody({ userId })
+      .withResponse<SuccessResponse>()
+      .build(),
 
-  deleteUser: (request: DeleteUserRequest) => apiContractBuilderHelper
-    .delete(`/api/Project/${request.id}/remove-user`)
-    .withService(PROJECT_SERVICE)
-    .withQueryParams(request)
-    .withResponse<SuccessResponse>()
-    .build(),
+  deleteUser: (projectId: string, userId: string) =>
+    apiContractBuilderHelper
+      .delete(`/api/Project/${projectId}/remove-user`)
+      .withService(PROJECT_SERVICE)
+      .withQueryParams({ userId })
+      .withResponse<SuccessResponse>()
+      .build(),
 };

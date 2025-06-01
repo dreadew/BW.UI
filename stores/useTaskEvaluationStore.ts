@@ -6,6 +6,7 @@ import type {
 } from "~/types/request.types";
 import type { TaskEvaluationDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
+import type { PagingParams } from "~/types/api.types";
 
 export const useTaskEvaluationStore = defineStore("taskEvaluation", () => {
   const toast = useToast();
@@ -14,25 +15,31 @@ export const useTaskEvaluationStore = defineStore("taskEvaluation", () => {
   const evaluations = ref<TaskEvaluationDto[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
   function resetState() {
     isLoading.value = false;
     error.value = null;
   }
 
-  async function list(taskId: string) {
+  async function list(taskId: string, params: PagingParams = {}) {
     resetState();
     isLoading.value = true;
 
     try {
       const res = await taskEvaluationServiceFactory
-        .list(taskId)
+        .list(taskId, {
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          ...params,
+        })
         .execute();
       if (!res || res.length === 0) {
-        return;
+        return [];
       }
       evaluations.value = res;
-      return evaluations.value;
+      return res;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
@@ -124,11 +131,29 @@ export const useTaskEvaluationStore = defineStore("taskEvaluation", () => {
     }
   }
 
+  function setPaging(newLimit: number, newOffset: number) {
+    limit.value = newLimit;
+    offset.value = newOffset;
+  }
+
+  function nextPage() {
+    offset.value += limit.value;
+  }
+
+  function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value);
+  }
+
   return {
     evaluations,
     isLoading,
     error,
+    limit,
+    offset,
     list,
+    setPaging,
+    nextPage,
+    prevPage,
     get,
     create,
     update,

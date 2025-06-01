@@ -1,5 +1,7 @@
 <template>
-  <profile-index />
+  <div>
+    <profile-index />
+  </div>
 </template>
 <script setup lang="ts">
 import ProfileIndex from './index.vue'

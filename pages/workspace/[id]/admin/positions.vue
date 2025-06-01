@@ -8,16 +8,15 @@
         <UTable :data="filteredAndSortedPositions" :columns="columns" class="w-full">
             <template #cell(actions)="{ row }">
                 <UButton size="sm" variant="soft" color="primary" @click="onEdit(row.original)">Редактировать</UButton>
-                <UButton size="sm" variant="soft" color="danger" class="ml-2" @click="onDelete(row.original)">Удалить
+                <UButton size="sm" variant="soft" color="error" class="ml-2" @click="onDelete(row.original)">Удалить
                 </UButton>
             </template>
         </UTable>
-        <!-- Create Modal -->
         <UModal v-model:open="openCreateModal" title="Создать должность">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Создать должность</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openCreateModal = false"
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openCreateModal = false"
                         size="sm" />
                 </div>
             </template>
@@ -32,12 +31,11 @@
                 </UForm>
             </template>
         </UModal>
-        <!-- Edit Modal -->
         <UModal v-model:open="openEditModal" title="Редактировать должность">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Редактировать должность</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openEditModal = false" size="sm" />
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openEditModal = false" size="sm" />
                 </div>
             </template>
             <template #body>
@@ -51,22 +49,21 @@
                 </UForm>
             </template>
         </UModal>
-        <!-- Delete Confirmation Modal -->
         <UModal v-model:open="openDeleteModal" title="Удаление должности">
             <template #header>
                 <div class="flex justify-between items-center w-full">
                     <span>Удаление должности</span>
-                    <UButton icon="i-lucide-x" color="gray" variant="ghost" @click="openDeleteModal = false"
+                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openDeleteModal = false"
                         size="sm" />
                 </div>
             </template>
             <template #body>
-                <UiText color="danger">Вы уверены, что хотите удалить должность "{{ selectedPosition?.name }}"?</UiText>
+                <UiText color="error">Вы уверены, что хотите удалить должность "{{ selectedPosition?.name }}"?</UiText>
             </template>
             <template #footer>
                 <div class="flex justify-end gap-2">
-                    <UButton color="gray" @click="openDeleteModal = false">Отмена</UButton>
-                    <UButton color="danger" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
+                    <UButton color="neutral" @click="openDeleteModal = false">Отмена</UButton>
+                    <UButton color="error" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
                 </div>
             </template>
         </UModal>
@@ -80,11 +77,12 @@ import { useWorkspacePositionStore } from '~/stores/useWorkspacePositionStore'
 import { createWorkspacePositionRequestSchema, updateWorkspacePositionRequestSchema } from '~/schemas/generated.schema'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
-
+import type { WorkspacePosition } from '~/types/response.types'
+useHead({ title: 'Должности рабочего пространства' })
 const route = useRoute()
 const workspaceId = computed(() => route.params.id as string)
 const positionStore = useWorkspacePositionStore()
-const { positions, isLoading } = storeToRefs(positionStore)
+const { positions } = storeToRefs(positionStore)
 const search = ref('')
 const openCreateModal = ref(false)
 const openEditModal = ref(false)
@@ -108,19 +106,19 @@ const filteredAndSortedPositions = computed(() => {
     }
     return data
 })
-function onEdit(position) {
+function onEdit(position: WorkspacePosition) {
     selectedPosition.value = position
     formState.value = { id: position.id, name: position.name }
     openEditModal.value = true
 }
-function onDelete(position) {
+function onDelete(position: WorkspacePosition) {
     selectedPosition.value = position
     openDeleteModal.value = true
 }
 async function confirmDelete() {
     if (!selectedPosition.value) return
     formLoading.value = true
-    await positionStore.deleteWorkspacePosition(selectedPosition.value.id)
+    await positionStore.deletePosition(selectedPosition.value.id)
     formLoading.value = false
     openDeleteModal.value = false
     await positionStore.list(workspaceId.value)

@@ -9,6 +9,7 @@ import type {
   DeleteFileRequest,
 } from "~/types/request.types";
 import type { Workspace } from "~/types/response.types";
+import type { PagingParams } from "~/types/api.types";
 
 export const useWorkspaceStore = defineStore("Workspace", () => {
   const workspaces = ref<Workspace[]>([]);
@@ -16,16 +17,21 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
   const currentPage = ref(1);
   const pageSize = ref(25);
   const loading = ref(false);
+  const error = ref<string | null>(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
-  async function list() {
+  async function list(params: PagingParams = {}) {
     if (loading.value) return;
 
     loading.value = true;
+    error.value = null;
     try {
       const resp = await workspaceServiceFactory
         .listWorkspaces({
-          page: currentPage.value,
-          pageSize: pageSize.value,
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          ...params,
         })
         .execute();
 
@@ -37,6 +43,7 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
       total.value = resp.length;
     } catch (error) {
       console.error("Error fetching workspaces:", error);
+      //error.value = "Ошибка при получении рабочих пространств";
     } finally {
       loading.value = false;
     }
@@ -151,12 +158,28 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
     currentPage.value = 1;
   }
 
+  function setPaging(newLimit: number, newOffset: number) {
+    limit.value = newLimit;
+    offset.value = newOffset;
+  }
+
+  function nextPage() {
+    offset.value += limit.value;
+  }
+
+  function prevPage() {
+    offset.value = Math.max(0, offset.value - limit.value);
+  }
+
   return {
     workspaces,
     total,
     currentPage,
     pageSize,
     loading,
+    error,
+    limit,
+    offset,
     list,
     get,
     update,
@@ -168,5 +191,8 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
     uploadPicture,
     deletePicture,
     reset,
+    setPaging,
+    nextPage,
+    prevPage,
   }
 });

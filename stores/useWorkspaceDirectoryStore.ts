@@ -11,31 +11,41 @@ export const useWorkspaceDirectoryStore = defineStore(
   () => {
     const directories: Ref<WorkspaceDirectory[]> = ref([]);
     const total: Ref<number> = ref(0);
-    const currentPage: Ref<number> = ref(1);
-    const pageSize: Ref<number> = ref(25);
+    const limit: Ref<number> = ref(20);
+    const offset: Ref<number> = ref(0);
     const loading: Ref<boolean> = ref(false);
 
-    async function list(workspaceId: string) {
+    async function list(workspaceId: string, params: { limit?: number; offset?: number } = {}) {
       loading.value = true;
       try {
         const resp = await workspaceDirectoryServiceFactory
           .listWorkspaceDirectories({
             workspaceId,
-            page: currentPage.value,
-            pageSize: pageSize.value,
+            limit: params.limit ?? limit.value,
+            offset: params.offset ?? offset.value,
           })
           .execute();
 
         directories.value = resp;
         total.value = resp.length;
-        if (resp.length == pageSize.value) {
-          currentPage.value++;
-        }
       } catch (error) {
         console.error("Error fetching directories:", error);
       } finally {
         loading.value = false;
       }
+    }
+
+    function setPaging(newLimit: number, newOffset: number) {
+      limit.value = newLimit;
+      offset.value = newOffset;
+    }
+
+    function nextPage() {
+      offset.value += limit.value;
+    }
+
+    function prevPage() {
+      offset.value = Math.max(0, offset.value - limit.value);
     }
 
     async function get(id: string) {
@@ -119,18 +129,21 @@ export const useWorkspaceDirectoryStore = defineStore(
     async function reset() {
       directories.value = [];
       total.value = 0;
-      currentPage.value = 1;
-      pageSize.value = 25;
+      offset.value = 0;
+      limit.value = 20;
       loading.value = false;
     }
 
     return {
       directories,
       total,
-      currentPage,
-      pageSize,
+      limit,
+      offset,
       loading,
       list,
+      setPaging,
+      nextPage,
+      prevPage,
       get,
       create,
       update,

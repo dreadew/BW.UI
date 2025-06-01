@@ -5,30 +5,41 @@
             <UInput v-model="search" placeholder="Поиск по названию папки..." class="w-64" />
             <UButton color="primary" @click="openCreateModal = true">Создать папку</UButton>
         </div>
-        <div v-if="treeData.length === 0" class="flex justify-center items-center h-64">
+        <div v-if="directories.length === 0" class="flex justify-center items-center h-64">
             <UCard class="flex flex-col items-center justify-center p-8">
                 <UIcon name="i-lucide-folder-open" class="text-4xl text-primary mb-2" />
                 <UiHeading size="lg">Нет папок</UiHeading>
                 <UiText class="text-gray-500 mt-2">Создайте первую папку для хранения файлов и артефактов.</UiText>
             </UCard>
         </div>
-        <UTree v-else :items="treeData" class="mb-6">
-            <template #default="{ item }">
-                <div class="flex items-center gap-2">
-                    <span>{{ item.name }}</span>
-                    <template v-if="item.artifacts">
-                        <span v-for="artifact in item.artifacts" :key="artifact.id" class="ml-2">
-                            <ULink :to="artifact.downloadUrl" target="_blank" class="text-primary underline flex items-center gap-1">
-                                <UIcon name="i-lucide-download" />
-                                {{ artifact.name }}
-                            </ULink>
-                            <span class="text-xs text-gray-400">({{ artifact.size }} байт)</span>
-                        </span>
-                    </template>
+        <div v-else>
+            <UCard v-for="directory in filteredDirectories" :key="directory.id" class="mb-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <UiText class="font-bold">{{ directory.name }}</UiText>
+                        <div class="text-xs text-gray-400 mt-1">ID: {{ directory.id }}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <UButton size="xs" color="primary" variant="soft" @click="onEdit(directory)">Редактировать</UButton>
+                        <UButton size="xs" color="error" variant="soft" @click="onDelete(directory)">Удалить</UButton>
+                        <UButton size="xs" color="primary" variant="soft" @click="openUploadModalFor(directory)">Загрузить файл</UButton>
+                    </div>
                 </div>
-            </template>
-        </UTree>
-        <!-- Create Modal -->
+                <div class="mt-2">
+                    <div v-if="directory.artifacts && directory.artifacts.length > 0">
+                        <div class="font-semibold mb-1">Артефакты:</div>
+                        <div class="flex flex-wrap gap-2">
+                            <UCard v-for="artifact in directory.artifacts" :key="artifact.id" class="p-2 flex items-center gap-2">
+                                <UIcon name="i-lucide-file" />
+                                <span>{{ artifact.name }}</span>
+                                <UButton size="xs" color="error" variant="soft" @click="openDeleteArtifactModal(directory, artifact)">Удалить</UButton>
+                            </UCard>
+                        </div>
+                    </div>
+                    <div v-else class="text-xs text-gray-400">Нет артефактов</div>
+                </div>
+            </UCard>
+        </div>
         <UModal v-model:open="openCreateModal" title="Создать папку">
             <template #body>
                 <UForm :state="formState" :schema="createFormSchema" @submit="onSubmitCreate">
@@ -39,25 +50,32 @@
                 </UForm>
             </template>
         </UModal>
-        <!-- Edit Modal -->
-        <UModal v-model:open="openEditModal" title="Редактировать папку">
+        <UModal v-model:open="openUploadModal" title="Загрузить файл">
             <template #body>
-                <UForm :state="formState" :schema="editFormSchema" @submit="onSubmitEdit">
-                    <UFormField label="Название" name="name" required>
-                        <UInput v-model="formState.name" required placeholder="Название папки" />
+                <UForm :state="uploadFormState" @submit="onUploadFile">
+                    <UFormField label="Файл" name="file" required>
+                        <UInput type="file" @change="onFileChange" required />
                     </UFormField>
-                    <UButton type="submit" color="primary" class="mt-4" :loading="formLoading">Сохранить</UButton>
+                    <UButton type="submit" color="primary" class="mt-4" :loading="formLoading">Загрузить</UButton>
                 </UForm>
             </template>
         </UModal>
-        <!-- Delete Confirmation Modal -->
         <UModal v-model:open="openDeleteModal" title="Удаление папки">
             <template #body>
-                <UiText color="danger">Вы уверены, что хотите удалить папку "{{ selectedDirectory?.name }}"?</UiText>
+                <UiText color="error">Вы уверены, что хотите удалить папку "{{ selectedDirectory?.name }}"?</UiText>
             </template>
             <template #footer>
-                <UButton color="gray" @click="openDeleteModal = false">Отмена</UButton>
-                <UButton color="danger" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
+                <UButton color="neutral" @click="openDeleteModal = false">Отмена</UButton>
+                <UButton color="error" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
+            </template>
+        </UModal>
+        <UModal v-model:open="openDeleteArtifactModalFlag" title="Удалить артефакт?">
+            <template #body>
+                <UiText>Вы уверены, что хотите удалить артефакт <b>{{ selectedArtifact?.name }}</b>?</UiText>
+                <div class="flex justify-end gap-2 mt-4">
+                    <UButton @click="openDeleteArtifactModalFlag = false">Отмена</UButton>
+                    <UButton color="error" @click="onDeleteArtifact" :loading="formLoading">Удалить</UButton>
+                </div>
             </template>
         </UModal>
     </div>
@@ -68,43 +86,52 @@ import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceDirectoryStore } from '~/stores/useWorkspaceDirectoryStore'
-import { createWorkspaceDirectoryRequestSchema, updateWorkspaceDirectoryRequestSchema } from '~/schemas/generated.schema'
+import { createWorkspaceDirectoryRequestSchema } from '~/schemas/generated.schema'
 import UiHeading from '~/components/Ui/Heading.vue'
 import UiText from '~/components/Ui/Text.vue'
-
+import type { WorkspaceDirectory, WorkspaceDirectoryArtifact } from '~/types/response.types'
+useHead({ title: 'Папки и файлы' })
 const route = useRoute()
 const workspaceId = computed(() => route.params.id as string)
 const directoryStore = useWorkspaceDirectoryStore()
-const { directories, isLoading } = storeToRefs(directoryStore)
+const { directories } = storeToRefs(directoryStore)
 const search = ref('')
 const openCreateModal = ref(false)
 const openEditModal = ref(false)
 const openDeleteModal = ref(false)
-const selectedDirectory = ref<any>(null)
+const openUploadModal = ref(false)
+const openDeleteArtifactModalFlag = ref(false)
+const selectedDirectory = ref<WorkspaceDirectory | null>(null)
+const selectedArtifact = ref<WorkspaceDirectoryArtifact | null>(null)
 const formState = ref<any>({ name: '' })
 const formLoading = ref(false)
+const uploadFormState = ref({})
+const uploadFile = ref<File | null>(null)
+const uploadDirectoryId = ref<string | null>(null)
 const createFormSchema = createWorkspaceDirectoryRequestSchema;
-const editFormSchema = updateWorkspaceDirectoryRequestSchema;
-const treeData = computed(() => {
-    let data = directories.value
-    if (search.value) {
-        data = data.filter(d => d.name.toLowerCase().includes(search.value.toLowerCase()))
-    }
-    // Преобразуем в формат дерева, если есть вложенность (пример для flat списка)
-    return data.map(d => ({
-        ...d,
-        children: [], // если появится вложенность, сюда можно добавить дочерние папки
-        artifacts: d.artifacts || []
-    }))
+
+const filteredDirectories = computed(() => {
+    if (!search.value) return directories.value
+    return directories.value.filter(d => d.name.toLowerCase().includes(search.value.toLowerCase()))
 })
-function onEdit(directory) {
+
+function onEdit(directory: WorkspaceDirectory) {
     selectedDirectory.value = directory
     formState.value = { id: directory.id, name: directory.name }
     openEditModal.value = true
 }
-function onDelete(directory) {
+function onDelete(directory: WorkspaceDirectory) {
     selectedDirectory.value = directory
     openDeleteModal.value = true
+}
+function openUploadModalFor(directory: WorkspaceDirectory) {
+    uploadDirectoryId.value = directory.id
+    selectedDirectory.value = directory
+    openUploadModal.value = true
+}
+function onFileChange(e: Event) {
+    const files = (e.target as HTMLInputElement).files
+    uploadFile.value = files && files[0] ? files[0] : null
 }
 async function confirmDelete() {
     if (!selectedDirectory.value) return
@@ -123,10 +150,41 @@ async function onSubmitCreate() {
 }
 async function onSubmitEdit() {
     formLoading.value = true
+    if (!selectedDirectory.value) return;
     await directoryStore.update(selectedDirectory.value.id, { ...formState.value })
     openEditModal.value = false
     formLoading.value = false
     await directoryStore.list(workspaceId.value)
+}
+async function onUploadFile() {
+    if (!uploadDirectoryId.value || !uploadFile.value) return
+    formLoading.value = true
+    try {
+        await directoryStore.uploadArtifact(uploadDirectoryId.value, uploadFile.value)
+        await directoryStore.list(workspaceId.value)
+    } finally {
+        formLoading.value = false
+        openUploadModal.value = false
+        uploadFile.value = null
+        uploadDirectoryId.value = null
+    }
+}
+function openDeleteArtifactModal(directory: WorkspaceDirectory, artifact: WorkspaceDirectoryArtifact) {
+    selectedDirectory.value = directory
+    selectedArtifact.value = artifact
+    openDeleteArtifactModalFlag.value = true
+}
+async function onDeleteArtifact() {
+    if (!selectedDirectory.value || !selectedArtifact.value) return
+    formLoading.value = true
+    try {
+        await directoryStore.deleteArtifact(selectedDirectory.value.id, { id: selectedArtifact.value.id, fromId: workspaceId.value })
+        await directoryStore.list(workspaceId.value)
+    } finally {
+        formLoading.value = false
+        openDeleteArtifactModalFlag.value = false
+        selectedArtifact.value = null
+    }
 }
 watch([openCreateModal, openEditModal], ([create, edit]) => {
     if (!create && !edit) {

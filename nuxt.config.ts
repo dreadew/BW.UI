@@ -13,6 +13,15 @@ export default defineNuxtConfig({
       projectApiUrl: process.env.NUXT_PUBLIC_PROJECT_API_URL
     }
   },
+  app: {
+    head: {
+      title: 'Hexaend',
+      titleTemplate: '%s — Hexaend',
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.ico' }
+      ]
+    }
+  },
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',

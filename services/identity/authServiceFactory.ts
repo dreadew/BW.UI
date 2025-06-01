@@ -1,11 +1,8 @@
-import type {
-  SignInRequest,
-  SignUpRequest,
-  TokensResponse,
-} from "~/types/identity/auth.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { IDENTITY_SERVICE } from "~/constants/services.constants";
 import type { SuccessResponse } from "~/types/api.types";
+import type { SignInRequest, SignUpRequest } from "~/types/request.types";
+import type { TokensResponse } from "~/types/response.types";
 
 export const authServiceFactory = {
   login: (body: SignInRequest) =>

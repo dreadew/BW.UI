@@ -10,7 +10,7 @@
 
       <div class="grid gap-8 md:grid-cols-3">
         <div>
-          <div class="bg-primary/10 p-2 rounded-full mb-3 flex items-center justify-center">
+          <div class="w-max bg-secondary/10 p-3 rounded-full mb-3 flex items-center justify-center">
             <UIcon name="i-lucide-trending-up" class="h-6 w-6 text-primary" />
           </div>
           <UiHeading level="5" class="mb-2">Возможности для роста</UiHeading>
@@ -20,7 +20,7 @@
         </div>
 
         <div>
-          <div class="bg-primary/10 p-2 rounded-full mb-3 flex items-center justify-center">
+          <div class="w-max bg-secondary/10 p-3 rounded-full mb-3 flex items-center justify-center">
             <UIcon name="i-lucide-thumbs-up" class="h-6 w-6 text-primary" />
           </div>
           <UiHeading level="5" class="mb-2">Совместная работа</UiHeading>
@@ -30,28 +30,28 @@
         </div>
 
         <div>
-          <div class="bg-primary/10 p-2 rounded-full mb-3 flex items-center justify-center">
+          <div class="w-max bg-secondary/10 p-3 rounded-full mb-3 flex items-center justify-center">
             <UIcon name="i-lucide-heart" class="h-6 w-6 text-primary" />
           </div>
           <UiHeading level="5" class="mb-2">Благополучие</UiHeading>
-          <UiText class="text-muted-foreground">
+          <UiText color="neutral">
             Мы заботимся о балансе между работой и личной жизнью и поддерживаем общее благополучие наших сотрудников.
           </UiText>
         </div>
 
         <div>
-          <div class="bg-primary/10 p-2 rounded-full mb-3 flex items-center justify-center">
+          <div class="w-max bg-secondary/10 p-3 rounded-full mb-3 flex items-center justify-center">
             <UIcon name="i-lucide-users" class="h-6 w-6 text-primary" />
           </div>
           <UiHeading level="5" class="mb-2">Инклюзивная культура</UiHeading>
-          <UiText class="text-muted-foreground">
+          <UiText color="neutral">
             Мы стремимся создать разнообразную и инклюзивную рабочую среду, где каждый чувствует себя принадлежащим и
             ценным.
           </UiText>
         </div>
 
         <div>
-          <div class="bg-primary/10 p-2 rounded-full mb-3 flex items-center justify-center">
+          <div class="w-max bg-secondary/10 p-3 rounded-full mb-3 flex items-center justify-center">
             <UIcon name="i-lucide-shield" class="h-6 w-6 text-primary" />
           </div>
           <UiHeading level="5" class="mb-2">Стабильность</UiHeading>
@@ -61,8 +61,8 @@
         </div>
 
         <div>
-          <div class="bg-primary/10 p-2 rounded-full mb-3 flex items-center justify-center">
-            <UIcon name="i-lucide-desktop" class="h-6 w-6 text-primary" />
+          <div class="w-max bg-secondary/10 p-3 rounded-full mb-3 flex items-center justify-center">
+            <UIcon name="i-lucide-proportions" class="h-6 w-6 text-primary" />
           </div>
           <UiHeading level="5" class="mb-2">Современный технологический стек</UiHeading>
           <UiText>

@@ -19,6 +19,9 @@ import ValueCard from '~/components/About/ValueCard.vue';
 
           <ValueCard icon="i-lucide-heart" title="Страсть"
             description="Мы любим свое дело и стремимся создавать инструменты, которые нравится использовать командам." />
+
+          <ValueCard icon="i-lucide-proportions" title="Современный технологический стек"
+            description="Работайте с новейшими технологиями и лучшими практиками в области разработки программного обеспечения и дизайна." />
         </div>
       </div>
     </div>

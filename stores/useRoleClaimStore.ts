@@ -3,6 +3,7 @@ import { roleClaimServiceFactory } from "~/services/identity/roleClaimServiceFac
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 import type { CreateUserRoleClaimsRequest } from "~/types/request.types";
 import type { UserRoleClaim } from "~/types/response.types";
+import type { PagingParams } from "~/types/api.types";
 
 export const useRoleClaimStore = defineStore("roleClaim", () => {
   const toast = useToast();
@@ -16,7 +17,7 @@ export const useRoleClaimStore = defineStore("roleClaim", () => {
     isLoading.value = true;
     try {
       await roleClaimServiceFactory
-        .createRoleClaim(data)
+        .create(data)
         .ensured("Разрешение успешно создано");
       return true;
     } catch (err) {
@@ -45,7 +46,7 @@ export const useRoleClaimStore = defineStore("roleClaim", () => {
   async function get(id: string) {
     isLoading.value = true;
     try {
-      const res = await roleClaimServiceFactory.getRoleClaim(id);
+      const res = await roleClaimServiceFactory.get(id);
       return res;
     } catch (err) {
       errorHandler.handleError(err);
@@ -55,10 +56,10 @@ export const useRoleClaimStore = defineStore("roleClaim", () => {
     }
   }
 
-  async function list(roleId: string) {
+  async function list(roleId: string, params: PagingParams) {
     isLoading.value = true;
     try {
-      await roleClaimServiceFactory.listRoleClaims(roleId);
+      await roleClaimServiceFactory.list(params);
     } catch (err) {
       errorHandler.handleError(err);
       return null;

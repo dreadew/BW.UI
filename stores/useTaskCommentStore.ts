@@ -3,6 +3,7 @@ import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 import { taskCommentServiceFactory } from "~/services/project/taskCommentServiceFactory";
 import type { CreateTaskCommentRequest, UpdateTaskCommentRequest } from "~/types/request.types";
 import type { TaskCommentDto } from "~/types/response.types";
+import type { PagingParams } from "~/types/api.types";
 
 export const useTaskCommentStore = defineStore(
   "taskComment",
@@ -13,19 +14,21 @@ export const useTaskCommentStore = defineStore(
     const comments = ref<TaskCommentDto[]>([]);
     const isLoading = ref(false);
     const error = ref<string | null>(null);
+    const limit = ref(20);
+    const offset = ref(0);
 
     function resetState() {
       isLoading.value = false;
       error.value = null;
     }
 
-    async function listByTask(taskId: string) {
+    async function listByTask(taskId: string, params: PagingParams = {}) {
       resetState();
       isLoading.value = true;
 
       try {
         const res = await taskCommentServiceFactory
-          .listByTask(taskId)
+          .listByTask(taskId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value, ...params })
           .execute();
         if (!res || res.length === 0) {
           return [];
@@ -123,11 +126,29 @@ export const useTaskCommentStore = defineStore(
       }
     }
 
+    function setPaging(newLimit: number, newOffset: number) {
+      limit.value = newLimit;
+      offset.value = newOffset;
+    }
+
+    function nextPage() {
+      offset.value += limit.value;
+    }
+
+    function prevPage() {
+      offset.value = Math.max(0, offset.value - limit.value);
+    }
+
     return {
       comments,
       isLoading,
       error,
+      limit,
+      offset,
       listByTask,
+      setPaging,
+      nextPage,
+      prevPage,
       get,
       create,
       update,

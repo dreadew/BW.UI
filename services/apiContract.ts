@@ -2,7 +2,7 @@ import { httpClient } from "#imports";
 import type { IRequestConfig } from "~/types/api.types";
 
 export class ApiContract<TResponse> {
-  constructor(private config: IRequestConfig<any, any, any>) {}
+  constructor(private config: IRequestConfig<any, any, any>) { }
 
   async execute(): Promise<TResponse> {
     const url = this.config.endpoint;
@@ -10,6 +10,11 @@ export class ApiContract<TResponse> {
       method: this.config.method,
       headers: this.config.headers ? { ...this.config.headers } : {},
     };
+
+    // const token = tokenManager.getAccessToken();
+    // if (token) {
+    //   options.headers["Authorization"] = `Bearer ${token}`;
+    // }
 
     if (this.config.body !== undefined) {
       if (this.config.isFormData) {
@@ -38,7 +43,6 @@ export class ApiContract<TResponse> {
         }
       }
     }
-
     return await httpClient.request<TResponse>(url, options);
   }
 
