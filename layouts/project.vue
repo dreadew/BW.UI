@@ -21,9 +21,4 @@
 import { ref } from 'vue'
 import ProjectSidebar from '~/components/Project/ProjectSidebar.vue'
 const isSidebarOpen = ref(false)
-
-const { isAuthenticated } = useUserStore();
-if (!isAuthenticated) {
-  await navigateTo('/');
-}
 </script>

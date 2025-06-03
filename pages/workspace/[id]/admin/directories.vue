@@ -194,5 +194,5 @@ watch([openCreateModal, openEditModal], ([create, edit]) => {
 })
 watch(workspaceId, (id) => {
     if (id) directoryStore.list(id)
-}, { immediate: true })
+})
 </script>

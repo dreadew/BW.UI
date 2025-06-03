@@ -166,7 +166,7 @@ function prevPage() {
     fetchRoles()
 }
 
-watch([search, sortKey, sortOrder, limit, offset], fetchRoles, { immediate: true })
+watch([search, sortKey, sortOrder, limit, offset], fetchRoles)
 
 const filteredAndSortedRoles = computed(() => roles.value)
 

@@ -145,5 +145,5 @@ watch([openCreateModal, openEditModal], ([create, edit]) => {
 })
 watch(workspaceId, (id) => {
     if (id) positionStore.list(id)
-}, { immediate: true })
+})
 </script>

@@ -53,9 +53,4 @@ const toggleTheme = () => {
 }
 
 const isSidebarOpen = ref(false)
-
-const { isAuthenticated } = useUserStore();
-if (!isAuthenticated) {
-  await navigateTo('/');
-}
 </script>

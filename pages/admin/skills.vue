@@ -151,7 +151,7 @@ function prevPage() {
     offset.value = Math.max(0, offset.value - limit.value)
     fetchSkills()
 }
-watch([limit, offset, search], fetchSkills, { immediate: true })
+watch([limit, offset, search], fetchSkills)
 watch([openCreateModal, openEditModal], ([create, edit]) => {
     if (!create && !edit) {
         formState.value = { name: '' }

@@ -93,7 +93,7 @@ const prevPage = () => {
   fetchProjects()
 }
 
-watch([limit, offset], fetchProjects, { immediate: true })
+watch([limit, offset], fetchProjects)
 
 const onSubmitCreate = async () => {
   formLoading.value = true

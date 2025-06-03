@@ -1060,6 +1060,11 @@ export interface CreateWorkspaceRequest {
    * @pattern ^[a-zA-Z0-9!@$%^&*()_+{}:;<>,.? ]+$
    */
   name: string;
+  /**
+   * @description Идентификатор пользователя
+   * @pattern [a-fA-F\d]{8}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}
+   */
+  userId: string;
 }
 
 /**

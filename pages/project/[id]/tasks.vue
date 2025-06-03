@@ -44,7 +44,7 @@ function prevPage() {
   offset.value = Math.max(0, offset.value - limit.value)
   fetchTasks()
 }
-watch([limit, offset], fetchTasks, { immediate: true })
+watch([limit, offset], fetchTasks)
 const openCreateModal = ref(false)
 const openDeleteModal = ref(false)
 const taskToDelete = ref<TaskDto | null>(null)

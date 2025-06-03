@@ -70,7 +70,7 @@ function prevPage() {
   offset.value = Math.max(0, offset.value - limit.value)
   fetchThreads()
 }
-watch([limit, offset], fetchThreads, { immediate: true })
+watch([limit, offset], fetchThreads)
 onMounted(fetchThreads)
 const onSubmitThread = async () => {
   loading.value = true

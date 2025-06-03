@@ -84,5 +84,5 @@ function prevPage() {
   fetchSections()
 }
 
-watch([limit, offset], fetchSections, { immediate: true })
+watch([limit, offset], fetchSections)
 </script>

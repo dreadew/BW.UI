@@ -74,6 +74,7 @@ const formLoading = ref(false)
 const createFormSchema = createWorkspaceRequestSchema;
 const limit = ref(20)
 const offset = ref(0)
+const { user } = useUserStore();
 const columns = [
     { accessorKey: 'id', header: 'ID', cell: ({ row }) => row.original.id },
     { accessorKey: 'name', header: 'Название', cell: ({ row }) => row.original.name },
@@ -102,7 +103,10 @@ async function confirmDelete() {
 }
 async function onSubmitCreate() {
     formLoading.value = true
-    await workspaceStore.create(formState.value)
+    await workspaceStore.create({ 
+        ...formState.value,
+        userId: user.id
+    })
     openCreateModal.value = false
     formLoading.value = false
     await workspaceStore.list()
@@ -120,12 +124,14 @@ function prevPage() {
     fetchWorkspaces()
 }
 
-watch([limit, offset], fetchWorkspaces, { immediate: true })
+watch([limit, offset], fetchWorkspaces)
 watch([openCreateModal], ([create]) => {
     if (!create) {
         formState.value = { name: '' }
         selectedWorkspace.value = null
     }
 })
-workspaceStore.list()
+watchEffect(async () => {
+    await workspaceStore.list();
+});
 </script>

@@ -237,7 +237,6 @@ watch(
       await userScheduleStore.findByUser(id, { limit: scheduleLimit.value, offset: scheduleOffset.value })
     }
   },
-  { immediate: true }
 )
 
 const loadSessionsNext = async () => {
