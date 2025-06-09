@@ -15,7 +15,6 @@ export const useRoleStore = defineStore("role", () => {
   const limit = ref(20);
   const offset = ref(0);
 
-  // Исправить list: ListRequest с includeDeleted
   async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     isLoading.value = true;
     try {
@@ -25,7 +24,7 @@ export const useRoleStore = defineStore("role", () => {
         includeDeleted: params.includeDeleted ?? false
       };
       const res = await roleServiceFactory.list(req).execute();
-      roles.value = res as any; // Приведение к нужному типу, если требуется
+      roles.value = res as any;
       return roles.value;
     } catch (err) {
       errorHandler.handleError(err);

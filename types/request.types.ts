@@ -189,6 +189,7 @@ export interface UpdateRoleRequest extends BaseDto {
  * DTO глобальной роли
  */
 export interface RoleDto extends BaseSoftDeletableDto {
+    name: string;
     claims: RoleClaimsDto[];
 }
 

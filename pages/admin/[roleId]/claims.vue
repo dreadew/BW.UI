@@ -6,7 +6,7 @@
             <UButton color="primary" @click="openCreateModal = true">Создать клейм</UButton>
         </div>
         <UTable :data="filteredAndSortedClaims" :columns="columns" class="w-full">
-            <template #cell(actions)="{ row }">
+            <template #action-cell="{ row }">
                 <UButton size="sm" variant="soft" color="primary" @click="onEdit(row.original)">Редактировать</UButton>
                 <UButton size="sm" variant="soft" color="error" class="ml-2" @click="onDelete(row.original)">Удалить
                 </UButton>
@@ -22,6 +22,9 @@
             </template>
             <template #body>
                 <UForm :state="formState" :schema="createFormSchema" @submit="onSubmitCreate">
+                    <UFormField label="Значение" name="value" required>
+                        <UInput v-model="formState.value" required placeholder="Значение клейма" class="w-full" />
+                    </UFormField>
                     <UFormField label="Значение" name="value" required>
                         <UInput v-model="formState.value" required placeholder="Значение клейма" class="w-full" />
                     </UFormField>
@@ -73,17 +76,14 @@ const openCreateModal = ref(false)
 const openEditModal = ref(false)
 const openDeleteModal = ref(false)
 const selectedClaim = ref<any>(null)
-const formState = ref<any>({ value: '' })
+const formState = ref<CreateRoleClaimsRequest>({})
 const formLoading = ref(false)
 const limit = ref(20)
 const offset = ref(0)
 const createFormSchema = createUserRoleClaimsRequestSchema;
 const columns = [
-    { accessorKey: 'id', header: 'ID', cell: ({ row }) => row.original.id },
-    { accessorKey: 'value', header: 'Значение', cell: ({ row }) => row.original.value },
-    { accessorKey: 'createdAt', header: 'Дата создания', cell: ({ row }) => row.original.createdAt },
-    { accessorKey: 'updatedAt', header: 'Дата обновления', cell: ({ row }) => row.original.updatedAt },
-    { id: 'actions', header: 'Действия', cell: undefined }
+    { accessorKey: 'value', header: 'Значение', cell: ({ row }) => `${row.original.claimValue}.${row.original.claimType}` },
+    { id: 'action' }
 ]
 const filteredAndSortedClaims = computed(() => {
     let data = roleClaims.value
@@ -134,5 +134,9 @@ watch([openCreateModal, openEditModal], ([create, edit]) => {
         selectedClaim.value = null
     }
 })
-await claimStore.list(roleId.value, { limit: limit.value, offset: offset.value })
+
+await claimStore.list(roleId.value, {
+    limit: limit.value,
+    offset: offset.value
+});
 </script>

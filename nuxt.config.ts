@@ -27,5 +27,10 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/ui',
     '@nuxt/icon'
-  ]
+  ],
+  ui: {
+    colors: {
+      primary: "indigo"
+    }
+  }
 })

@@ -1,22 +1,20 @@
 import { defineStore } from "pinia";
 import { roleClaimServiceFactory } from "~/services/identity/roleClaimServiceFactory";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { ListRequest, CreateRoleClaimsRequest } from "~/types/request.types";
-import type { UserRoleClaim } from "~/types/response.types";
-import type { PagingParams } from "~/types/api.types";
+import type { ListRequest, CreateRoleClaimsRequest, RoleClaimsDto } from "~/types/request.types";
 
 export const useRoleClaimStore = defineStore("roleClaim", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
-
-  const roleClaims: Ref<UserRoleClaim[]> = ref([]);
+  const roleClaims: Ref<RoleClaimsDto[]> = ref([]);
   const isLoading = ref(false);
   const error = ref(null);
 
   async function createRoleClaim(data: CreateRoleClaimsRequest) {
     isLoading.value = true;
     try {
-      await roleClaimServiceFactory.create(data).ensured("Разрешение успешно создано");
+      await roleClaimServiceFactory.create(data)
+        .ensured("Разрешение успешно создано");
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -54,7 +52,7 @@ export const useRoleClaimStore = defineStore("roleClaim", () => {
     }
   }
 
-  async function list(params: ListRequest = { limit: 20, offset: 0, includeDeleted: false }) {
+  async function list(roleId: string, params: ListRequest = { limit: 20, offset: 0, includeDeleted: false }) {
     isLoading.value = true;
     try {
       const req: ListRequest = {
@@ -62,7 +60,9 @@ export const useRoleClaimStore = defineStore("roleClaim", () => {
         offset: params.offset ?? 0,
         includeDeleted: params.includeDeleted ?? false
       };
-      await roleClaimServiceFactory.list(req);
+      const res = await roleClaimServiceFactory
+        .list(roleId, req).execute();
+      roleClaims.value = res as RoleClaimsDto[];
     } catch (err) {
       errorHandler.handleError(err);
       return null;

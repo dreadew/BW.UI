@@ -4,9 +4,9 @@ import { apiContractBuilderHelper } from "../apiContractBuilder";
 import type { CreateRoleClaimsRequest, ListRequest, RoleClaimsDto } from "~/types/request.types";
 
 export const roleClaimServiceFactory = {
-  list: (dto: ListRequest) =>
+  list: (roleId: string, dto: ListRequest) =>
     apiContractBuilderHelper
-      .get('/api/RoleClaim/list')
+      .get(`/api/RoleClaims/list/${roleId}`)
       .withService(IDENTITY_SERVICE)
       .withQueryParams<ListRequest>(dto)
       .withResponse<RoleClaimsDto[]>()
@@ -14,14 +14,14 @@ export const roleClaimServiceFactory = {
 
   get: (id: string) =>
     apiContractBuilderHelper
-      .get(`/api/RoleClaim/${id}`)
+      .get(`/api/RoleClaims/${id}`)
       .withService(IDENTITY_SERVICE)
       .withResponse<RoleClaimsDto>()
       .build(),
 
   create: (body: CreateRoleClaimsRequest) =>
     apiContractBuilderHelper
-      .post('/api/RoleClaim')
+      .post('/api/RoleClaims')
       .withService(IDENTITY_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()
@@ -29,7 +29,7 @@ export const roleClaimServiceFactory = {
 
   deleteRoleClaim: (id: string) =>
     apiContractBuilderHelper
-      .delete(`/api/RoleClaim/${id}`)
+      .delete(`/api/RoleClaims/${id}`)
       .withService(IDENTITY_SERVICE)
       .withResponse<SuccessResponse>()
       .build(),

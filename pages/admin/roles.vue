@@ -6,7 +6,7 @@
             <UButton color="primary" @click="openCreateModal = true">Создать роль</UButton>
         </div>
         <UTable :data="filteredAndSortedRoles" :columns="columns" class="w-full" @sort="onSort">
-            <template #cell(actions)="{ row }">
+            <template #action-cell="{ row }">
                 <UButton size="sm" variant="soft" color="primary" @click="onEdit(row.original)">Редактировать</UButton>
                 <UButton size="sm" variant="soft" color="error" class="ml-2" @click="onDelete(row.original)">Удалить
                 </UButton>
@@ -137,13 +137,11 @@ const columns = [
     {
         accessorKey: 'updatedAt',
         header: 'Дата обновления',
-        cell: ({ row }) => row.original.updatedAt ? new Date(DateUtils.deserialize(row.original.updatedAt)!).toLocaleString() : '',
+        cell: ({ row }) => row.original.updatedAt ? new Date(DateUtils.deserialize(row.original.updatedAt)!).toLocaleString() : 'Отсутствует',
         enableSorting: true
     },
     {
-        id: 'actions',
-        header: 'Действия',
-        cell: undefined
+        id: 'action',
     }
 ]
 
@@ -221,5 +219,11 @@ watch([openCreateModal, openEditModal], ([create, edit]) => {
     }
 })
 
-roleStore.list()
+watchEffect(async () => {
+    await roleStore.list({
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: true
+    });
+});
 </script>
