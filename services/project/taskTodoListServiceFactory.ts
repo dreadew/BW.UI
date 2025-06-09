@@ -1,24 +1,9 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type { CreateTaskTodoListRequest, UpdateTaskTodoListRequest, CreateTaskTodoListItemRequest, UpdateTaskTodoListItemRequest } from "~/types/request.types";
-import type { TaskTodoListDto, TaskTodoListItemDto } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { CreateTaskTodoListItemRequest, CreateTaskTodoListRequest, ListRequest, TaskTodoListDto, TaskTodoListItemDto, UpdateTaskTodoListItemRequest, UpdateTaskTodoListRequest } from "~/types/request.types";
 
 export const taskTodoListServiceFactory = {
-  list: (taskId: string, params: PagingParams) =>
-    apiContractBuilderHelper
-      .get(`/api/TaskTodoList/by-task/${taskId}`)
-      .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
-      .withResponse<TaskTodoListDto[]>()
-      .build(),
-
-  get: (todoListId: string) =>
-    apiContractBuilderHelper.get(`/api/TaskTodoList/${todoListId}`)
-      .withService(PROJECT_SERVICE)
-      .withResponse<TaskTodoListDto>()
-      .build(),
-
   createTodoList: (request: CreateTaskTodoListRequest) =>
     apiContractBuilderHelper
       .post("/api/TaskTodoList")
@@ -33,6 +18,20 @@ export const taskTodoListServiceFactory = {
       .withService(PROJECT_SERVICE)
       .withBody(request)
       .withResponse<SuccessResponse>()
+      .build(),
+
+  list: (taskId: string, dto: ListRequest) =>
+    apiContractBuilderHelper
+      .get(`/api/TaskTodoList/by-task/${taskId}`)
+      .withService(PROJECT_SERVICE)
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<TaskTodoListDto[]>()
+      .build(),
+
+  get: (todoListId: string) =>
+    apiContractBuilderHelper.get(`/api/TaskTodoList/${todoListId}`)
+      .withService(PROJECT_SERVICE)
+      .withResponse<TaskTodoListDto>()
       .build(),
 
   deleteTaskTodoList: (todoListId: string) =>

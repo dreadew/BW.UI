@@ -1,25 +1,28 @@
 import { defineStore } from "pinia";
 import { skillServiceFactory } from "~/services/identity/skillsServiceFactory";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { CreateSkillRequest, UpdateSkillRequest } from "~/types/request.types";
-import type { Skill } from "~/types/response.types";
-import type { PagingParams } from "~/types/api.types";
+import type { CreateSkillRequest, UpdateSkillRequest, SkillDto, ListRequest } from "~/types/request.types";
 
 export const useSkillStore = defineStore("skill", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const skills: Ref<Skill[]> = ref([]);
+  const skills = ref<SkillDto[]>([]);
   const isLoading = ref(false);
   const error = ref(null);
   const limit = ref(20);
   const offset = ref(0);
 
-  async function list(params: PagingParams = {}) {
+  async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     isLoading.value = true;
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
       const res = await skillServiceFactory
-        .list({ limit: params.limit ?? limit.value, offset: params.offset ?? offset.value })
+        .list(req)
         .execute();
       if (!res || res.length === 0) {
         return [];

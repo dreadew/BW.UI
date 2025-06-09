@@ -1,8 +1,7 @@
 import { defineStore } from "pinia";
 import { sectionServiceFactory } from "~/services/project/sectionServiceFactory";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { CreateSectionRequest, UpdateSectionRequest } from "~/types/request.types";
-import type { SectionDto } from "~/types/response.types";
+import type { CreateSectionRequest, UpdateSectionRequest, SectionDto, ListRequest } from "~/types/request.types";
 
 export const useSectionStore = defineStore("section", () => {
   const toast = useToast();
@@ -14,11 +13,16 @@ export const useSectionStore = defineStore("section", () => {
   const limit = ref(20);
   const offset = ref(0);
 
-  async function listByProject(projectId: string, params: { limit?: number; offset?: number } = {}) {
+  async function listByProject(projectId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     isLoading.value = true;
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
       const res = await sectionServiceFactory
-        .listByProject(projectId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value })
+        .listByProject(projectId, req)
         .execute();
       if (!res || res.length === 0) {
         return [];

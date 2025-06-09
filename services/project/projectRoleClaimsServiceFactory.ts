@@ -1,21 +1,9 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type {
-  CreateProjectRoleClaimsRequest,
-  UpdateProjectRoleClaimsRequest,
-} from "~/types/request.types";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type { ProjectRoleClaimsDto } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { CreateProjectRoleClaimsRequest, ListRequest, ProjectRoleClaimsDto, UpdateProjectRoleClaimsRequest } from "~/types/request.types";
 
 export const projectRoleClaimsServiceFactory = {
-  listByRole: (roleId: string, params: PagingParams) =>
-    apiContractBuilderHelper
-      .get(`/api/ProjectRoleClaims/by-role/${roleId}`)
-      .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
-      .withResponse<ProjectRoleClaimsDto[]>()
-      .build(),
-
   create: (request: CreateProjectRoleClaimsRequest) =>
     apiContractBuilderHelper
       .post(`/api/ProjectRoleClaims`)
@@ -37,6 +25,14 @@ export const projectRoleClaimsServiceFactory = {
       .get(`/api/ProjectRoleClaims/${claimId}`)
       .withService(PROJECT_SERVICE)
       .withResponse<ProjectRoleClaimsDto>()
+      .build(),
+
+  listByRole: (roleId: string, params: ListRequest) =>
+    apiContractBuilderHelper
+      .get(`/api/ProjectRoleClaims/by-role/${roleId}`)
+      .withService(PROJECT_SERVICE)
+      .withQueryParams<ListRequest>(params)
+      .withResponse<ProjectRoleClaimsDto[]>()
       .build(),
 
   delete: (claimId: string) =>

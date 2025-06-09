@@ -1,8 +1,7 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type { CreateTaskEvaluationRequest, UpdateTaskEvaluationRequest } from "~/types/request.types";
-import type { TaskEvaluationDto } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { CreateTaskEvaluationRequest, ListRequest, TaskEvaluationDto, UpdateTaskEvaluationRequest } from "~/types/request.types";
 
 export const taskEvaluationServiceFactory = {
   create: (request: CreateTaskEvaluationRequest) =>
@@ -15,7 +14,7 @@ export const taskEvaluationServiceFactory = {
 
   update: (request: UpdateTaskEvaluationRequest) =>
     apiContractBuilderHelper
-      .patch(`/api/TaskEvaluation/${request.evaluationId}`)
+      .patch(`/api/TaskEvaluation/${request.id}`)
       .withService(PROJECT_SERVICE)
       .withBody(request)
       .withResponse<SuccessResponse>()
@@ -28,11 +27,11 @@ export const taskEvaluationServiceFactory = {
       .withResponse<TaskEvaluationDto>()
       .build(),
 
-  list: (taskId: string, params: PagingParams) =>
+  list: (taskId: string, dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/TaskEvaluation/by-task/${taskId}`)
       .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
+      .withQueryParams<ListRequest>(dto)
       .withResponse<TaskEvaluationDto[]>()
       .build(),
 

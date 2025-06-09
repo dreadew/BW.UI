@@ -1,36 +1,27 @@
 import { IDENTITY_SERVICE } from "~/constants/services.constants";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { CreateUserRoleClaimsRequest, UpdateUserRoleClaimsRequest } from "~/types/request.types";
-import type { UserRoleClaim } from "~/types/response.types";
+import type { CreateRoleClaimsRequest, ListRequest, RoleClaimsDto } from "~/types/request.types";
 
 export const roleClaimServiceFactory = {
-  list: (params: PagingParams = {}) =>
+  list: (dto: ListRequest) =>
     apiContractBuilderHelper
       .get('/api/RoleClaim/list')
       .withService(IDENTITY_SERVICE)
-      .withQueryParams(params)
-      .withResponse<UserRoleClaim[]>()
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<RoleClaimsDto[]>()
       .build(),
 
   get: (id: string) =>
     apiContractBuilderHelper
       .get(`/api/RoleClaim/${id}`)
       .withService(IDENTITY_SERVICE)
-      .withResponse<UserRoleClaim>()
+      .withResponse<RoleClaimsDto>()
       .build(),
 
-  create: (body: CreateUserRoleClaimsRequest) =>
+  create: (body: CreateRoleClaimsRequest) =>
     apiContractBuilderHelper
       .post('/api/RoleClaim')
-      .withService(IDENTITY_SERVICE)
-      .withBody(body)
-      .withResponse<SuccessResponse>()
-      .build(),
-
-  update: (body: UpdateUserRoleClaimsRequest) =>
-    apiContractBuilderHelper
-      .patch(`/api/RoleClaim/${body.claimType}`)
       .withService(IDENTITY_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()

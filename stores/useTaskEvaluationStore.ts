@@ -1,12 +1,7 @@
 import { defineStore } from "pinia";
 import { taskEvaluationServiceFactory } from "~/services/project/taskEvaluationServiceFactory";
-import type {
-  CreateTaskEvaluationRequest,
-  UpdateTaskEvaluationRequest,
-} from "~/types/request.types";
-import type { TaskEvaluationDto } from "~/types/response.types";
+import type { CreateTaskEvaluationRequest, ListRequest, TaskEvaluationDto, UpdateTaskEvaluationRequest } from "~/types/request.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { PagingParams } from "~/types/api.types";
 
 export const useTaskEvaluationStore = defineStore("taskEvaluation", () => {
   const toast = useToast();
@@ -23,23 +18,22 @@ export const useTaskEvaluationStore = defineStore("taskEvaluation", () => {
     error.value = null;
   }
 
-  async function list(taskId: string, params: PagingParams = {}) {
-    resetState();
+  async function list(taskId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     isLoading.value = true;
-
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
       const res = await taskEvaluationServiceFactory
-        .list(taskId, {
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          ...params,
-        })
+        .list(taskId, req)
         .execute();
       if (!res || res.length === 0) {
         return [];
       }
       evaluations.value = res;
-      return res;
+      return evaluations.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];

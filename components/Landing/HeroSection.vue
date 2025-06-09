@@ -22,11 +22,8 @@
         </div>
       </div>
       <div class="mx-auto mt-24 max-w-5xl">
-        <img
-          src="/landing/example.jpg"
-          alt="Демонстрация продукта"
-          class="h-[37rem] w-full object-cover rounded-2xl border border-secondary/10 bg-secondary/2"
-        />
+        <img src="/landing/example2.png" alt="Демонстрация продукта"
+          class="h-[37rem] w-full object-cover rounded-2xl border border-secondary/10 bg-secondary/2" />
       </div>
     </div>
   </section>

@@ -1,19 +1,18 @@
 import { IDENTITY_SERVICE } from "~/constants/services.constants";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { CreateSkillRequest, UpdateSkillRequest } from "~/types/request.types";
-import type { Skill } from "~/types/response.types";
+import type { CreateSkillRequest, ListRequest, SkillDto, UpdateSkillRequest } from "~/types/request.types";
 
 export const skillServiceFactory = {
-    list: (params: PagingParams = {}) => apiContractBuilderHelper.get('/api/Skill/list')
+    list: (dto: ListRequest) => apiContractBuilderHelper.get('/api/Skill/list')
         .withService(IDENTITY_SERVICE)
-        .withQueryParams(params)
-        .withResponse<Skill[]>()
+        .withQueryParams<ListRequest>(dto)
+        .withResponse<SkillDto[]>()
         .build(),
 
     get: (id: string) => apiContractBuilderHelper.get(`/api/Skill/${id}`)
         .withService(IDENTITY_SERVICE)
-        .withResponse<Skill>()
+        .withResponse<SkillDto>()
         .build(),
 
     create: (body: CreateSkillRequest) => apiContractBuilderHelper.post('/api/Skill')

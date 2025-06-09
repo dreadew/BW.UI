@@ -1,14 +1,8 @@
 import { defineStore } from "pinia";
 import { taskTodoListServiceFactory } from "~/services/project/taskTodoListServiceFactory";
-import type {
-  CreateTaskTodoListRequest,
-  CreateTaskTodoListItemRequest,
-  UpdateTaskTodoListRequest,
-  UpdateTaskTodoListItemRequest,
-} from "~/types/request.types";
+import type { CreateTaskTodoListItemRequest, CreateTaskTodoListRequest, ListRequest, UpdateTaskTodoListItemRequest, UpdateTaskTodoListRequest } from "~/types/request.types";
 import type { TaskTodoListDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { PagingParams } from "~/types/api.types";
 
 export const useTaskTodoListStore = defineStore("taskTodoList", () => {
   const toast = useToast();
@@ -26,26 +20,22 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
     error.value = null;
   }
 
-  async function list(taskId: string, params: PagingParams = {}) {
-    resetState();
+  async function list(taskId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     isLoading.value = true;
-
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
       const res = await taskTodoListServiceFactory
-        .list(taskId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value, ...params })
+        .list(taskId, req)
         .execute();
-
       if (!res || res.length === 0) {
-        toast.add({
-          title: 'Внимание!',
-          description: 'Список задач пуст',
-          color: 'warning'
-        });
         return [];
       }
-
       todoLists.value = res;
-      return res;
+      return todoLists.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];

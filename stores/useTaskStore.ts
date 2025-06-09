@@ -5,10 +5,11 @@ import type {
   CreateTaskRequest,
   RemoveTaskAssigneeRequest,
   UpdateTaskRequest,
+  TaskDto,
+  TaskPositionDto,
+  ListRequest,
 } from "~/types/request.types";
-import type { TaskDto, TaskPositionDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { PagingParams } from "~/types/api.types";
 
 export const useTaskStore = defineStore("task", () => {
   const toast = useToast();
@@ -25,23 +26,21 @@ export const useTaskStore = defineStore("task", () => {
     error.value = null;
   }
 
-  async function listByProject(projectId: string, params: PagingParams = {}) {
+  async function listByProject(projectId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     resetState();
     isLoading.value = true;
-
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
       const res = await taskServiceFactory
-        .listByProject(projectId, {
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          ...params,
-        })
+        .listByProject(projectId, req)
         .execute();
-
       if (!res || res.length === 0) {
         return [];
       }
-
       tasks.value = res;
       return res;
     } catch (err) {
@@ -52,23 +51,21 @@ export const useTaskStore = defineStore("task", () => {
     }
   }
 
-  async function listBySection(sectionId: string, params: PagingParams = {}) {
+  async function listBySection(sectionId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     resetState();
     isLoading.value = true;
-
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
       const res = await taskServiceFactory
-        .listBySection(sectionId, {
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          ...params,
-        })
+        .listBySection(sectionId, req)
         .execute();
-
       if (!res || res.length === 0) {
         return [];
       }
-
       tasks.value = res;
       return res;
     } catch (err) {
@@ -163,7 +160,7 @@ export const useTaskStore = defineStore("task", () => {
       await taskServiceFactory
         .addTaskAssignee(request)
         .ensured("Исполнитель успешно добавлен к задаче");
-      await get(request.taskId);
+      await get(request.id);
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -181,7 +178,7 @@ export const useTaskStore = defineStore("task", () => {
       await taskServiceFactory
         .removeTaskAssignee(request)
         .ensured("Исполнитель успешно удален из задачи");
-      await get(request.taskId);
+      await get(request.id);
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -199,7 +196,7 @@ export const useTaskStore = defineStore("task", () => {
       await taskServiceFactory
         .changePosition(request)
         .ensured("Исполнитель успешно удален из задачи");
-      await get(request.taskId);
+      await get(request.id);
       return true;
     } catch (err) {
       errorHandler.handleError(err);

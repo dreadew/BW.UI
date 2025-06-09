@@ -1,7 +1,7 @@
 <template>
   <footer class="border-t border-t-secondary/10 my-12 py-12">
     <div>
-      <div class="flex flex-col items-center justify-between gap-6 lg:flex-row">
+      <div class="flex flex-col items-center justify-between gap-6 md:flex-row">
         <div>
           <div class="flex items-center gap-2">
             <img src="/assets/img/128.svg" alt="Hexaend Logo" class="h-7 w-7" />
@@ -13,7 +13,9 @@
         </div>
         <div class="flex gap-8 flex-wrap">
           <CommonFooterLinksWrapper title="Продукт">
-            <template #icon><UIcon name="i-lucide-box" /></template>
+            <template #icon>
+              <UIcon name="i-lucide-box" />
+            </template>
             <template #links>
               <ULink to="/features">
                 <UIcon name="i-lucide-star" class="mr-1" /> Особенности
@@ -27,7 +29,9 @@
             </template>
           </CommonFooterLinksWrapper>
           <CommonFooterLinksWrapper title="Компания">
-            <template #icon><UIcon name="i-lucide-users" /></template>
+            <template #icon>
+              <UIcon name="i-lucide-users" />
+            </template>
             <template #links>
               <ULink to="/about">
                 <UIcon name="i-lucide-info" class="mr-1" /> О нас
@@ -41,7 +45,9 @@
             </template>
           </CommonFooterLinksWrapper>
           <CommonFooterLinksWrapper title="Юридическое">
-            <template #icon><UIcon name="i-lucide-shield" /></template>
+            <template #icon>
+              <UIcon name="i-lucide-shield" />
+            </template>
             <template #links>
               <ULink to="/privacy">
                 <UIcon name="i-lucide-lock" class="mr-1" /> Приватность

@@ -18,6 +18,7 @@ const colorOptions = {
   primary: 'text-primary',
   secondary: 'text-secondary',
   neutral: 'text-neutral-400',
+  "darker-neutral": 'text-neutral-700',
   error: 'text-red-600',
   success: 'text-green-600',
 } as const;
@@ -39,4 +40,3 @@ const colorClass = computed(() => colorOptions[props.color ?? 'neutral'])
 const alignClass = computed(() => props.align ? `text-${props.align}` : '')
 const customClass = computed(() => props.class)
 </script>
-

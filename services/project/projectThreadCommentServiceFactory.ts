@@ -1,8 +1,7 @@
 import { PROJECT_SERVICE } from "~/constants/services.constants";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type { CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest } from "~/types/request.types";
-import type { ProjectThreadCommentDto } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { CreateProjectThreadCommentRequest, ListRequest, ProjectThreadCommentDto, UpdateProjectThreadCommentRequest } from "~/types/request.types";
 
 export const projectThreadCommentServiceFactory = {
   create: (body: CreateProjectThreadCommentRequest) =>
@@ -15,18 +14,10 @@ export const projectThreadCommentServiceFactory = {
 
   update: (body: UpdateProjectThreadCommentRequest) =>
     apiContractBuilderHelper
-      .patch(`/api/ProjectThreadComments/${body.threadCommentId}`)
+      .patch(`/api/ProjectThreadComments/${body.id}`)
       .withService(PROJECT_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()
-      .build(),
-
-  listByThread: (threadId: string, params: PagingParams = {}) =>
-    apiContractBuilderHelper
-      .get(`/api/ProjectThreadComments/by-thread/${threadId}`)
-      .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
-      .withResponse<ProjectThreadCommentDto[]>()
       .build(),
 
   get: (commentId: string) =>
@@ -34,6 +25,14 @@ export const projectThreadCommentServiceFactory = {
       .get(`/api/ProjectThreadComments/${commentId}`)
       .withService(PROJECT_SERVICE)
       .withResponse<ProjectThreadCommentDto>()
+      .build(),
+
+  listByThread: (threadId: string, dto: ListRequest) =>
+    apiContractBuilderHelper
+      .get(`/api/ProjectThreadComments/by-thread/${threadId}`)
+      .withService(PROJECT_SERVICE)
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<ProjectThreadCommentDto[]>()
       .build(),
 
   delete: (commentId: string) =>

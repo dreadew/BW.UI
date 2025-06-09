@@ -1,13 +1,7 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type {
-  AddTaskAssigneeRequest,
-  CreateTaskRequest,
-  RemoveTaskAssigneeRequest,
-  UpdateTaskRequest,
-} from "~/types/request.types";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type { TaskDto, TaskPositionDto, TaskRelationDto } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { AddTaskAssigneeRequest, AddTaskSprintRequest, CreateTaskRequest, ListRequest, RemoveTaskAssigneeRequest, RemoveTaskSprintRequest, TaskDto, TaskPositionDto, TaskRelationDto, UpdateTaskRequest } from "~/types/request.types";
 
 export const taskServiceFactory = {
   create: (request: CreateTaskRequest) =>
@@ -33,19 +27,19 @@ export const taskServiceFactory = {
       .withResponse<TaskDto>()
       .build(),
 
-  listBySection: (sectionId: string, params: PagingParams) =>
+  listBySection: (sectionId: string, dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/Tasks/by-section/${sectionId}`)
       .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
+      .withQueryParams<ListRequest>(dto)
       .withResponse<TaskDto[]>()
       .build(),
 
-  listByProject: (projectId: string, params: PagingParams) =>
+  listByProject: (projectId: string, dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/Tasks/by-project/${projectId}`)
       .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
+      .withQueryParams<ListRequest>(dto)
       .withResponse<TaskDto[]>()
       .build(),
 
@@ -79,7 +73,7 @@ export const taskServiceFactory = {
 
   addTaskAssignee: (request: AddTaskAssigneeRequest) =>
     apiContractBuilderHelper
-      .post(`/api/Tasks/${request.taskId}/assignee`)
+      .post(`/api/Tasks/${request.id}/assignee`)
       .withService(PROJECT_SERVICE)
       .withBody(request)
       .withResponse<SuccessResponse>()
@@ -87,7 +81,23 @@ export const taskServiceFactory = {
 
   removeTaskAssignee: (request: RemoveTaskAssigneeRequest) =>
     apiContractBuilderHelper
-      .delete(`/api/Tasks/${request.taskId}/assignee/`)
+      .delete(`/api/Tasks/${request.id}/assignee`)
+      .withService(PROJECT_SERVICE)
+      .withBody(request)
+      .withResponse<SuccessResponse>()
+      .build(),
+
+  addTaskSprint: (request: AddTaskSprintRequest) =>
+    apiContractBuilderHelper
+      .post(`/api/Tasks/${request.id}/sprint`)
+      .withService(PROJECT_SERVICE)
+      .withBody(request)
+      .withResponse<SuccessResponse>()
+      .build(),
+
+  removeTaskSprint: (request: RemoveTaskSprintRequest) =>
+    apiContractBuilderHelper
+      .delete(`/api/Tasks/${request.id}/assignee`)
       .withService(PROJECT_SERVICE)
       .withBody(request)
       .withResponse<SuccessResponse>()
@@ -95,7 +105,7 @@ export const taskServiceFactory = {
 
   changePosition: (request: TaskPositionDto) =>
     apiContractBuilderHelper
-      .post(`/api/Tasks/${request.taskId}/position`)
+      .post(`/api/Tasks/${request.id}/position`)
       .withService(PROJECT_SERVICE)
       .withBody(request)
       .withResponse<SuccessResponse>()

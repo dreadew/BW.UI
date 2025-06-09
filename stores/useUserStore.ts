@@ -1,16 +1,7 @@
 import { defineStore } from "pinia";
-import type {
-  GenerateVerificationCodeRequest,
-  RecoverPasswordRequest,
-  SignInRequest,
-  SignUpRequest,
-  SkillRequest,
-  UpdateUserRequest,
-  RoleRequest
-} from '~/types/request.types';
+import type { GenerateVerificationCodeRequest, RecoverPasswordRequest, SignInRequest, SignUpRequest, SkillRequest, UpdateUserRequest, RoleRequest, UserDto } from '~/types/request.types';
 import * as signalR from "@microsoft/signalr";
 import { NotificationLevel, type WebNotificationDto } from "../types/api.types";
-import type { User } from "~/types/response.types";
 import { userServiceFactory } from "~/services/identity/userServiceFactory";
 import { signInRequestSchema, signUpRequestSchema } from "~/schemas/generated.schema";
 import { authServiceFactory } from "~/services/identity/authServiceFactory";
@@ -20,7 +11,7 @@ export const useUserStore = defineStore("user", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const user = ref<User | null>(null);
+  const user = ref<UserDto | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const validationErrors = ref<Record<string, string>>({});
@@ -267,7 +258,7 @@ export const useUserStore = defineStore("user", () => {
 
     try {
       await userServiceFactory
-        .recoverPassword(id, body)
+        .recoverPassword({ ...body, id })
         .ensured("Вы успешно изменили пароль!");
       return true;
     } finally {
@@ -306,7 +297,7 @@ export const useUserStore = defineStore("user", () => {
 
     try {
       await userServiceFactory
-        .addSkill(user.value?.id!, dto)
+        .addSkill(dto)
         .ensured("Вы успешно добавили навык!");
       return true;
     } finally {
@@ -319,7 +310,7 @@ export const useUserStore = defineStore("user", () => {
 
     try {
       await userServiceFactory
-        .removeSkill(user.value?.id!, dto)
+        .removeSkill(dto)
         .ensured("Вы успешно удалили навык!");
       return true;
     } finally {
@@ -331,7 +322,7 @@ export const useUserStore = defineStore("user", () => {
     isLoading.value = true;
     try {
       await userServiceFactory
-        .addRole(user.value?.id!, dto)
+        .addRole(dto)
         .ensured("Роль успешно добавлена!");
       return true;
     } catch (err) {
@@ -346,7 +337,7 @@ export const useUserStore = defineStore("user", () => {
     isLoading.value = true;
     try {
       await userServiceFactory
-        .removeRole(user.value?.id!, dto)
+        .removeRole(dto)
         .ensured("Роль успешно удалена!");
       return true;
     } catch (err) {

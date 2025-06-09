@@ -1,28 +1,27 @@
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type { CreateWorkspaceRoleClaimRequest, UpdateWorkspaceRoleClaimRequest } from "~/types/request.types";
-import type { WorkspaceRoleClaim } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { CreateWorkspaceRoleClaimsRequest, ListRequest, UpdateWorkspaceRoleClaimsRequest, WorkspaceRoleClaimsDto } from "~/types/request.types";
 
 export const workspaceRoleClaimsServiceFactory = {
-    listWorkspaceRoleClaims: (params: PagingParams) => apiContractBuilderHelper.get(`/api/WorkspaceRoleClaim/list`)
+    listWorkspaceRoleClaims: (dto: ListRequest) => apiContractBuilderHelper.get(`/api/WorkspaceRoleClaim/list`)
         .withService(WORKSPACE_SERVICE)
-        .withQueryParams(params)
-        .withResponse<WorkspaceRoleClaim[]>()
+        .withQueryParams<ListRequest>(dto)
+        .withResponse<WorkspaceRoleClaimsDto[]>()
         .build(),
 
     getWorkspaceRoleClaim: (id: string) => apiContractBuilderHelper.get(`/api/WorkspaceRoleClaim/${id}`)
         .withService(WORKSPACE_SERVICE)
-        .withResponse<WorkspaceRoleClaim>()
+        .withResponse<WorkspaceRoleClaimsDto>()
         .build(),
 
-    createWorkspaceRoleClaim: (body: CreateWorkspaceRoleClaimRequest) => apiContractBuilderHelper.post(`/api/WorkspaceRoleClaim`)
+    createWorkspaceRoleClaim: (body: CreateWorkspaceRoleClaimsRequest) => apiContractBuilderHelper.post(`/api/WorkspaceRoleClaim`)
         .withService(WORKSPACE_SERVICE)
         .withBody(body)
         .withResponse<SuccessResponse>()
         .build(),
 
-    updateWorkspaceRoleClaim: (id: string, body: UpdateWorkspaceRoleClaimRequest) => apiContractBuilderHelper.patch(`/api/WorkspaceRoleClaim/${id}`)
+    updateWorkspaceRoleClaim: (id: string, body: UpdateWorkspaceRoleClaimsRequest) => apiContractBuilderHelper.patch(`/api/WorkspaceRoleClaim/${id}`)
         .withService(WORKSPACE_SERVICE)
         .withBody(body)
         .withResponse<SuccessResponse>()

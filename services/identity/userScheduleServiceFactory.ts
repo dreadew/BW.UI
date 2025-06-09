@@ -1,23 +1,22 @@
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { IDENTITY_SERVICE } from "~/constants/services.constants";
-import type { CreateUserScheduleRequest, UpdateUserScheduleRequest } from "~/types/request.types";
-import type { UserSchedule } from "~/types/response.types";
+import type { CreateUserScheduleRequest, ListRequest, UpdateUserScheduleRequest, UserScheduleDto } from "~/types/request.types";
 
 export const userScheduleService = {
-  findByUser: (userId: string, params: PagingParams) =>
+  findByUser: (userId: string, dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/UserSchedule/by-user/${userId}`)
       .withService(IDENTITY_SERVICE)
-      .withQueryParams(params)
-      .withResponse<UserSchedule[]>()
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<UserScheduleDto[]>()
       .build(),
 
   getUserSchedule: (id: string) =>
     apiContractBuilderHelper
       .get(`/api/UserSchedule/${id}`)
       .withService(IDENTITY_SERVICE)
-      .withResponse<UserSchedule>()
+      .withResponse<UserScheduleDto>()
       .build(),
 
   createUserSchedule: (body: CreateUserScheduleRequest) =>
@@ -28,9 +27,9 @@ export const userScheduleService = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  updateUserSchedule: (id: string, body: UpdateUserScheduleRequest) =>
+  updateUserSchedule: (body: UpdateUserScheduleRequest) =>
     apiContractBuilderHelper
-      .patch(`/api/UserSchedule/${id}`)
+      .patch(`/api/UserSchedule/${body.id}`)
       .withService(IDENTITY_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()

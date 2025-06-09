@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { sessionServiceFactory } from "~/services/identity/sessionServiceFactory";
 import type { PagingParams } from "~/types/api.types";
-import type { RevokeRequest, RenewRequest } from "~/types/request.types";
+import type { ListRequest, SessionDto, RevokeRequest, RenewRequest } from "~/types/request.types";
 import type { Session } from "~/types/response.types";
 import type { AccessTokenResponse } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
@@ -15,16 +15,18 @@ export const useSessionStore = defineStore("session", () => {
     const limit = ref(20);
     const offset = ref(0);
 
-    async function list(params: PagingParams = {}) {
+    // list теперь принимает ListRequest с includeDeleted
+    async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
         isLoading.value = true;
         error.value = null;
-        const paging: PagingParams = {
-            limit: params.limit ?? limit.value,
-            offset: params.offset ?? offset.value,
-            ...params
-        };
         try {
-            sessions.value = await sessionServiceFactory.list(paging).execute();
+            const req: ListRequest = {
+                limit: params.limit ?? limit.value,
+                offset: params.offset ?? offset.value,
+                includeDeleted: params.includeDeleted ?? false
+            };
+            const res = await sessionServiceFactory.list(req).execute();
+            sessions.value = res as any; // Приведение к нужному типу, если требуется
             return sessions.value;
         } catch (err) {
             errorHandler.handleError(err);

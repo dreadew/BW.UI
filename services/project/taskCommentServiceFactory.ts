@@ -1,18 +1,9 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type { CreateTaskCommentRequest, UpdateTaskCommentRequest } from "~/types/request.types";
-import type { TaskCommentDto } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { CreateTaskCommentRequest, ListRequest, TaskCommentDto, UpdateTaskCommentRequest } from "~/types/request.types";
 
 export const taskCommentServiceFactory = {
-  listByTask: (taskId: string, params: PagingParams) =>
-    apiContractBuilderHelper
-      .get(`/api/TaskComment/by-task/${taskId}`)
-      .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
-      .withResponse<TaskCommentDto[]>()
-      .build(),
-
   create: (request: CreateTaskCommentRequest) =>
     apiContractBuilderHelper
       .post(`/api/TaskComment`)
@@ -34,6 +25,14 @@ export const taskCommentServiceFactory = {
       .get(`/api/TaskComment/${commentId}`)
       .withService(PROJECT_SERVICE)
       .withResponse<TaskCommentDto>()
+      .build(),
+
+  listByTask: (taskId: string, dto: ListRequest) =>
+    apiContractBuilderHelper
+      .get(`/api/TaskComment/by-task/${taskId}`)
+      .withService(PROJECT_SERVICE)
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<TaskCommentDto[]>()
       .build(),
 
   delete: (commentId: string) =>

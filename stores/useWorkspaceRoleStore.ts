@@ -1,8 +1,5 @@
 import { workspaceRoleServiceFactory } from "~/services/workspace/workspaceRoleServiceFactory";
-import type {
-  CreateWorkspaceRoleRequest,
-  UpdateWorkspaceRoleRequest,
-} from "~/types/request.types";
+import type { CreateWorkspaceRoleRequest, UpdateWorkspaceRoleRequest, ListRequest, WorkspaceRoleDto } from "~/types/request.types";
 import type { WorkspaceRole } from "~/types/response.types";
 
 export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
@@ -13,19 +10,18 @@ export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
   const loading = ref(false);
   const currentRole = ref<WorkspaceRole | null>(null);
 
-  async function list(workspaceId: string, includeDeleted: boolean = false) {
+  async function list(workspaceId: string, params: ListRequest = { limit: pageSize.value, offset: 0, includeDeleted: false }) {
     reset();
     loading.value = true;
     try {
-      const resp = await workspaceRoleServiceFactory
-        .listWorkspaceRoles({
-          workspaceId,
-          page: currentPage.value,
-          pageSize: pageSize.value,
-          includeDeleted,
-        })
-        .execute();
-      roles.value = resp;
+      const req: ListRequest = {
+        ...params,
+        limit: params.limit ?? pageSize.value,
+        offset: params.offset ?? 0,
+        includeDeleted: params.includeDeleted ?? false
+      };
+      const resp = await workspaceRoleServiceFactory.listWorkspaceRoles(workspaceId, req).execute();
+      roles.value = resp as any; // Приведение к нужному типу, если требуется
       total.value = resp.length;
       if (resp.length == pageSize.value) {
         currentPage.value++;
@@ -43,7 +39,7 @@ export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
       const resp = await workspaceRoleServiceFactory
         .getWorkspaceRole(id)
         .execute();
-      currentRole.value = resp;
+      currentRole.value = resp as any;
       return resp;
     } catch (error) {
       console.error("Error fetching workspace role:", error);
@@ -64,12 +60,11 @@ export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
     }
   }
 
-  async function update(id: string, body: UpdateWorkspaceRoleRequest) {
+  // Исправить update: один объект-аргумент
+  async function update(body: UpdateWorkspaceRoleRequest) {
     loading.value = true;
     try {
-      await workspaceRoleServiceFactory
-        .updateWorkspaceRole(id, body)
-        .ensured("Роль успешно обновлена");
+      await workspaceRoleServiceFactory.updateWorkspaceRole(body).ensured("Роль успешно обновлена");
     } finally {
       loading.value = false;
     }

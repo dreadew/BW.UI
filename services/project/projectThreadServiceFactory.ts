@@ -1,8 +1,7 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
-import type { CreateProjectThreadRequest, UpdateProjectThreadRequest } from "~/types/request.types";
-import type { ProjectThreadDto } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { CreateProjectThreadRequest, ListRequest, ProjectThreadDto, UpdateProjectThreadRequest } from "~/types/request.types";
 
 export const projectThreadServiceFactory = {
   create: (body: CreateProjectThreadRequest) =>
@@ -21,11 +20,11 @@ export const projectThreadServiceFactory = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  listByProject: (projectId: string, params: PagingParams = {}) =>
+  listByProject: (projectId: string, dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/ProjectThreads/by-project/${projectId}`)
       .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
+      .withQueryParams<ListRequest>(dto)
       .withResponse<ProjectThreadDto[]>()
       .build(),
 

@@ -3,8 +3,9 @@ import { taskActivityServiceFactory } from "~/services/project/taskActivityServi
 import type {
   CreateTaskActivityRequest,
   UpdateTaskActivityRequest,
+  TaskActivityDto,
+  ListRequest,
 } from "~/types/request.types";
-import type { TaskActivityDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useTaskActivityStore = defineStore("taskActivity", () => {
@@ -20,10 +21,11 @@ export const useTaskActivityStore = defineStore("taskActivity", () => {
     error.value = null;
   }
 
-  async function listByTask(taskId: string) {
-    resetState();
+  async function listByTask(
+    taskId: string,
+    params: ListRequest = { limit: 20, offset: 0, includeDeleted: false }
+  ) {
     isLoading.value = true;
-
     try {
       const res = await taskActivityServiceFactory
         .listByTask(taskId)
@@ -42,9 +44,7 @@ export const useTaskActivityStore = defineStore("taskActivity", () => {
   }
 
   async function listByUser(userId: string) {
-    resetState();
     isLoading.value = true;
-
     try {
       const res = await taskActivityServiceFactory
         .listByUser(userId)

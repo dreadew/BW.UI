@@ -1,28 +1,27 @@
 import {
   IDENTITY_SERVICE,
 } from "~/constants/services.constants";
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { CreateUserRoleRequest, UpdateUserRoleRequest } from "~/types/request.types";
-import type { UserRole } from "~/types/response.types";
+import type { CreateRoleRequest, ListRequest, RoleDto, UpdateRoleRequest } from "~/types/request.types";
 
 export const roleServiceFactory = {
-  list: (params: PagingParams = {}) =>
+  list: (dto: ListRequest) =>
     apiContractBuilderHelper
       .get('/api/Role/list')
       .withService(IDENTITY_SERVICE)
-      .withQueryParams(params)
-      .withResponse<UserRole[]>()
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<RoleDto[]>()
       .build(),
 
   get: (id: string) =>
     apiContractBuilderHelper
       .get(`/api/Role/${id}`)
       .withService(IDENTITY_SERVICE)
-      .withResponse<UserRole>()
+      .withResponse<RoleDto>()
       .build(),
 
-  create: (body: CreateUserRoleRequest) =>
+  create: (body: CreateRoleRequest) =>
     apiContractBuilderHelper
       .post('/api/Role')
       .withService(IDENTITY_SERVICE)
@@ -30,7 +29,7 @@ export const roleServiceFactory = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  update: (body: UpdateUserRoleRequest) =>
+  update: (body: UpdateRoleRequest) =>
     apiContractBuilderHelper
       .patch(`/api/Role/${body.id}`)
       .withService(IDENTITY_SERVICE)

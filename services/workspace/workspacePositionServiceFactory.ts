@@ -1,28 +1,27 @@
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
 import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { CreateWorkspacePositionRequest, UpdateWorkspacePositionRequest } from "~/types/request.types";
-import type { WorkspacePagingParams, WorkspacePosition } from "~/types/response.types";
+import type { CreatePositionRequest, ListRequest, PositionDto, UpdatePositionRequest } from "~/types/request.types";
 
 export const workspacePositionServiceFactory = {
-    listWorkspacePositions: (params: WorkspacePagingParams) => apiContractBuilderHelper.get(`/api/WorkspacePosition/list`)
+    listWorkspacePositions: (dto: ListRequest) => apiContractBuilderHelper.get(`/api/WorkspacePosition/list`)
         .withService(WORKSPACE_SERVICE)
-        .withQueryParams(params)
-        .withResponse<WorkspacePosition[]>()
+        .withQueryParams<ListRequest>(dto)
+        .withResponse<PositionDto[]>()
         .build(),
 
     getWorkspacePosition: (id: string) => apiContractBuilderHelper.get(`/api/WorkspacePosition/${id}`)
         .withService(WORKSPACE_SERVICE)
-        .withResponse<WorkspacePosition>()
+        .withResponse<PositionDto>()
         .build(),
 
-    createWorkspacePosition: (body: CreateWorkspacePositionRequest) => apiContractBuilderHelper.post(`/api/WorkspacePosition`)
+    createWorkspacePosition: (body: CreatePositionRequest) => apiContractBuilderHelper.post(`/api/WorkspacePosition`)
         .withService(WORKSPACE_SERVICE)
         .withBody(body)
         .withResponse<SuccessResponse>()
         .build(),
 
-    updateWorkspacePosition: (id: string, body: UpdateWorkspacePositionRequest) => apiContractBuilderHelper.patch(`/api/WorkspacePosition/${id}`)
+    updateWorkspacePosition: (body: UpdatePositionRequest) => apiContractBuilderHelper.patch(`/api/WorkspacePosition/${body.id}`)
         .withService(WORKSPACE_SERVICE)
         .withBody(body)
         .withResponse<SuccessResponse>()

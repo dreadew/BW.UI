@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Workspace Service API",
-    "description": "Workspace Service API",
+    "description": "API for managing workspaces, including creation, deletion, and updates.",
     "version": "v1"
   },
   "paths": {
@@ -13,6 +13,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkspaceRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateWorkspaceRequest"
@@ -54,6 +59,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkspaceRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateWorkspaceRequest"
@@ -87,7 +97,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -120,6 +131,13 @@
         ],
         "parameters": [
           {
+            "name": "Id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "path",
             "required": true,
@@ -128,25 +146,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteWorkspaceRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteWorkspaceRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteWorkspaceRequest"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "OK"
@@ -169,6 +168,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreWorkspaceRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RestoreWorkspaceRequest"
@@ -213,6 +217,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "IncludeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -274,6 +285,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUserRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/InviteUserRequest"
@@ -323,6 +339,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateUserRequest"
@@ -360,7 +381,7 @@
             }
           },
           {
-            "name": "id",
+            "name": "Id",
             "in": "path",
             "required": true,
             "schema": {
@@ -386,14 +407,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "fromId",
-            "in": "query",
-            "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -433,7 +448,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -469,7 +485,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -506,7 +523,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -526,7 +544,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -537,12 +556,21 @@
         }
       }
     },
-    "/api/WorkspaceDirectory/list": {
+    "/api/WorkspaceDirectory/{workspaceId}/list": {
       "get": {
         "tags": [
           "WorkspaceDirectory"
         ],
         "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "Limit",
             "in": "query",
@@ -557,6 +585,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "IncludeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -600,6 +635,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDirectoryRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateDirectoryRequest"
@@ -629,6 +669,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDirectoryRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateDirectoryRequest"
@@ -664,14 +709,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "fromId",
-            "in": "query",
-            "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -711,7 +750,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -747,7 +787,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -784,7 +825,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -804,7 +846,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -815,12 +858,21 @@
         }
       }
     },
-    "/api/WorkspacePosition/list": {
+    "/api/WorkspacePosition/{workspaceId}/list": {
       "get": {
         "tags": [
           "WorkspacePosition"
         ],
         "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "Limit",
             "in": "query",
@@ -835,6 +887,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "IncludeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -878,6 +937,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePositionRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreatePositionRequest"
@@ -907,6 +971,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePositionRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdatePositionRequest"
@@ -942,7 +1011,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -969,7 +1039,7 @@
           }
         }
       },
-      "delete": {
+      "patch": {
         "tags": [
           "WorkspaceRole"
         ],
@@ -980,6 +1050,51 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "WorkspaceRole"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -999,7 +1114,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -1010,12 +1126,21 @@
         }
       }
     },
-    "/api/WorkspaceRole/list": {
+    "/api/WorkspaceRole/{workspaceId}/list": {
       "get": {
         "tags": [
           "WorkspaceRole"
         ],
         "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "Limit",
             "in": "query",
@@ -1030,6 +1155,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "IncludeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -1073,6 +1205,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateRoleRequest"
@@ -1086,35 +1223,6 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateRoleRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "WorkspaceRole"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoleRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoleRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoleRequest"
               }
             }
           }
@@ -1137,7 +1245,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -1164,7 +1273,7 @@
           }
         }
       },
-      "delete": {
+      "patch": {
         "tags": [
           "WorkspaceRoleClaims"
         ],
@@ -1178,6 +1287,51 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleClaimsRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleClaimsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleClaimsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleClaimsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "WorkspaceRoleClaims"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1185,12 +1339,21 @@
         }
       }
     },
-    "/api/WorkspaceRoleClaims/list": {
+    "/api/WorkspaceRoleClaims/{roleId}/list": {
       "get": {
         "tags": [
           "WorkspaceRoleClaims"
         ],
         "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "Limit",
             "in": "query",
@@ -1205,6 +1368,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "IncludeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -1248,6 +1418,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleClaimsRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateRoleClaimsRequest"
@@ -1261,35 +1436,6 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateRoleClaimsRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "WorkspaceRoleClaims"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoleClaimsRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoleClaimsRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoleClaimsRequest"
               }
             }
           }
@@ -1323,7 +1469,7 @@
             "type": "string",
             "format": "date-time"
           },
-          "modifiedAt": {
+          "updatedAt": {
             "type": "string",
             "format": "date-time",
             "nullable": true
@@ -1334,11 +1480,15 @@
       "CreateDirectoryRequest": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
           "name": {
             "type": "string",
             "nullable": true
           },
-          "workspaceId": {
+          "parentId": {
             "type": "string",
             "nullable": true
           }
@@ -1348,11 +1498,11 @@
       "CreatePositionRequest": {
         "type": "object",
         "properties": {
-          "name": {
+          "id": {
             "type": "string",
             "nullable": true
           },
-          "workspaceId": {
+          "name": {
             "type": "string",
             "nullable": true
           }
@@ -1362,11 +1512,11 @@
       "CreateRoleClaimsRequest": {
         "type": "object",
         "properties": {
-          "value": {
+          "id": {
             "type": "string",
             "nullable": true
           },
-          "roleId": {
+          "value": {
             "type": "string",
             "nullable": true
           }
@@ -1376,11 +1526,11 @@
       "CreateRoleRequest": {
         "type": "object",
         "properties": {
-          "name": {
+          "id": {
             "type": "string",
             "nullable": true
           },
-          "workspaceId": {
+          "name": {
             "type": "string",
             "nullable": true
           }
@@ -1390,25 +1540,7 @@
       "CreateWorkspaceRequest": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "string",
-            "nullable": true
-          },
           "name": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "DeleteWorkspaceRequest": {
-        "type": "object",
-        "properties": {
-          "fromId": {
-            "type": "string",
-            "nullable": true
-          },
-          "workspaceId": {
             "type": "string",
             "nullable": true
           }
@@ -1422,9 +1554,24 @@
             "type": "string",
             "nullable": true
           },
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "name": {
             "type": "string",
             "nullable": true
+          },
+          "parent": {
+            "$ref": "#/components/schemas/DirectoryDto"
           },
           "children": {
             "type": "array",
@@ -1439,14 +1586,6 @@
               "$ref": "#/components/schemas/ArtifactDto"
             },
             "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modifiedAt": {
-            "type": "string",
-            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -1454,19 +1593,11 @@
       "InviteUserRequest": {
         "type": "object",
         "properties": {
-          "fromId": {
-            "type": "string",
-            "nullable": true
-          },
           "id": {
             "type": "string",
             "nullable": true
           },
           "userId": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
             "type": "string",
             "nullable": true
           }
@@ -1480,17 +1611,20 @@
             "type": "string",
             "nullable": true
           },
-          "name": {
-            "type": "string",
-            "nullable": true
+          "isDeleted": {
+            "type": "boolean"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time"
           },
-          "modifiedAt": {
+          "updatedAt": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
             "nullable": true
           }
         },
@@ -1499,11 +1633,7 @@
       "RestoreWorkspaceRequest": {
         "type": "object",
         "properties": {
-          "fromId": {
-            "type": "string",
-            "nullable": true
-          },
-          "workspaceId": {
+          "id": {
             "type": "string",
             "nullable": true
           }
@@ -1531,6 +1661,18 @@
             "type": "string",
             "nullable": true
           },
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "name": {
             "type": "string",
             "nullable": true
@@ -1540,15 +1682,6 @@
             "items": {
               "$ref": "#/components/schemas/RoleClaimsDto"
             },
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modifiedAt": {
-            "type": "string",
-            "format": "date-time",
             "nullable": true
           }
         },
@@ -1576,10 +1709,6 @@
             "nullable": true
           },
           "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "workspaceId": {
             "type": "string",
             "nullable": true
           },
@@ -1625,11 +1754,7 @@
       "UpdateUserRequest": {
         "type": "object",
         "properties": {
-          "fromId": {
-            "type": "string",
-            "nullable": true
-          },
-          "workspaceId": {
+          "id": {
             "type": "string",
             "nullable": true
           },
@@ -1651,10 +1776,6 @@
       "UpdateWorkspaceRequest": {
         "type": "object",
         "properties": {
-          "fromId": {
-            "type": "string",
-            "nullable": true
-          },
           "id": {
             "type": "string",
             "nullable": true
@@ -1697,7 +1818,7 @@
             "type": "string",
             "format": "date-time"
           },
-          "modifiedAt": {
+          "updatedAt": {
             "type": "string",
             "format": "date-time",
             "nullable": true
@@ -1710,6 +1831,18 @@
         "properties": {
           "id": {
             "type": "string",
+            "nullable": true
+          },
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           },
           "name": {
@@ -1747,15 +1880,6 @@
               "$ref": "#/components/schemas/WorkspaceUserDto"
             },
             "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modifiedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1763,7 +1887,7 @@
       "WorkspaceUserDto": {
         "type": "object",
         "properties": {
-          "userId": {
+          "id": {
             "type": "string",
             "nullable": true
           },

@@ -1,8 +1,7 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
 import type { SuccessResponse } from "~/types/api.types";
-import type { CreateTaskActivityRequest, UpdateTaskActivityRequest } from "~/types/request.types";
-import type { TaskActivityDto } from "~/types/response.types";
+import type { CreateTaskActivityRequest, TaskActivityDto, UpdateTaskActivityRequest } from "~/types/request.types";
 
 export const taskActivityServiceFactory = {
   create: (request: CreateTaskActivityRequest) =>
@@ -15,7 +14,7 @@ export const taskActivityServiceFactory = {
 
   update: (request: UpdateTaskActivityRequest) =>
     apiContractBuilderHelper
-      .patch(`/api/TaskActivity/${request.taskActivityId}`)
+      .patch(`/api/TaskActivity/${request.id}`)
       .withService(PROJECT_SERVICE)
       .withBody(request)
       .withResponse<SuccessResponse>()

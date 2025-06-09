@@ -1,12 +1,7 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type {
-  CreateTaskDirectoryRequest,
-  DeleteFileRequest,
-  UpdateTaskDirectoryRequest,
-} from "~/types/request.types";
-import type { SuccessResponse, PagingParams } from "~/types/api.types";
-import type { TaskDirectoryDto } from "~/types/response.types";
+import type { SuccessResponse } from "~/types/api.types";
+import type { CreateTaskDirectoryRequest, FileDeleteRequest, ListRequest, TaskDirectoryDto, UpdateTaskDirectoryRequest } from "~/types/request.types";
 
 export const taskDirectoryServiceFactory = {
   create: (request: CreateTaskDirectoryRequest) =>
@@ -32,11 +27,11 @@ export const taskDirectoryServiceFactory = {
       .withResponse<TaskDirectoryDto>()
       .build(),
 
-  list: (taskId: string, params: PagingParams = {}) =>
+  list: (taskId: string, dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/TasksDirectory/by-task/${taskId}`)
       .withService(PROJECT_SERVICE)
-      .withQueryParams(params)
+      .withQueryParams<ListRequest>(dto)
       .withResponse<TaskDirectoryDto[]>()
       .build(),
 
@@ -65,7 +60,7 @@ export const taskDirectoryServiceFactory = {
       .build();
   },
 
-  deleteArtifact: (request: DeleteFileRequest) =>
+  deleteArtifact: (request: FileDeleteRequest) =>
     apiContractBuilderHelper
       .delete(`/api/TaskDirectory/${request.id}/file`)
       .withService(PROJECT_SERVICE)

@@ -2,10 +2,11 @@ import { defineStore } from "pinia";
 import { taskDirectoryServiceFactory } from "~/services/project/taskDirectoryServiceFactory";
 import type {
   CreateTaskDirectoryRequest,
-  DeleteFileRequest,
   UpdateTaskDirectoryRequest,
+  TaskDirectoryDto,
+  FileDeleteRequest,
+  ListRequest
 } from "~/types/request.types";
-import type { TaskDirectoryArtifactDto, TaskDirectoryDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
@@ -13,7 +14,6 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
   const errorHandler = useApiErrorHandler();
 
   const directories = ref<TaskDirectoryDto[]>([]);
-  const artifacts = ref<Record<string, TaskDirectoryArtifactDto[]>>({});
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const limit = ref(20);
@@ -24,13 +24,17 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
     error.value = null;
   }
 
-  async function list(taskId: string, params: { limit?: number; offset?: number } = {}) {
+  async function list(taskId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     resetState();
     isLoading.value = true;
-
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
       const res = await taskDirectoryServiceFactory
-        .list(taskId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value })
+        .list(taskId, req)
         .execute();
       if (!res || res.length === 0) {
         return [];
@@ -130,8 +134,8 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
   async function uploadArtifact(directoryId: string, file: File) {
     resetState();
     isLoading.value = true;
-
     try {
+      // Актуальный вызов uploadArtifact: directoryId и file
       await taskDirectoryServiceFactory
         .uploadArtifact(directoryId, file)
         .ensured("Файл успешно загружен");
@@ -144,11 +148,11 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
     }
   }
 
-  async function deleteArtifact(request: DeleteFileRequest) {
+  async function deleteArtifact(request: FileDeleteRequest) {
     resetState();
     isLoading.value = true;
-
     try {
+      // Актуальный вызов deleteArtifact: request с id и fromId
       await taskDirectoryServiceFactory
         .deleteArtifact(request)
         .ensured("Файл успешно удален");
@@ -176,7 +180,6 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
 
   return {
     directories,
-    artifacts,
     isLoading,
     error,
     limit,

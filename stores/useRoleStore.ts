@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { roleServiceFactory } from "~/services/identity/roleServiceFactory";
 import { useApiErrorHandler } from "#imports";
-import type { CreateUserRoleRequest, UpdateUserRoleRequest } from "~/types/request.types";
+import type { CreateRoleRequest, UpdateRoleRequest, ListRequest, RoleDto } from "~/types/request.types";
 import type { UserRole } from "~/types/response.types";
 import type { PagingParams } from "~/types/api.types";
 
@@ -15,16 +15,17 @@ export const useRoleStore = defineStore("role", () => {
   const limit = ref(20);
   const offset = ref(0);
 
-  async function list(params: PagingParams = {}) {
+  // Исправить list: ListRequest с includeDeleted
+  async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     isLoading.value = true;
     try {
-      const res = await roleServiceFactory
-        .list({ limit: params.limit ?? limit.value, offset: params.offset ?? offset.value, ...params })
-        .execute();
-      if (!res || res.length === 0) {
-        return [];
-      }
-      roles.value = res;
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
+      const res = await roleServiceFactory.list(req).execute();
+      roles.value = res as any; // Приведение к нужному типу, если требуется
       return roles.value;
     } catch (err) {
       errorHandler.handleError(err);
@@ -48,7 +49,7 @@ export const useRoleStore = defineStore("role", () => {
     }
   }
 
-  async function create(request: CreateUserRoleRequest) {
+  async function create(request: CreateRoleRequest) {
     isLoading.value = true;
     try {
       await roleServiceFactory
@@ -63,7 +64,7 @@ export const useRoleStore = defineStore("role", () => {
     }
   }
 
-  async function update(request: UpdateUserRoleRequest) {
+  async function update(request: UpdateRoleRequest) {
     isLoading.value = true;
     try {
       await roleServiceFactory

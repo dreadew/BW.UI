@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 import { taskCommentServiceFactory } from "~/services/project/taskCommentServiceFactory";
-import type { CreateTaskCommentRequest, UpdateTaskCommentRequest } from "~/types/request.types";
-import type { TaskCommentDto } from "~/types/response.types";
-import type { PagingParams } from "~/types/api.types";
+import type { CreateTaskCommentRequest, UpdateTaskCommentRequest, TaskCommentDto, ListRequest } from "~/types/request.types";
 
 export const useTaskCommentStore = defineStore(
   "taskComment",
@@ -22,13 +20,16 @@ export const useTaskCommentStore = defineStore(
       error.value = null;
     }
 
-    async function listByTask(taskId: string, params: PagingParams = {}) {
-      resetState();
+    async function listByTask(taskId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
       isLoading.value = true;
-
       try {
+        const req: ListRequest = {
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          includeDeleted: params.includeDeleted ?? false
+        };
         const res = await taskCommentServiceFactory
-          .listByTask(taskId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value, ...params })
+          .listByTask(taskId, req)
           .execute();
         if (!res || res.length === 0) {
           return [];

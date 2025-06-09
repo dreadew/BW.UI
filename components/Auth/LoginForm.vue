@@ -4,8 +4,8 @@
       <UInput required class="w-full" v-model="state.username" placeholder="Введите логин" size="xl" autofocus />
     </UFormField>
     <UFormField label="Пароль" name="password" required>
-    <UInput required class="w-full" v-model="state.password" type="password" placeholder="Введите пароль" size="xl" />
-  </UFormField>
+      <UInput required class="w-full" v-model="state.password" type="password" placeholder="Введите пароль" size="xl" />
+    </UFormField>
     <UFormField>
       <UCheckbox v-model="state.rememberMe" label="Запомнить меня" />
     </UFormField>
@@ -36,7 +36,7 @@ const props = defineProps({
 const userStore = useUserStore()
 const { isLoading } = storeToRefs(userStore)
 const state = ref({ username: '', password: '', rememberMe: false })
-const schema = signInRequestSchema; 
+const schema = signInRequestSchema;
 const router = useRouter()
 
 const onSubmit = async () => {

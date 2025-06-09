@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { projectThreadCommentServiceFactory } from "~/services/project/projectThreadCommentServiceFactory";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest } from "~/types/request.types";
+import type { ListRequest, CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest } from "~/types/request.types";
 import type { ProjectThreadCommentDto } from "~/types/response.types";
 import type { PagingParams } from "~/types/api.types";
 
@@ -17,12 +17,16 @@ export const useProjectThreadCommentStore = defineStore(
     const limit = ref(20);
     const offset = ref(0);
 
-    async function list(threadId: string, params: PagingParams = {}) {
+    // Исправить list: ListRequest с includeDeleted
+    async function list(threadId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
       isLoading.value = true;
       try {
-        const res = await projectThreadCommentServiceFactory
-          .listByThread(threadId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value, ...params })
-          .execute();
+        const req: ListRequest = {
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          includeDeleted: params.includeDeleted ?? false
+        };
+        const res = await projectThreadCommentServiceFactory.listByThread(threadId, req).execute();
         if (!res || res.length === 0) {
           return [];
         }

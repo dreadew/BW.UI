@@ -1,14 +1,13 @@
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { IDENTITY_SERVICE } from "~/constants/services.constants";
-import type { RevokeRequest, RenewRequest } from "~/types/request.types";
-import type { Session, AccessTokenResponse } from "~/types/response.types";
+import type { AccessTokenResponse, ListRequest, RenewRequest, RevokeRequest, SessionDto } from "~/types/request.types";
 
 export const sessionServiceFactory = {
-    list: (params: PagingParams) => apiContractBuilderHelper.get('/api/Session/list')
+    list: (dto: ListRequest) => apiContractBuilderHelper.get('/api/Session/list')
         .withService(IDENTITY_SERVICE)
-        .withQueryParams(params)
-        .withResponse<Session[]>()
+        .withQueryParams<ListRequest>(dto)
+        .withResponse<SessionDto[]>()
         .build(),
 
     revoke: (body: RevokeRequest) => apiContractBuilderHelper.post('/api/Session/revoke')

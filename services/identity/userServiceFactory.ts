@@ -1,36 +1,26 @@
 import {
   IDENTITY_SERVICE,
-  type WORKSPACE_SERVICE,
 } from "~/constants/services.constants";
 import type {
-  PagingParams,
-  SingleJsonStringResponse,
   SuccessResponse,
 } from "~/types/api.types";
-import type {
-  RecoverPasswordRequest,
-  RoleRequest,
-  SkillRequest,
-  UpdateUserRequest,
-  GenerateVerificationCodeRequest,
-} from "~/types/request.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { User } from "~/types/response.types";
+import type { GenerateVerificationCodeRequest, ListRequest, RecoverPasswordRequest, RoleRequest, SkillRequest, UpdateUserRequest, UserDto } from "~/types/request.types";
 
 export const userServiceFactory = {
-  listUsers: (params: PagingParams) =>
+  listUsers: (dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/Users/list`)
       .withService(IDENTITY_SERVICE)
-      .withQueryParams(params)
-      .withResponse<User[]>()
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<UserDto[]>()
       .build(),
 
   getUser: (id: string) =>
     apiContractBuilderHelper
       .get(`/api/Users/${id}`)
       .withService(IDENTITY_SERVICE)
-      .withResponse<User>()
+      .withResponse<UserDto>()
       .build(),
 
   updateUser: (id: string, body: UpdateUserRequest) =>
@@ -70,35 +60,35 @@ export const userServiceFactory = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  addRole: (id: string, body: RoleRequest) =>
+  addRole: (body: RoleRequest) =>
     apiContractBuilderHelper
-      .post(`/api/Users/${id}/role`)
+      .post(`/api/Users/${body.id}/role`)
       .withService(IDENTITY_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()
       .build(),
 
-  removeRole: (id: string, dto: RoleRequest) =>
+  removeRole: (dto: RoleRequest) =>
     apiContractBuilderHelper
-      .delete(`/api/Users/${id}/role`)
+      .delete(`/api/Users/${dto.id}/role`)
       .withService(IDENTITY_SERVICE)
-      .withQueryParams({ roleId: dto.roleId })
+      .withQueryParams(dto)
       .withResponse<SuccessResponse>()
       .build(),
 
-  addSkill: (id: string, body: SkillRequest) =>
+  addSkill: (body: SkillRequest) =>
     apiContractBuilderHelper
-      .post(`/api/Users/${id}/skill`)
+      .post(`/api/Users/${body.id}/skill`)
       .withService(IDENTITY_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()
       .build(),
 
-  removeSkill: (id: string, body: SkillRequest) =>
+  removeSkill: (body: SkillRequest) =>
     apiContractBuilderHelper
-      .delete(`/api/Users/${id}/skill`)
+      .delete(`/api/Users/${body.id}/skill`)
       .withService(IDENTITY_SERVICE)
-      .withQueryParams({ skillId: body.skillId })
+      .withQueryParams(body)
       .withResponse<SuccessResponse>()
       .build(),
 
@@ -110,9 +100,9 @@ export const userServiceFactory = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  recoverPassword: (id: string, body: RecoverPasswordRequest) =>
+  recoverPassword: (body: RecoverPasswordRequest) =>
     apiContractBuilderHelper
-      .post(`/api/Users/${id}/recover-password`)
+      .post(`/api/Users/${body.id}/recover-password`)
       .withService(IDENTITY_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()

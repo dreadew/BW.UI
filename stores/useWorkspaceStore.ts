@@ -6,7 +6,9 @@ import type {
   DeleteWorkspaceUserRequest,
   UpdateWorkspaceRequest,
   CreateWorkspaceRequest,
-  DeleteFileRequest,
+  FileDeleteRequest,
+  ListRequest,
+  WorkspaceDto,
 } from "~/types/request.types";
 import type { Workspace } from "~/types/response.types";
 import type { PagingParams } from "~/types/api.types";
@@ -21,29 +23,22 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
   const limit = ref(20);
   const offset = ref(0);
 
-  async function list(params: PagingParams = {}) {
+  async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     if (loading.value) return;
 
     loading.value = true;
     error.value = null;
     try {
-      const resp = await workspaceServiceFactory
-        .listWorkspaces({
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          ...params,
-        })
-        .execute();
-
-      if (resp.length > 0) {
-        workspaces.value = [...workspaces.value, ...resp];
-        currentPage.value++;
-      }
-
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false,
+      };
+      const resp = await workspaceServiceFactory.listWorkspaces(req).execute();
+      workspaces.value = resp as any; // Приведение к нужному типу, если требуется
       total.value = resp.length;
     } catch (error) {
       console.error("Error fetching workspaces:", error);
-      //error.value = "Ошибка при получении рабочих пространств";
     } finally {
       loading.value = false;
     }
@@ -142,7 +137,7 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
     }
   }
 
-  async function deletePicture(id: string, params: DeleteFileRequest) {
+  async function deletePicture(id: string, params: FileDeleteRequest) {
     loading.value = true;
     try {
       await workspaceServiceFactory

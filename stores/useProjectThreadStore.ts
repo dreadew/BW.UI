@@ -1,8 +1,7 @@
 import { defineStore } from "pinia";
 import { projectThreadServiceFactory } from "~/services/project/projectThreadServiceFactory";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { CreateProjectThreadRequest, UpdateProjectThreadRequest } from "~/types/request.types";
-import type { ProjectThreadDto } from "~/types/response.types";
+import type { CreateProjectThreadRequest, UpdateProjectThreadRequest, ProjectThreadDto, ListRequest } from "~/types/request.types";
 
 export const useProjectThreadStore = defineStore("projectThread", () => {
   const toast = useToast();
@@ -14,11 +13,40 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
   const limit = ref(20);
   const offset = ref(0);
 
-  async function list(projectId: string, params: { limit?: number; offset?: number } = {}) {
+  async function list(projectId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     isLoading.value = true;
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
       const res = await projectThreadServiceFactory
-        .listByProject(projectId, { limit: params.limit ?? limit.value, offset: params.offset ?? offset.value })
+        .listByProject(projectId, req)
+        .execute();
+      if (!res || res.length === 0) {
+        return [];
+      }
+      threads.value = res;
+      return threads.value;
+    } catch (err) {
+      errorHandler.handleError(err);
+      return [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function listByProject(projectId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
+    isLoading.value = true;
+    try {
+      const req: ListRequest = {
+        limit: params.limit ?? limit.value,
+        offset: params.offset ?? offset.value,
+        includeDeleted: params.includeDeleted ?? false
+      };
+      const res = await projectThreadServiceFactory
+        .listByProject(projectId, req)
         .execute();
       if (!res || res.length === 0) {
         return [];

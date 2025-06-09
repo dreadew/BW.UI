@@ -1,12 +1,7 @@
 import { defineStore } from "pinia";
 import { projectRoleClaimsServiceFactory } from "~/services/project/projectRoleClaimsServiceFactory";
-import type {
-  CreateProjectRoleClaimsRequest,
-  UpdateProjectRoleClaimsRequest,
-} from "~/types/request.types";
-import type { ProjectRoleClaimsDto } from "~/types/response.types";
+import type { CreateProjectRoleClaimsRequest, UpdateProjectRoleClaimsRequest, ProjectRoleClaimsDto, ListRequest } from "~/types/request.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { PagingParams } from "~/types/api.types";
 
 export const useProjectRoleClaimsStore = defineStore(
   "projectRoleClaims",
@@ -25,17 +20,40 @@ export const useProjectRoleClaimsStore = defineStore(
       error.value = null;
     }
 
-    async function list(roleId: string, params: PagingParams = {}) {
-      resetState();
+    async function list(roleId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
       isLoading.value = true;
-
       try {
+        const req: ListRequest = {
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          includeDeleted: params.includeDeleted ?? false
+        };
         const res = await projectRoleClaimsServiceFactory
-          .listByRole(roleId, {
-            limit: params.limit ?? limit.value,
-            offset: params.offset ?? offset.value,
-            ...params,
-          })
+          .listByRole(roleId, req)
+          .execute();
+        if (!res || res.length === 0) {
+          return [];
+        }
+        roleClaims.value = res;
+        return roleClaims.value;
+      } catch (err) {
+        errorHandler.handleError(err);
+        return [];
+      } finally {
+        isLoading.value = false;
+      }
+    }
+
+    async function listByRole(roleId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
+      isLoading.value = true;
+      try {
+        const req: ListRequest = {
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          includeDeleted: params.includeDeleted ?? false
+        };
+        const res = await projectRoleClaimsServiceFactory
+          .listByRole(roleId, req)
           .execute();
         if (!res || res.length === 0) {
           return [];

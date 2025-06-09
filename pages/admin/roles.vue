@@ -151,9 +151,7 @@ async function fetchRoles() {
     await roleStore.list({
         limit: limit.value,
         offset: offset.value,
-        search: search.value,
-        sortKey: sortKey.value,
-        sortOrder: sortOrder.value
+        includeDeleted: true
     })
 }
 

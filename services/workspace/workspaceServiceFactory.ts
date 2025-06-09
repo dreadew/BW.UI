@@ -1,21 +1,9 @@
-import type { PagingParams, SuccessResponse } from "~/types/api.types";
+import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
-import type { CreateWorkspaceRequest, UpdateWorkspaceRequest, InviteWorkspaceUserRequest, UpdateWorkspaceUserRequest, DeleteWorkspaceUserRequest, DeleteFileRequest } from "~/types/request.types";
-import type { Workspace } from "~/types/response.types";
+import type { CreateWorkspaceRequest, DeleteWorkspaceUserRequest, FileDeleteRequest, InviteWorkspaceUserRequest, ListRequest, UpdateWorkspaceRequest, UpdateWorkspaceUserRequest, WorkspaceDto } from "~/types/request.types";
 
 export const workspaceServiceFactory = {
-    listWorkspaces: (params: PagingParams) => apiContractBuilderHelper.get('/api/Workspace/list')
-        .withService(WORKSPACE_SERVICE)
-        .withQueryParams(params)
-        .withResponse<Workspace[]>()
-        .build(),
-
-    getWorkspace: (id: string) => apiContractBuilderHelper.get(`/api/Workspace/${id}`)
-        .withService(WORKSPACE_SERVICE)
-        .withResponse<Workspace>()
-        .build(),
-
     createWorkspace: (body: CreateWorkspaceRequest) => apiContractBuilderHelper.post('/api/Workspace')
         .withService(WORKSPACE_SERVICE)
         .withBody(body)
@@ -26,6 +14,17 @@ export const workspaceServiceFactory = {
         .withService(WORKSPACE_SERVICE)
         .withBody(body)
         .withResponse<SuccessResponse>()
+        .build(),
+
+    listWorkspaces: (dto: ListRequest) => apiContractBuilderHelper.get('/api/Workspace/list')
+        .withService(WORKSPACE_SERVICE)
+        .withQueryParams<ListRequest>(dto)
+        .withResponse<WorkspaceDto[]>()
+        .build(),
+
+    getWorkspace: (id: string) => apiContractBuilderHelper.get(`/api/Workspace/${id}`)
+        .withService(WORKSPACE_SERVICE)
+        .withResponse<WorkspaceDto>()
         .build(),
 
     deleteWorkspace: (id: string) => apiContractBuilderHelper.delete(`/api/Workspace/${id}`)
@@ -60,7 +59,7 @@ export const workspaceServiceFactory = {
         .withResponse<SuccessResponse>()
         .build(),
 
-    deletePicture: (id: string, params: DeleteFileRequest) => apiContractBuilderHelper.delete(`/api/Workspace/${id}/picture`)
+    deletePicture: (id: string, params: FileDeleteRequest) => apiContractBuilderHelper.delete(`/api/Workspace/${id}/picture`)
         .withService(WORKSPACE_SERVICE)
         .withQueryParams(params)
         .withResponse<SuccessResponse>()

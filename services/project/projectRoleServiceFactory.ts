@@ -1,24 +1,9 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
 import type { SuccessResponse } from "~/types/api.types";
-import type { CreateProjectRoleRequest, UpdateProjectRoleRequest } from "~/types/request.types";
-import type { ProjectRoleDto } from "~/types/response.types";
+import type { CreateProjectRoleRequest, ListRequest, ProjectRoleDto, UpdateProjectRoleRequest } from "~/types/request.types";
 
 export const projectRoleServiceFactory = {
-  list: (projectId: string) =>
-    apiContractBuilderHelper
-      .get(`/api/ProjectRoles/by-project/${projectId}`)
-      .withService(PROJECT_SERVICE)
-      .withResponse<ProjectRoleDto[]>()
-      .build(),
-
-  get: (roleId: string) =>
-    apiContractBuilderHelper
-      .get(`/api/ProjectRoles/${roleId}`)
-      .withService(PROJECT_SERVICE)
-      .withResponse<ProjectRoleDto>()
-      .build(),
-
   create: (request: CreateProjectRoleRequest) =>
     apiContractBuilderHelper
       .post("/api/ProjectRoles")
@@ -32,6 +17,21 @@ export const projectRoleServiceFactory = {
       .patch(`/api/ProjectRoles/${request.id}`)
       .withService(PROJECT_SERVICE)
       .withBody(request)
+      .withResponse<ProjectRoleDto>()
+      .build(),
+
+  list: (projectId: string, params: ListRequest) =>
+    apiContractBuilderHelper
+      .get(`/api/ProjectRoles/by-project/${projectId}`)
+      .withService(PROJECT_SERVICE)
+      .withQueryParams<ListRequest>(params)
+      .withResponse<ProjectRoleDto[]>()
+      .build(),
+
+  get: (roleId: string) =>
+    apiContractBuilderHelper
+      .get(`/api/ProjectRoles/${roleId}`)
+      .withService(PROJECT_SERVICE)
       .withResponse<ProjectRoleDto>()
       .build(),
 

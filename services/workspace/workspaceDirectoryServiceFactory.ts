@@ -1,26 +1,25 @@
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse, PagingParams } from "~/types/api.types";
+import type { SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { CreateWorkspaceDirectoryRequest, UpdateWorkspaceDirectoryRequest, DeleteFileRequest } from "~/types/request.types";
-import type { WorkspaceDirectory } from "~/types/response.types";
+import type { CreateDirectoryRequest, DirectoryDto, FileDeleteRequest, ListRequest, UpdateDirectoryRequest } from "~/types/request.types";
 
 export const workspaceDirectoryServiceFactory = {
-  listWorkspaceDirectories: (params: PagingParams & { workspaceId: string }) =>
+  listWorkspaceDirectories: (workspaceId: string, dto: ListRequest) =>
     apiContractBuilderHelper
-      .get(`/api/WorkspaceDirectory/list`)
+      .get(`/api/WorkspaceDirectory/${workspaceId}/list`)
       .withService(WORKSPACE_SERVICE)
-      .withQueryParams(params)
-      .withResponse<WorkspaceDirectory[]>()
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<DirectoryDto[]>()
       .build(),
 
   getWorkspaceDirectory: (id: string) =>
     apiContractBuilderHelper
       .get(`/api/WorkspaceDirectory/${id}`)
       .withService(WORKSPACE_SERVICE)
-      .withResponse<WorkspaceDirectory>()
+      .withResponse<DirectoryDto>()
       .build(),
 
-  createWorkspaceDirectory: (body: CreateWorkspaceDirectoryRequest) =>
+  createWorkspaceDirectory: (body: CreateDirectoryRequest) =>
     apiContractBuilderHelper
       .post(`/api/WorkspaceDirectory`)
       .withService(WORKSPACE_SERVICE)
@@ -28,12 +27,9 @@ export const workspaceDirectoryServiceFactory = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  updateWorkspaceDirectory: (
-    id: string,
-    body: UpdateWorkspaceDirectoryRequest
-  ) =>
+  updateWorkspaceDirectory: (body: UpdateDirectoryRequest) =>
     apiContractBuilderHelper
-      .patch(`/api/WorkspaceDirectory/${id}`)
+      .patch(`/api/WorkspaceDirectory/${body.id}`)
       .withService(WORKSPACE_SERVICE)
       .withBody(body)
       .withResponse<SuccessResponse>()
@@ -64,10 +60,10 @@ export const workspaceDirectoryServiceFactory = {
       .build();
   },
 
-  deleteArtifact: (id: string, params: DeleteFileRequest) =>
+  deleteArtifact: (id: string, dto: FileDeleteRequest) =>
     apiContractBuilderHelper
       .delete(`/api/WorkspaceDirectory/${id}/artifact`)
       .withService(WORKSPACE_SERVICE)
-      .withQueryParams(params)
+      .withQueryParams<FileDeleteRequest>(dto)
       .build(),
 };

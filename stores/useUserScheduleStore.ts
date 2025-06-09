@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { userScheduleService } from "~/services/identity/userScheduleServiceFactory";
 import type { PagingParams } from "~/types/api.types";
-import type { CreateUserScheduleRequest, UpdateUserScheduleRequest } from "~/types/request.types";
+import type { CreateUserScheduleRequest, UpdateUserScheduleRequest, ListRequest } from "~/types/request.types";
 import type { UserSchedule } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
@@ -14,16 +14,16 @@ export const useUserScheduleStore = defineStore("userSchedule", () => {
     const limit = ref(20);
     const offset = ref(0);
 
-    async function findByUser(userId: string, params: PagingParams = {}) {
+    async function findByUser(userId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
         isLoading.value = true;
         error.value = null;
-        const paging: PagingParams = {
-            limit: params.limit ?? limit.value,
-            offset: params.offset ?? offset.value,
-            ...params
-        };
         try {
-            schedules.value = await userScheduleService.findByUser(userId, paging).execute();
+            const req: ListRequest = {
+                limit: params.limit ?? limit.value,
+                offset: params.offset ?? offset.value,
+                includeDeleted: params.includeDeleted ?? false
+            };
+            schedules.value = await userScheduleService.findByUser(userId, req).execute();
             return schedules.value;
         } catch (err) {
             errorHandler.handleError(err);
@@ -73,11 +73,11 @@ export const useUserScheduleStore = defineStore("userSchedule", () => {
         }
     }
 
-    async function updateUserSchedule(id: string, body: UpdateUserScheduleRequest) {
+    async function updateUserSchedule(body: UpdateUserScheduleRequest) {
         isLoading.value = true;
         error.value = null;
         try {
-            await userScheduleService.updateUserSchedule(id, body).ensured("Расписание успешно обновлено!");
+            await userScheduleService.updateUserSchedule(body).ensured("Расписание успешно обновлено!");
             return true;
         } catch (err) {
             errorHandler.handleError(err);

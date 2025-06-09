@@ -8,10 +8,10 @@ import { ApiContract } from "./apiContract";
 
 type ExtractPathParams<T extends string> =
   T extends `${infer _Start}:${infer Param}/${infer Rest}`
-    ? { [K in Param | keyof ExtractPathParams<Rest>]: string | number }
-    : T extends `${infer _Start}:${infer Param}`
-      ? { [K in Param]: string | number }
-      : Record<string, never>;
+  ? { [K in Param | keyof ExtractPathParams<Rest>]: string | number }
+  : T extends `${infer _Start}:${infer Param}`
+  ? { [K in Param]: string | number }
+  : Record<string, never>;
 
 export class ApiContractBuilder<
   TRoute extends Record<string, string | number> = Record<string, never>,
@@ -38,7 +38,7 @@ export class ApiContractBuilder<
     }) as ApiContractBuilder<TRouteNew, TQueryParams, TBody, TResponse>;
   }
 
-  withQueryParams<TQueryParamsNew extends Record<string, unknown>>(
+  withQueryParams<TQueryParamsNew extends Record<string, any>>(
     queryParams: TQueryParamsNew
   ): ApiContractBuilder<TRoute, TQueryParamsNew, TBody, TResponse> {
     return new ApiContractBuilder<TRoute, TQueryParamsNew, TBody, TResponse>(

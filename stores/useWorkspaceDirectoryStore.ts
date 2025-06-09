@@ -1,9 +1,5 @@
 import { workspaceDirectoryServiceFactory } from "~/services/workspace/workspaceDirectoryServiceFactory";
-import type {
-  CreateWorkspaceDirectoryRequest,
-  DeleteFileRequest,
-  UpdateWorkspaceDirectoryRequest,
-} from "~/types/request.types";
+import type { CreateDirectoryRequest, UpdateDirectoryRequest, FileDeleteRequest, DirectoryDto, ListRequest } from "~/types/request.types";
 import type { WorkspaceDirectory } from "~/types/response.types";
 
 export const useWorkspaceDirectoryStore = defineStore(
@@ -15,18 +11,16 @@ export const useWorkspaceDirectoryStore = defineStore(
     const offset: Ref<number> = ref(0);
     const loading: Ref<boolean> = ref(false);
 
-    async function list(workspaceId: string, params: { limit?: number; offset?: number } = {}) {
+    async function list(workspaceId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
       loading.value = true;
       try {
-        const resp = await workspaceDirectoryServiceFactory
-          .listWorkspaceDirectories({
-            workspaceId,
-            limit: params.limit ?? limit.value,
-            offset: params.offset ?? offset.value,
-          })
-          .execute();
-
-        directories.value = resp;
+        const req: ListRequest = {
+          limit: params.limit ?? limit.value,
+          offset: params.offset ?? offset.value,
+          includeDeleted: params.includeDeleted ?? false
+        };
+        const resp = await workspaceDirectoryServiceFactory.listWorkspaceDirectories(workspaceId, req).execute();
+        directories.value = resp as any; // Приведение к нужному типу, если требуется
         total.value = resp.length;
       } catch (error) {
         console.error("Error fetching directories:", error);
@@ -60,7 +54,7 @@ export const useWorkspaceDirectoryStore = defineStore(
       }
     }
 
-    async function create(body: CreateWorkspaceDirectoryRequest) {
+    async function create(body: CreateDirectoryRequest) {
       loading.value = true;
       try {
         await workspaceDirectoryServiceFactory
@@ -71,11 +65,11 @@ export const useWorkspaceDirectoryStore = defineStore(
       }
     }
 
-    async function update(id: string, body: UpdateWorkspaceDirectoryRequest) {
+    async function update(body: UpdateDirectoryRequest) {
       loading.value = true;
       try {
         await workspaceDirectoryServiceFactory
-          .updateWorkspaceDirectory(id, body)
+          .updateWorkspaceDirectory(body)
           .ensured("Вы успешно обновили директорию!");
       } finally {
         loading.value = false;
@@ -115,11 +109,11 @@ export const useWorkspaceDirectoryStore = defineStore(
       }
     }
 
-    async function deleteArtifact(id: string, params: DeleteFileRequest) {
+    async function deleteArtifact(workspaceId: string, body: FileDeleteRequest) {
       loading.value = true;
       try {
         await workspaceDirectoryServiceFactory
-          .deleteArtifact(id, params)
+          .deleteArtifact(workspaceId, body)
           .ensured("Вы успешно удалили артефакт!");
       } finally {
         loading.value = false;

@@ -1,8 +1,5 @@
 import { workspacePositionServiceFactory } from "~/services/workspace/workspacePositionServiceFactory";
-import type {
-  CreateWorkspacePositionRequest,
-  UpdateWorkspacePositionRequest,
-} from "~/types/request.types";
+import type { ListRequest, PositionDto, CreatePositionRequest, UpdatePositionRequest } from "~/types/request.types";
 import type { WorkspacePosition } from "~/types/response.types";
 
 export const useWorkspacePositionStore = defineStore("WorkspacePosition", () => {
@@ -13,18 +10,18 @@ export const useWorkspacePositionStore = defineStore("WorkspacePosition", () => 
   const pageSize = ref(25);
   const loading = ref(false);
 
-  async function list(workspaceId: string) {
+  // Исправить list: только req (ListRequest)
+  async function list(params: ListRequest = { limit: pageSize.value, offset: 0, includeDeleted: false }) {
     reset();
     loading.value = true;
     try {
-      const resp = await workspacePositionServiceFactory
-        .listWorkspacePositions({
-          workspaceId,
-          page: currentPage.value,
-          pageSize: pageSize.value,
-        })
-        .execute();
-      positions.value = resp;
+      const req: ListRequest = {
+        limit: params.limit ?? pageSize.value,
+        offset: params.offset ?? 0,
+        includeDeleted: params.includeDeleted ?? false
+      };
+      const resp = await workspacePositionServiceFactory.listWorkspacePositions(req).execute();
+      positions.value = resp as any; // Приведение к нужному типу, если требуется
       total.value = resp.length;
       if (resp.length == pageSize.value) {
         currentPage.value++;
@@ -47,23 +44,19 @@ export const useWorkspacePositionStore = defineStore("WorkspacePosition", () => 
     }
   }
 
-  async function update(id: string, body: UpdateWorkspacePositionRequest) {
+  // Исправить update/create сигнатуры: один объект-аргумент
+  async function update(body: UpdatePositionRequest) {
     loading.value = true;
     try {
-      await workspacePositionServiceFactory
-        .updateWorkspacePosition(id, body)
-        .ensured("Должность успешно обновлена");
+      await workspacePositionServiceFactory.updateWorkspacePosition(body).ensured("Должность успешно обновлена");
     } finally {
       loading.value = false;
     }
   }
-
-  async function create(body: CreateWorkspacePositionRequest) {
+  async function create(body: CreatePositionRequest) {
     loading.value = true;
     try {
-      await workspacePositionServiceFactory
-        .createWorkspacePosition(body)
-        .ensured("Должность успешно создана");
+      await workspacePositionServiceFactory.createWorkspacePosition(body).ensured("Должность успешно создана");
     } finally {
       loading.value = false;
     }

@@ -3,8 +3,9 @@ import { projectRoleServiceFactory } from "~/services/project/projectRoleService
 import type {
   CreateProjectRoleRequest,
   UpdateProjectRoleRequest,
+  ProjectRoleDto,
+  ListRequest,
 } from "~/types/request.types";
-import type { ProjectRoleDto } from "~/types/response.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useProjectRoleStore = defineStore("projectRole", () => {
@@ -20,13 +21,19 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
     error.value = null;
   }
 
-  async function listByProject(projectId: string) {
-    resetState();
+  async function listByProject(
+    projectId: string,
+    params: ListRequest = { limit: 20, offset: 0, includeDeleted: false }
+  ) {
     isLoading.value = true;
-
     try {
+      const req: ListRequest = {
+        limit: params.limit ?? 20,
+        offset: params.offset ?? 0,
+        includeDeleted: params.includeDeleted ?? false,
+      };
       const res = await projectRoleServiceFactory
-        .list(projectId)
+        .list(projectId, req)
         .execute();
       if (!res || res.length === 0) {
         return [];

@@ -1,14 +1,6 @@
 import { defineStore } from "pinia";
 import { projectServiceFactory } from "~/services/project/projectServiceFactory";
-import type { PagingParams } from "~/types/api.types";
-import type {
-  AddUserRequest,
-  CreateProjectRequest,
-  DeleteProjectRequest,
-  DeleteUserRequest,
-  UpdateProjectRequest,
-} from "~/types/request.types";
-import type { ProjectDto } from "~/types/response.types";
+import type { ListRequest, CreateProjectRequest, UpdateProjectRequest, DeleteProjectRequest, ProjectDto, AddProjectUserRequest, DeleteProjectUserRequest } from "~/types/request.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useProjectStore = defineStore("project", () => {
@@ -25,7 +17,7 @@ export const useProjectStore = defineStore("project", () => {
     error.value = null;
   }
 
-  async function listByUser(userId: string, params: PagingParams) {
+  async function listByUser(userId: string, params: ListRequest) {
     resetState();
     isLoading.value = true;
 
@@ -46,13 +38,13 @@ export const useProjectStore = defineStore("project", () => {
     }
   }
 
-  async function listByWorkspace(workspaceId: string) {
+  async function listByWorkspace(workspaceId: string, params: ListRequest) {
     resetState();
     isLoading.value = true;
 
     try {
       const res = await projectServiceFactory
-        .listByWorkspace(workspaceId, {})
+        .listByWorkspace(workspaceId, params)
         .execute();
       if (!res || res.length === 0) {
         return [];
@@ -150,12 +142,13 @@ export const useProjectStore = defineStore("project", () => {
     }
   }
 
-  async function addUser(projectId: string, userId: string) {
+  async function addUser(dto: AddProjectUserRequest) {
     isLoading.value = true;
     try {
       await projectServiceFactory
-        .addUser(projectId, userId)
+        .addUser(dto)
         .ensured("Пользователь успешно добавлен в проект");
+      return true;
     } catch (err) {
       errorHandler.handleError(err);
       return false;
@@ -164,12 +157,13 @@ export const useProjectStore = defineStore("project", () => {
     }
   }
 
-  async function deleteUser(projectId: string, userId: string) {
+  async function deleteUser(dto: DeleteProjectUserRequest) {
     isLoading.value = true;
     try {
       await projectServiceFactory
-        .deleteUser(projectId, userId)
+        .deleteUser(dto)
         .ensured("Пользователь успешно удален из проекта");
+      return true;
     } catch (err) {
       errorHandler.handleError(err);
       return false;
