@@ -1,7 +1,7 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
-import type { AddProjectUserRequest, CreateProjectRequest, DeleteProjectRequest, DeleteProjectUserRequest, ListRequest, ProjectDto, UpdateProjectRequest } from "~/types/request.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
+import type { AddProjectUserRequest, CreateProjectRequest, DeleteProjectRequest, DeleteProjectUserRequest, ListRequest, ProjectDto, UpdateProjectRequest, FileDeleteRequest } from "~/types/request.types";
 
 export const projectServiceFactory = {
   create: (request: CreateProjectRequest) =>
@@ -32,7 +32,7 @@ export const projectServiceFactory = {
       .get(`/api/Project/by-workspace/${workspaceId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(params)
-      .withResponse<ProjectDto[]>()
+      .withResponse<ListResponse<ProjectDto[]>>()
       .build(),
 
   listByUser: (userId: string, params: ListRequest) =>
@@ -40,7 +40,7 @@ export const projectServiceFactory = {
       .get(`/api/Project/by-user/${userId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(params)
-      .withResponse<ProjectDto[]>()
+      .withResponse<ListResponse<ProjectDto[]>>()
       .build(),
 
   delete: (request: DeleteProjectRequest) =>
@@ -74,4 +74,16 @@ export const projectServiceFactory = {
       .withQueryParams<DeleteProjectUserRequest>(dto)
       .withResponse<SuccessResponse>()
       .build(),
+
+  uploadPicture: (id: string, file: File) => apiContractBuilderHelper.uploadFile(`/api/Project/${id}/picture`)
+    .withService(PROJECT_SERVICE)
+    .withBody({ file })
+    .withResponse<SuccessResponse>()
+    .build(),
+
+  deletePicture: (id: string, params: FileDeleteRequest) => apiContractBuilderHelper.delete(`/api/Project/${id}/picture`)
+    .withService(PROJECT_SERVICE)
+    .withQueryParams(params)
+    .withResponse<SuccessResponse>()
+    .build(),
 };

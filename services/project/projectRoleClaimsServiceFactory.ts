@@ -1,6 +1,6 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import type { CreateProjectRoleClaimsRequest, ListRequest, ProjectRoleClaimsDto, UpdateProjectRoleClaimsRequest } from "~/types/request.types";
 
 export const projectRoleClaimsServiceFactory = {
@@ -32,7 +32,7 @@ export const projectRoleClaimsServiceFactory = {
       .get(`/api/ProjectRoleClaims/by-role/${roleId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(params)
-      .withResponse<ProjectRoleClaimsDto[]>()
+      .withResponse<ListResponse<ProjectRoleClaimsDto[]>>()
       .build(),
 
   delete: (claimId: string) =>

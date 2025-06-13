@@ -2,10 +2,11 @@ import {
   IDENTITY_SERVICE,
 } from "~/constants/services.constants";
 import type {
+  ListResponse,
   SuccessResponse,
 } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { GenerateVerificationCodeRequest, ListRequest, RecoverPasswordRequest, RoleRequest, SkillRequest, UpdateUserRequest, UserDto } from "~/types/request.types";
+import type { FileDeleteRequest, GenerateVerificationCodeRequest, ListRequest, RecoverPasswordRequest, RoleRequest, SkillRequest, UpdateUserRequest, UserDto, VerifyRequest } from "~/types/request.types";
 
 export const userServiceFactory = {
   listUsers: (dto: ListRequest) =>
@@ -13,7 +14,7 @@ export const userServiceFactory = {
       .get(`/api/Users/list`)
       .withService(IDENTITY_SERVICE)
       .withQueryParams<ListRequest>(dto)
-      .withResponse<UserDto[]>()
+      .withResponse<ListResponse<UserDto[]>>()
       .build(),
 
   getUser: (id: string) =>
@@ -47,9 +48,9 @@ export const userServiceFactory = {
 
   uploadPhoto: (id: string, file: File) =>
     apiContractBuilderHelper
-      .post(`/api/Users/${id}/photo`)
+      .uploadFile(`/api/Users/${id}/photo`)
       .withService(IDENTITY_SERVICE)
-      .withBody(file)
+      .withBody({ file })
       .withResponse<SuccessResponse>()
       .build(),
 
@@ -57,6 +58,7 @@ export const userServiceFactory = {
     apiContractBuilderHelper
       .delete(`/api/Users/${id}/photo`)
       .withService(IDENTITY_SERVICE)
+      .withQueryParams<FileDeleteRequest>({ id })
       .withResponse<SuccessResponse>()
       .build(),
 
@@ -96,7 +98,7 @@ export const userServiceFactory = {
     apiContractBuilderHelper
       .post(`/api/Users/generate-code`)
       .withService(IDENTITY_SERVICE)
-      .withBody(body)
+      .withBody<GenerateVerificationCodeRequest>(body)
       .withResponse<SuccessResponse>()
       .build(),
 
@@ -104,7 +106,15 @@ export const userServiceFactory = {
     apiContractBuilderHelper
       .post(`/api/Users/${body.id}/recover-password`)
       .withService(IDENTITY_SERVICE)
-      .withBody(body)
+      .withBody<RecoverPasswordRequest>(body)
+      .withResponse<SuccessResponse>()
+      .build(),
+
+  verify: (body: VerifyRequest) =>
+    apiContractBuilderHelper
+      .post(`/api/Users/${body.id}/verify`)
+      .withService(IDENTITY_SERVICE)
+      .withBody<VerifyRequest>(body)
       .withResponse<SuccessResponse>()
       .build(),
 };

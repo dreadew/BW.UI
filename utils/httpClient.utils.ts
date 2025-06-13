@@ -1,5 +1,5 @@
 class HttpClient {
-  async request<T>(url: string, options: RequestInit): Promise<T> {
+  async request<T>(url: string, options: RequestInit & { signal?: AbortSignal } = {}): Promise<T> {
     const token = tokenManager?.getAccessToken();
     if (token) {
       options.headers = {
@@ -11,6 +11,7 @@ class HttpClient {
     const response = await fetch(url, {
       ...options,
       credentials: "include",
+      signal: options.signal,
     });
 
     if (!response.ok) {
@@ -25,14 +26,14 @@ class HttpClient {
     return data as T;
   }
 
-  async get<T>(url: string, options: RequestInit = {}): Promise<T> {
+  async get<T>(url: string, options: RequestInit & { signal?: AbortSignal } = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: "GET" });
   }
 
   async post<TResponse, TBody>(
     url: string,
     body?: TBody,
-    options: RequestInit = {}
+    options: RequestInit & { signal?: AbortSignal } = {}
   ): Promise<TResponse> {
     const isFormData = body instanceof FormData;
 
@@ -49,7 +50,7 @@ class HttpClient {
     });
   }
 
-  async put<T>(url: string, body?: any, options: RequestInit = {}): Promise<T> {
+  async put<T>(url: string, body?: any, options: RequestInit & { signal?: AbortSignal } = {}): Promise<T> {
     return this.request<T>(url, {
       ...options,
       method: "PUT",
@@ -64,7 +65,7 @@ class HttpClient {
   async patch<T>(
     url: string,
     body?: any,
-    options: RequestInit = {}
+    options: RequestInit & { signal?: AbortSignal } = {}
   ): Promise<T> {
     return this.request<T>(url, {
       ...options,
@@ -77,7 +78,7 @@ class HttpClient {
     });
   }
 
-  async delete<T>(url: string, options: RequestInit = {}): Promise<T> {
+  async delete<T>(url: string, options: RequestInit & { signal?: AbortSignal } = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: "DELETE" });
   }
 

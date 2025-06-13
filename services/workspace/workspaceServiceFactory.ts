@@ -1,7 +1,7 @@
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
-import type { CreateWorkspaceRequest, DeleteWorkspaceUserRequest, FileDeleteRequest, InviteWorkspaceUserRequest, ListRequest, UpdateWorkspaceRequest, UpdateWorkspaceUserRequest, WorkspaceDto } from "~/types/request.types";
+import type { DeleteWorkspaceRequest, CreateWorkspaceRequest, DeleteWorkspaceUserRequest, FileDeleteRequest, InviteWorkspaceUserRequest, ListRequest, UpdateWorkspaceRequest, UpdateWorkspaceUserRequest, WorkspaceDto } from "~/types/request.types";
 
 export const workspaceServiceFactory = {
     createWorkspace: (body: CreateWorkspaceRequest) => apiContractBuilderHelper.post('/api/Workspace')
@@ -19,7 +19,7 @@ export const workspaceServiceFactory = {
     listWorkspaces: (dto: ListRequest) => apiContractBuilderHelper.get('/api/Workspace/list')
         .withService(WORKSPACE_SERVICE)
         .withQueryParams<ListRequest>(dto)
-        .withResponse<WorkspaceDto[]>()
+        .withResponse<ListResponse<WorkspaceDto[]>>()
         .build(),
 
     getWorkspace: (id: string) => apiContractBuilderHelper.get(`/api/Workspace/${id}`)
@@ -29,16 +29,19 @@ export const workspaceServiceFactory = {
 
     deleteWorkspace: (id: string) => apiContractBuilderHelper.delete(`/api/Workspace/${id}`)
         .withService(WORKSPACE_SERVICE)
+        .withQueryParams<DeleteWorkspaceRequest>({ id })
         .withResponse<SuccessResponse>()
         .build(),
 
     restoreWorkspace: (id: string) => apiContractBuilderHelper.post(`/api/Workspace/${id}`)
         .withService(WORKSPACE_SERVICE)
+        .withQueryParams<DeleteWorkspaceRequest>({ id })
         .withResponse<SuccessResponse>()
         .build(),
 
     inviteUser: (dto: InviteWorkspaceUserRequest) => apiContractBuilderHelper.post(`/api/Workspace/${dto.id}/${dto.userId}/invite`)
         .withService(WORKSPACE_SERVICE)
+        .withBody(dto)
         .withResponse<SuccessResponse>()
         .build(),
 
@@ -53,9 +56,9 @@ export const workspaceServiceFactory = {
         .withResponse<SuccessResponse>()
         .build(),
 
-    uploadPicture: (id: string, file: File) => apiContractBuilderHelper.post(`/api/Workspace/${id}/picture`)
+    uploadPicture: (id: string, file: File) => apiContractBuilderHelper.uploadFile(`/api/Workspace/${id}/picture`)
         .withService(WORKSPACE_SERVICE)
-        .withBody(file)
+        .withBody({ file })
         .withResponse<SuccessResponse>()
         .build(),
 

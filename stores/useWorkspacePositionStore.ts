@@ -1,31 +1,32 @@
 import { workspacePositionServiceFactory } from "~/services/workspace/workspacePositionServiceFactory";
 import type { ListRequest, PositionDto, CreatePositionRequest, UpdatePositionRequest } from "~/types/request.types";
-import type { WorkspacePosition } from "~/types/response.types";
 
 export const useWorkspacePositionStore = defineStore("WorkspacePosition", () => {
-  const positions = ref<WorkspacePosition[]>([]);
-  1;
-  const total = ref(0);
-  const currentPage = ref(1);
-  const pageSize = ref(25);
+  const data = ref<PositionDto[]>([]);
+  const workspaceId = ref<string | null>(null);
+  const totalCount = ref(0);
+  const offset = ref(0);
+  const limit = ref(25);
+  const includeDeleted = ref(false);
   const loading = ref(false);
 
-  // Исправить list: только req (ListRequest)
-  async function list(params: ListRequest = { limit: pageSize.value, offset: 0, includeDeleted: false }) {
+  async function list() {
     reset();
     loading.value = true;
     try {
-      const req: ListRequest = {
-        limit: params.limit ?? pageSize.value,
-        offset: params.offset ?? 0,
-        includeDeleted: params.includeDeleted ?? false
-      };
-      const resp = await workspacePositionServiceFactory.listWorkspacePositions(req).execute();
-      positions.value = resp as any; // Приведение к нужному типу, если требуется
-      total.value = resp.length;
-      if (resp.length == pageSize.value) {
-        currentPage.value++;
+      if (!workspaceId.value) {
+        console.error("Workspace ID is not set");
+        return [];
       }
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
+      };
+      const resp = await workspacePositionServiceFactory.listWorkspacePositions(workspaceId.value, req).execute();
+      data.value = resp.data;
+      totalCount.value = resp.totalCount;
+      return data.value;
     } catch (error) {
       console.error("Error fetching workspaces:", error);
     } finally {
@@ -44,7 +45,6 @@ export const useWorkspacePositionStore = defineStore("WorkspacePosition", () => 
     }
   }
 
-  // Исправить update/create сигнатуры: один объект-аргумент
   async function update(body: UpdatePositionRequest) {
     loading.value = true;
     try {
@@ -84,18 +84,44 @@ export const useWorkspacePositionStore = defineStore("WorkspacePosition", () => 
     }
   }
 
-  async function reset() {
-    positions.value = [];
-    total.value = 0;
-    currentPage.value = 1;
-    pageSize.value = 25;
+    async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
   }
 
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    list()
+  })
+
   return {
-    positions,
-    total,
+    data,
+    workspaceId,
+    totalCount,
     currentPage,
-    pageSize,
+    limit,
+    offset,
+    includeDeleted,
     loading,
     list,
     get,
@@ -104,6 +130,8 @@ export const useWorkspacePositionStore = defineStore("WorkspacePosition", () => 
     deletePosition,
     restore,
     reset,
+    prevPage,
+    nextPage
   }
 }
 );

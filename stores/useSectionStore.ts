@@ -7,51 +7,43 @@ export const useSectionStore = defineStore("section", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const sections: Ref<SectionDto[]> = ref([]);
-  const isLoading = ref(false);
-  const error = ref(null);
+  const data: Ref<SectionDto[]> = ref([]);
+  const projectId: Ref<string | null> = ref(null);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
   const limit = ref(20);
   const offset = ref(0);
+  const includeDeleted = ref(false);
+  const totalCount = ref(0);
 
-  async function listByProject(projectId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-    isLoading.value = true;
+  async function listByProject() {
+    loading.value = true;
     try {
-      const req: ListRequest = {
-        limit: params.limit ?? limit.value,
-        offset: params.offset ?? offset.value,
-        includeDeleted: params.includeDeleted ?? false
-      };
-      const res = await sectionServiceFactory
-        .listByProject(projectId, req)
-        .execute();
-      if (!res || res.length === 0) {
+      if (!projectId.value) {
+        error.value = "Project ID is not set";
         return [];
       }
-      sections.value = res;
-      return sections.value;
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
+      };
+      const res = await sectionServiceFactory
+        .listByProject(projectId.value!, req)
+        .execute();
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return data.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
-  function setPaging(newLimit: number, newOffset: number) {
-    limit.value = newLimit;
-    offset.value = newOffset;
-  }
-
-  function nextPage() {
-    offset.value += limit.value;
-  }
-
-  function prevPage() {
-    offset.value = Math.max(0, offset.value - limit.value);
-  }
-
   async function get(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       return await sectionServiceFactory
         .get(id)
@@ -60,78 +52,116 @@ export const useSectionStore = defineStore("section", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function create(data: CreateSectionRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await sectionServiceFactory
         .create(data)
         .ensured("Секция создана");
+      await listByProject();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function update(data: UpdateSectionRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await sectionServiceFactory
         .update(data)
         .ensured("Секция обновлена");
+      await listByProject();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteSection(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await sectionServiceFactory
         .deleteSection(id)
         .ensured("Секция удалена");
+      await listByProject();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function restore(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await sectionServiceFactory
         .restore(id)
         .ensured("Секция восстановлена");
+      await listByProject();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
+  async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
+  }
+
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    listByProject()
+  })
+
   return {
-    sections,
-    isLoading,
+    data,
+    projectId,
+    loading,
+    currentPage,
     error,
     limit,
     offset,
+    includeDeleted,
+    totalCount,
     listByProject,
-    setPaging,
+    reset,
     nextPage,
     prevPage,
     get,

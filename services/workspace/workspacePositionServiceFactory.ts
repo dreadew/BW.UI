@@ -1,13 +1,13 @@
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import type { CreatePositionRequest, ListRequest, PositionDto, UpdatePositionRequest } from "~/types/request.types";
 
 export const workspacePositionServiceFactory = {
-    listWorkspacePositions: (dto: ListRequest) => apiContractBuilderHelper.get(`/api/WorkspacePosition/list`)
+    listWorkspacePositions: (workspaceId: string, dto: ListRequest) => apiContractBuilderHelper.get(`/api/WorkspacePosition/${workspaceId}/list`)
         .withService(WORKSPACE_SERVICE)
         .withQueryParams<ListRequest>(dto)
-        .withResponse<PositionDto[]>()
+        .withResponse<ListResponse<PositionDto[]>>()
         .build(),
 
     getWorkspacePosition: (id: string) => apiContractBuilderHelper.get(`/api/WorkspacePosition/${id}`)

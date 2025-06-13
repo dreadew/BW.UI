@@ -10,34 +10,39 @@ import type {
   ListRequest,
   WorkspaceDto,
 } from "~/types/request.types";
-import type { Workspace } from "~/types/response.types";
-import type { PagingParams } from "~/types/api.types";
 
 export const useWorkspaceStore = defineStore("Workspace", () => {
-  const workspaces = ref<Workspace[]>([]);
-  const total = ref(0);
-  const currentPage = ref(1);
-  const pageSize = ref(25);
+  const data = ref<WorkspaceDto[]>([]);
+  const totalCount = ref(0);
   const loading = ref(false);
   const error = ref<string | null>(null);
   const limit = ref(20);
   const offset = ref(0);
+  const includeDeleted = ref(false);
 
-  async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
+  let listAbortController: AbortController | null = null;
+  let getAbortController: AbortController | null = null;
+
+  async function list() {
     if (loading.value) return;
-
+    if (listAbortController) listAbortController.abort();
+    listAbortController = new AbortController();
     loading.value = true;
     error.value = null;
     try {
       const req: ListRequest = {
-        limit: params.limit ?? limit.value,
-        offset: params.offset ?? offset.value,
-        includeDeleted: params.includeDeleted ?? false,
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value,
       };
-      const resp = await workspaceServiceFactory.listWorkspaces(req).execute();
-      workspaces.value = resp as any; // Приведение к нужному типу, если требуется
-      total.value = resp.length;
+      const resp = await workspaceServiceFactory
+        .listWorkspaces(req)
+        .execute(listAbortController.signal);
+      data.value = resp.data;
+      totalCount.value = resp.totalCount;
+      return resp;
     } catch (error) {
+      if ((error as any)?.name === 'AbortError') return;
       console.error("Error fetching workspaces:", error);
     } finally {
       loading.value = false;
@@ -46,10 +51,13 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
 
   async function get(id: string) {
     loading.value = true;
+    if (getAbortController) getAbortController.abort();
+    getAbortController = new AbortController();
     try {
-      const resp = await workspaceServiceFactory.getWorkspace(id).execute();
+      const resp = await workspaceServiceFactory.getWorkspace(id).execute(getAbortController.signal);
       return resp;
     } catch (error) {
+      if ((error as any)?.name === 'AbortError') return;
       console.error("Error fetching workspace:", error);
     } finally {
       loading.value = false;
@@ -59,6 +67,7 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
   async function update(id: string, body: UpdateWorkspaceRequest) {
     loading.value = true;
     try {
+      console.log(id, body)
       await workspaceServiceFactory
         .updateWorkspace(id, body)
         .ensured("Рабочее пространство успешно обновлено");
@@ -84,6 +93,17 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
       await workspaceServiceFactory
         .deleteWorkspace(id)
         .ensured("Рабочее пространство успешно удалено");
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function restore(id: string) {
+    loading.value = true;
+    try {
+      await workspaceServiceFactory
+        .restoreWorkspace(id)
+        .ensured("Рабочее пространство успешно восстановлено");
     } finally {
       loading.value = false;
     }
@@ -148,45 +168,57 @@ export const useWorkspaceStore = defineStore("Workspace", () => {
     }
   }
 
-  function reset() {
-    workspaces.value = [];
-    currentPage.value = 1;
+  async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
   }
 
-  function setPaging(newLimit: number, newOffset: number) {
-    limit.value = newLimit;
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
     offset.value = newOffset;
   }
 
-  function nextPage() {
-    offset.value += limit.value;
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
   }
 
-  function prevPage() {
-    offset.value = Math.max(0, offset.value - limit.value);
-  }
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    list()
+  })
 
   return {
-    workspaces,
-    total,
-    currentPage,
-    pageSize,
+    data,
+    totalCount,
     loading,
     error,
     limit,
     offset,
+    includeDeleted,
+    currentPage,
     list,
     get,
     update,
     create,
     deleteWorkspace,
+    restore,
     invite,
     updateUser,
     deleteUser,
     uploadPicture,
     deletePicture,
     reset,
-    setPaging,
     nextPage,
     prevPage,
   }

@@ -1,6 +1,6 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import type { CreateProjectRoleRequest, ListRequest, ProjectRoleDto, UpdateProjectRoleRequest } from "~/types/request.types";
 
 export const projectRoleServiceFactory = {
@@ -25,7 +25,7 @@ export const projectRoleServiceFactory = {
       .get(`/api/ProjectRoles/by-project/${projectId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(params)
-      .withResponse<ProjectRoleDto[]>()
+      .withResponse<ListResponse<ProjectRoleDto[]>>()
       .build(),
 
   get: (roleId: string) =>

@@ -10,7 +10,8 @@ export default defineNuxtConfig({
     public: {
       identityApiUrl: process.env.NUXT_PUBLIC_IDENTITY_API_URL,
       workspaceApiUrl: process.env.NUXT_PUBLIC_WORKSPACE_API_URL,
-      projectApiUrl: process.env.NUXT_PUBLIC_PROJECT_API_URL
+      projectApiUrl: process.env.NUXT_PUBLIC_PROJECT_API_URL,
+      mode: process.env.NUXT_PUBLIC_MODE || 'default'
     }
   },
   app: {
@@ -29,8 +30,6 @@ export default defineNuxtConfig({
     '@nuxt/icon'
   ],
   ui: {
-    colors: {
-      primary: "indigo"
-    }
+    colorMode: false
   }
 })

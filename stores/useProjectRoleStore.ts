@@ -12,45 +12,49 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const projectRoles = ref<ProjectRoleDto[]>([]);
-  const isLoading = ref(false);
+  const projectId = ref<string | null>(null);
+  const data = ref<ProjectRoleDto[]>([]);
+  const loading = ref(false);
+  const offset = ref(0);
+  const limit = ref(20);
+  const includeDeleted = ref(false);
+  const totalCount = ref(0);
   const error = ref<string | null>(null);
 
   function resetState() {
-    isLoading.value = false;
+    loading.value = false;
     error.value = null;
   }
 
-  async function listByProject(
-    projectId: string,
-    params: ListRequest = { limit: 20, offset: 0, includeDeleted: false }
-  ) {
-    isLoading.value = true;
+  async function list() {
+    loading.value = true;
     try {
-      const req: ListRequest = {
-        limit: params.limit ?? 20,
-        offset: params.offset ?? 0,
-        includeDeleted: params.includeDeleted ?? false,
-      };
-      const res = await projectRoleServiceFactory
-        .list(projectId, req)
-        .execute();
-      if (!res || res.length === 0) {
+      if (!projectId.value) {
+        error.value = "Project ID is not set";
         return [];
       }
-      projectRoles.value = res;
-      return projectRoles.value;
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
+      };
+      const res = await projectRoleServiceFactory
+        .list(projectId.value, req)
+        .execute();
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return data.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function get(roleId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       return await projectRoleServiceFactory
@@ -60,13 +64,13 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function create(request: CreateProjectRoleRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await projectRoleServiceFactory
@@ -77,13 +81,13 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function update(request: UpdateProjectRoleRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await projectRoleServiceFactory
@@ -94,13 +98,13 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteRole(roleId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await projectRoleServiceFactory
@@ -111,13 +115,13 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function restore(roleId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await projectRoleServiceFactory
@@ -128,15 +132,27 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    list()
+  })
+
   return {
-    projectRoles,
-    isLoading,
+    data,
+    loading,
     error,
-    listByProject,
+    limit,
+    offset,
+    currentPage,
+    includeDeleted,
+    totalCount,
+    projectId,
+    list,
     get,
     create,
     update,

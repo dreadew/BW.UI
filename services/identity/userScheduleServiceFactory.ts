@@ -1,4 +1,4 @@
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { IDENTITY_SERVICE } from "~/constants/services.constants";
 import type { CreateUserScheduleRequest, ListRequest, UpdateUserScheduleRequest, UserScheduleDto } from "~/types/request.types";
@@ -9,7 +9,7 @@ export const userScheduleService = {
       .get(`/api/UserSchedule/by-user/${userId}`)
       .withService(IDENTITY_SERVICE)
       .withQueryParams<ListRequest>(dto)
-      .withResponse<UserScheduleDto[]>()
+      .withResponse<ListResponse<UserScheduleDto[]>>()
       .build(),
 
   getUserSchedule: (id: string) =>

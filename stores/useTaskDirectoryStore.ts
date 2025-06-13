@@ -5,7 +5,8 @@ import type {
   UpdateTaskDirectoryRequest,
   TaskDirectoryDto,
   FileDeleteRequest,
-  ListRequest
+  ListRequest,
+  BaseDirectoryDto
 } from "~/types/request.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
@@ -13,44 +14,49 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const directories = ref<TaskDirectoryDto[]>([]);
-  const isLoading = ref(false);
+  const taskId = ref<string | null>(null);
+  const data = ref<BaseDirectoryDto[]>([]);
+  const loading = ref(false);
   const error = ref<string | null>(null);
   const limit = ref(20);
   const offset = ref(0);
 
   function resetState() {
-    isLoading.value = false;
+    loading.value = false;
     error.value = null;
   }
 
-  async function list(taskId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
+  async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
     try {
+      if (!taskId.value) {
+        error.value = "Task ID is not set";
+        return [];
+      }
       const req: ListRequest = {
         limit: params.limit ?? limit.value,
         offset: params.offset ?? offset.value,
         includeDeleted: params.includeDeleted ?? false
       };
       const res = await taskDirectoryServiceFactory
-        .list(taskId, req)
+        .list(taskId.value, req)
         .execute();
       if (!res || res.length === 0) {
         return [];
       }
-      directories.value = res;
+      data.value = res;
       return res;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function get(directoryId: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       return await taskDirectoryServiceFactory
         .get(directoryId)
@@ -59,13 +65,13 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function create(request: CreateTaskDirectoryRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskDirectoryServiceFactory
@@ -76,13 +82,13 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function update(request: UpdateTaskDirectoryRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskDirectoryServiceFactory
@@ -93,13 +99,13 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteTaskDirectory(directoryId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskDirectoryServiceFactory
@@ -110,13 +116,13 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function restore(directoryId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskDirectoryServiceFactory
@@ -127,15 +133,14 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function uploadArtifact(directoryId: string, file: File) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
     try {
-      // Актуальный вызов uploadArtifact: directoryId и file
       await taskDirectoryServiceFactory
         .uploadArtifact(directoryId, file)
         .ensured("Файл успешно загружен");
@@ -144,15 +149,14 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteArtifact(request: FileDeleteRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
     try {
-      // Актуальный вызов deleteArtifact: request с id и fromId
       await taskDirectoryServiceFactory
         .deleteArtifact(request)
         .ensured("Файл успешно удален");
@@ -161,7 +165,7 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
@@ -179,8 +183,9 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
   }
 
   return {
-    directories,
-    isLoading,
+    taskId,
+    data,
+    loading,
     error,
     limit,
     offset,

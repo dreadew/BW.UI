@@ -1,7 +1,7 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
-import type { CreateTaskActivityRequest, TaskActivityDto, UpdateTaskActivityRequest } from "~/types/request.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
+import type { CreateTaskActivityRequest, ListRequest, TaskActivityDto, UpdateTaskActivityRequest } from "~/types/request.types";
 
 export const taskActivityServiceFactory = {
   create: (request: CreateTaskActivityRequest) =>
@@ -27,18 +27,20 @@ export const taskActivityServiceFactory = {
       .withResponse<TaskActivityDto>()
       .build(),
 
-  listByUser: (userId: string) =>
+  listByUser: (userId: string, dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/TaskActivity/by-user/${userId}`)
       .withService(PROJECT_SERVICE)
-      .withResponse<TaskActivityDto[]>()
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<ListResponse<TaskActivityDto[]>>()
       .build(),
 
-  listByTask: (taskId: string) =>
+  listByTask: (taskId: string, dto: ListRequest) =>
     apiContractBuilderHelper
       .get(`/api/TaskActivity/by-task/${taskId}`)
       .withService(PROJECT_SERVICE)
-      .withResponse<TaskActivityDto[]>()
+      .withQueryParams<ListRequest>(dto)
+      .withResponse<ListResponse<TaskActivityDto[]>>()
       .build(),
 
   delete: (activityId: string) =>

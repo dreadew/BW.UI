@@ -9,43 +9,48 @@ export const useTaskCommentStore = defineStore(
     const toast = useToast();
     const errorHandler = useApiErrorHandler();
 
-    const comments = ref<TaskCommentDto[]>([]);
-    const isLoading = ref(false);
+    const taskId = ref<string | null>(null);
+    const data = ref<TaskCommentDto[]>([]);
+    const loading = ref(false);
     const error = ref<string | null>(null);
     const limit = ref(20);
     const offset = ref(0);
+    const includeDeleted = ref(false);
+    const totalCount = ref(0);
 
     function resetState() {
-      isLoading.value = false;
+      loading.value = false;
       error.value = null;
     }
 
-    async function listByTask(taskId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-      isLoading.value = true;
+    async function list() {
+      loading.value = true;
       try {
-        const req: ListRequest = {
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          includeDeleted: params.includeDeleted ?? false
-        };
-        const res = await taskCommentServiceFactory
-          .listByTask(taskId, req)
-          .execute();
-        if (!res || res.length === 0) {
+        if (!taskId.value) {
+          error.value = "Task ID is not set";
           return [];
         }
-        comments.value = res;
-        return comments.value;
+        const req: ListRequest = {
+          limit: limit.value,
+          offset: offset.value,
+          includeDeleted: includeDeleted.value,
+        };
+        const res = await taskCommentServiceFactory
+          .listByTask(taskId.value, req)
+          .execute();
+        data.value = res.data;
+        totalCount.value = res.totalCount;
+        return data.value;
       } catch (err) {
         errorHandler.handleError(err);
         return [];
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function get(id: string) {
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         return await taskCommentServiceFactory
@@ -55,13 +60,13 @@ export const useTaskCommentStore = defineStore(
         errorHandler.handleError(err);
         return [];
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function create(request: CreateTaskCommentRequest) {
       resetState();
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         await taskCommentServiceFactory
@@ -72,13 +77,13 @@ export const useTaskCommentStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function update(request: UpdateTaskCommentRequest) {
       resetState();
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         await taskCommentServiceFactory
@@ -89,13 +94,13 @@ export const useTaskCommentStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function deleteComment(commentId: string) {
       resetState();
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         await taskCommentServiceFactory
@@ -106,13 +111,13 @@ export const useTaskCommentStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function restore(commentId: string) {
       resetState();
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         await taskCommentServiceFactory
@@ -123,31 +128,52 @@ export const useTaskCommentStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
-    function setPaging(newLimit: number, newOffset: number) {
-      limit.value = newLimit;
+    async function reset() {
+      offset.value = 0;
+      limit.value = 20;
+      totalCount.value = 0;
+      data.value = [];
+    }
+
+    const prevPage = () => {
+      const newOffset = offset.value - limit.value;
+      if (newOffset < 0) {
+        offset.value = 0;
+        return;
+      }
       offset.value = newOffset;
     }
 
-    function nextPage() {
-      offset.value += limit.value;
+    const nextPage = () => {
+      const newOffset = offset.value + limit.value;
+      if (newOffset >= totalCount.value) {
+        return;
+      }
+      offset.value = newOffset;
     }
 
-    function prevPage() {
-      offset.value = Math.max(0, offset.value - limit.value);
-    }
+    const currentPage = computed(() => offset.value / limit.value + 1);
+
+    watch(() => [offset.value, includeDeleted.value], () => {
+      list()
+    })
 
     return {
-      comments,
-      isLoading,
+      taskId,
+      data,
+      loading,
+      currentPage,
       error,
       limit,
       offset,
-      listByTask,
-      setPaging,
+      includeDeleted,
+      totalCount,
+      list,
+      reset,
       nextPage,
       prevPage,
       get,

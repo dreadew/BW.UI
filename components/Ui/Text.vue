@@ -18,7 +18,7 @@ const colorOptions = {
   primary: 'text-primary',
   secondary: 'text-secondary',
   neutral: 'text-neutral-400',
-  "darker-neutral": 'text-neutral-700',
+  "darker-neutral": 'text-muted',
   error: 'text-red-600',
   success: 'text-green-600',
 } as const;

@@ -1,31 +1,33 @@
 import { workspaceRoleServiceFactory } from "~/services/workspace/workspaceRoleServiceFactory";
 import type { CreateWorkspaceRoleRequest, UpdateWorkspaceRoleRequest, ListRequest, WorkspaceRoleDto } from "~/types/request.types";
-import type { WorkspaceRole } from "~/types/response.types";
 
 export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
-  const roles = ref<WorkspaceRole[]>([]);
-  const total = ref(0);
-  const currentPage = ref(1);
-  const pageSize = ref(25);
+  const data = ref<WorkspaceRoleDto[]>([]);
+  const workspaceId = ref<string | null>(null);
+  const totalCount = ref(0);
+  const offset = ref(1);
+  const limit = ref(20);
+  const includeDeleted = ref(false);
   const loading = ref(false);
-  const currentRole = ref<WorkspaceRole | null>(null);
+  const currentRole = ref<WorkspaceRoleDto | null>(null);
 
-  async function list(workspaceId: string, params: ListRequest = { limit: pageSize.value, offset: 0, includeDeleted: false }) {
+  async function list() {
     reset();
     loading.value = true;
     try {
-      const req: ListRequest = {
-        ...params,
-        limit: params.limit ?? pageSize.value,
-        offset: params.offset ?? 0,
-        includeDeleted: params.includeDeleted ?? false
-      };
-      const resp = await workspaceRoleServiceFactory.listWorkspaceRoles(workspaceId, req).execute();
-      roles.value = resp as any; // Приведение к нужному типу, если требуется
-      total.value = resp.length;
-      if (resp.length == pageSize.value) {
-        currentPage.value++;
+      if (!workspaceId.value) {
+        console.error("Workspace ID is not set");
+        return;
       }
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
+      };
+      const resp = await workspaceRoleServiceFactory.listWorkspaceRoles(workspaceId.value, req).execute();
+      data.value = resp.data;
+      totalCount.value = resp.totalCount;
+      return resp;
     } catch (error) {
       console.error("Error fetching workspace roles:", error);
     } finally {
@@ -60,7 +62,6 @@ export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
     }
   }
 
-  // Исправить update: один объект-аргумент
   async function update(body: UpdateWorkspaceRoleRequest) {
     loading.value = true;
     try {
@@ -94,18 +95,44 @@ export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
     }
   }
 
-  async function reset() {
-    roles.value = [];
-    total.value = 0;
-    currentPage.value = 1;
-    pageSize.value = 25;
+    async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
   }
 
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    list()
+  })
+
   return {
-    roles,
-    total,
+    data,
+    workspaceId,
+    totalCount,
     currentPage,
-    pageSize,
+    offset,
+    limit,
+    includeDeleted,
     loading,
     currentRole,
     list,
@@ -114,6 +141,8 @@ export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
     update,
     deleteWorkspaceRole,
     restore,
+    nextPage,
+    prevPage,
     reset,
   }
 });

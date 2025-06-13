@@ -1,98 +1,147 @@
 <template>
     <div>
-        <UiHeading size="2xl" class="mb-6">Рабочие пространства</UiHeading>
-        <div class="flex items-center gap-4 mb-4">
-            <UInput v-model="search" placeholder="Поиск по названию..." class="w-64" />
-            <UButton color="primary" @click="openCreateModal = true">Создать рабочее пространство</UButton>
+        <!-- <UiHeading size="2xl" class="mb-6">Рабочие пространства</UiHeading>
+        <div class="flex items-center justify-between gap-4 mb-4">
+            <UButton color="primary" @click="openCreateModal = true">Создать</UButton>
+            <div class="flex items-center gap-3">
+                <UCheckbox v-model="workspaceStore.includeDeleted" label="Показывать удаленные" />
+                <UInput v-model="search" placeholder="Поиск по значению..." class="w-64" />
+            </div>
         </div>
-        <div v-if="filteredWorkspaces.length === 0" class="flex justify-center items-center h-64">
-            <UCard class="w-full flex flex-col items-center justify-center p-8">
-                <UIcon name="i-lucide-folder-open" class="text-4xl text-primary mb-2" />
-                <UiHeading size="lg">Нет рабочих пространств</UiHeading>
-                <UiText color="neutral" class="mt-2">Создайте первое рабочее пространство, чтобы начать работу!</UiText>
-            </UCard>
+
+        <div v-if="workspaceStore.loading" class="flex justify-center items-center">
+            <USkeleton class="w-full h-96 mt-2" />
         </div>
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <UCard v-for="ws in filteredWorkspaces" :key="ws.id" class="flex flex-col justify-between">
-                <div>
-                    <UiHeading size="lg">{{ ws.name }}</UiHeading>
-                    <div class="text-xs text-gray-400 mt-1">ID: {{ ws.id }}</div>
-                    <div class="text-xs text-gray-400 mt-1">Создано: {{ ws.createdAt }}</div>
-                </div>
-                <div class="flex gap-2 mt-4">
+
+        <BaseEmpty v-if="!workspaceStore.loading && filteredWorkspaces?.length === 0" />
+
+        <div v-if="!workspaceStore.loading && filteredWorkspaces?.length > 0" class="flex items-center flex-wrap gap-6">
+            <BaseCard v-for="ws in filteredWorkspaces" :key="ws.id" :entity="ws" :title="ws.name" :image="ws.path"
+                :date="DateUtils.deserialize(ws.createdAt)?.toLocaleDateString()">
+                <template #actions>
+                    <div class="flex items-center gap-2">
+                        <UButton size="sm" variant="ghost" color="primary" @click="onEdit(ws)"
+                            icon="i-heroicons-pencil" />
+                        <UButton size="sm" variant="ghost" color="error" @click="onDelete(ws)"
+                            icon="i-heroicons-trash" />
+                    </div>
                     <NuxtLink :to="`/workspace/${ws.id}`">
-                        <UButton size="sm" color="primary">Открыть</UButton>
+                        <UButton size="sm" color="primary">Перейти</UButton>
                     </NuxtLink>
-                    <UButton size="sm" color="error" variant="soft" @click="onDelete(ws)">Удалить</UButton>
-                </div>
-            </UCard>
-        </div>
-        <div class="flex gap-2 mt-4">
-            <UButton size="xs" :disabled="offset === 0" @click="prevPage">Назад</UButton>
-            <UButton size="xs" :disabled="workspaces.length < limit" @click="nextPage">Вперёд</UButton>
-        </div>
+                </template>
+</BaseCard>
+</div> -->
+
+        <BaseCardLayout :store="workspaceStore" type="workspace" title="Рабочие пространства"
+            @open-create="openCreateModal = true" @open-edit="onEdit" @open-delete="onDelete"
+            @open-restore="onRestore" />
+
         <UModal v-model:open="openCreateModal" title="Создать рабочее пространство">
             <template #body>
-                <UForm :state="formState" :schema="createFormSchema" @submit="onSubmitCreate">
+                <UForm :state="formState" @submit="onSubmitCreate">
                     <UFormField label="Название" name="name" required>
-                        <UInput v-model="formState.name" required placeholder="Название рабочего пространства" />
+                        <UInput class="w-full" v-model="formState.name" required
+                            placeholder="Название рабочего пространства" />
                     </UFormField>
-                    <UButton type="submit" color="primary" class="mt-4" :loading="formLoading">Сохранить</UButton>
+                    <div class="flex justify-end gap-2 mt-4">
+                        <UButton type="button" color="neutral" variant="ghost" @click="openCreateModal = false">Отмена
+                        </UButton>
+                        <UButton type="submit" color="primary" variant="solid" :loading="formLoading">Создать</UButton>
+                    </div>
                 </UForm>
             </template>
         </UModal>
         <UModal v-model:open="openDeleteModal" title="Удаление рабочего пространства">
             <template #body>
-                <UiText color="error">Вы уверены, что хотите удалить рабочее пространство "{{ selectedWorkspace?.name
-                }}"?</UiText>
+                <UiText color="darker-neutral">Вы уверены, что хотите удалить рабочее пространство <b>"{{
+                    selectedWorkspace?.name }}"</b>?</UiText>
             </template>
             <template #footer>
-                <UButton color="neutral" @click="openDeleteModal = false">Отмена</UButton>
-                <UButton color="error" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
+                <div class="w-full flex justify-end gap-2">
+                    <UButton type="button" color="neutral" variant="ghost" @click="openDeleteModal = false">Отмена
+                    </UButton>
+                    <UButton type="button" color="error" variant="solid" @click="confirmDelete" :loading="formLoading">
+                        Удалить</UButton>
+                </div>
             </template>
         </UModal>
+
+        <UModal v-model:open="openEditModal" title="Редактировать рабочее пространство">
+            <template #body>
+                <UForm :state="formState" @submit="onSubmitEdit">
+                    <UFormField label="Название" name="name" required>
+                        <UInput v-model="formState.name" required placeholder="Название" class="w-full" />
+                    </UFormField>
+                    <div class="flex justify-end mt-4">
+                        <UButton type="submit" color="primary" :loading="formLoading">Сохранить</UButton>
+                    </div>
+                </UForm>
+            </template>
+        </UModal>
+
+        <UModal v-model:open="openRestoreModal" title="Восстановление рабочего пространства">
+            <template #body>
+                <UiText color="darker-neutral">Вы уверены, что хотите восстановить рабочее пространство <b>"{{
+                    selectedWorkspace?.name }}"</b>?
+                </UiText>
+            </template>
+            <template #footer>
+                <div class="w-full flex justify-end gap-2">
+                    <UButton type="button" color="neutral" variant="ghost" @click="openDeleteModal = false">Отмена
+                    </UButton>
+                    <UButton type="button" color="secondary" variant="solid" @click="confirmRestore"
+                        :loading="formLoading">
+                        Восстановить
+                    </UButton>
+                </div>
+            </template>
+        </UModal>
+
+        <div v-if="workspaceStore.totalCount > workspaceStore.limit" class="flex justify-end gap-2 mt-4">
+            <UButton icon="i-lucide-arrow-left" size="xs" variant="subtle" :disabled="workspaceStore.offset === 0"
+                @click="workspaceStore.prevPage" />
+            <UButton icon="i-lucide-arrow-right" size="xs" variant="subtle"
+                :disabled="workspaceStore.data.length < workspaceStore.limit" @click="workspaceStore.nextPage" />
+        </div>
     </div>
 </template>
+
 <script setup lang="ts">
-definePageMeta({ layout: 'workspace' })
 import { ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '~/stores/useWorkspaceStore'
-import { createWorkspaceRequestSchema } from '~/schemas/generated.schema'
-import UiHeading from '~/components/Ui/Heading.vue'
-import UiText from '~/components/Ui/Text.vue'
-import type { Workspace } from '~/types/response.types'
+import type { CreateWorkspaceRequest, WorkspaceDto } from '~/types/request.types'
+import { DateUtils } from '~/utils/date.utils'
+
+definePageMeta({ layout: 'workspace' })
 useHead({ title: 'Рабочие пространства' })
 const workspaceStore = useWorkspaceStore()
-const { workspaces } = storeToRefs(workspaceStore)
-const search = ref('')
 const openCreateModal = ref(false)
 const openDeleteModal = ref(false)
-const selectedWorkspace = ref<any>(null)
-const formState = ref<any>({ name: '' })
+const openEditModal = ref(false)
+const openRestoreModal = ref(false)
+const selectedWorkspace = ref<WorkspaceDto | null>(null)
+const formState = ref<CreateWorkspaceRequest>({ name: '' })
 const formLoading = ref(false)
-const createFormSchema = createWorkspaceRequestSchema;
-const limit = ref(20)
-const offset = ref(0)
-const { user } = useUserStore();
-const columns = [
-    { accessorKey: 'id', header: 'ID', cell: ({ row }) => row.original.id },
-    { accessorKey: 'name', header: 'Название', cell: ({ row }) => row.original.name },
-    { accessorKey: 'createdAt', header: 'Дата создания', cell: ({ row }) => row.original.createdAt },
-    { accessorKey: 'updatedAt', header: 'Дата обновления', cell: ({ row }) => row.original.updatedAt },
-    { id: 'actions', header: 'Действия', cell: undefined }
-]
-const filteredWorkspaces = computed(() => {
-    let data = workspaces.value
-    if (search.value) {
-        data = data.filter(w => w.name.toLowerCase().includes(search.value.toLowerCase()))
-    }
-    return data
-})
-function onDelete(workspace: Workspace) {
+
+onMounted(fetchWorkspaces)
+
+function onDelete(workspace: WorkspaceDto) {
     selectedWorkspace.value = workspace
     openDeleteModal.value = true
 }
+
+function onEdit(workspace: WorkspaceDto) {
+    selectedWorkspace.value = workspace
+    formState.value.name = selectedWorkspace.value.name
+    openEditModal.value = true
+}
+
+function onRestore(project: WorkspaceDto) {
+    selectedWorkspace.value = project
+    openRestoreModal.value = true
+}
+
 async function confirmDelete() {
     if (!selectedWorkspace.value) return
     formLoading.value = true
@@ -101,37 +150,44 @@ async function confirmDelete() {
     openDeleteModal.value = false
     await workspaceStore.list()
 }
+
+async function confirmRestore() {
+    if (!selectedWorkspace.value) return
+    formLoading.value = true
+    await workspaceStore.restore(selectedWorkspace.value.id)
+    formLoading.value = false
+    openRestoreModal.value = false
+    await fetchWorkspaces()
+}
+
 async function onSubmitCreate() {
     formLoading.value = true
-    await workspaceStore.create({ 
+    await workspaceStore.create({
         ...formState.value,
-        userId: user.id
     })
     openCreateModal.value = false
     formLoading.value = false
     await workspaceStore.list()
 }
+
+async function onSubmitEdit() {
+    formLoading.value = true
+    await workspaceStore.update(selectedWorkspace.value!.id, {
+        ...formState.value,
+        id: selectedWorkspace.value!.id,
+    })
+    openEditModal.value = false
+    formLoading.value = false
+    await workspaceStore.list()
+}
 async function fetchWorkspaces() {
-    await workspaceStore.list({ limit: limit.value, offset: offset.value })
+    await workspaceStore.list()
 }
 
-function nextPage() {
-    offset.value += limit.value
-    fetchWorkspaces()
-}
-function prevPage() {
-    offset.value = Math.max(0, offset.value - limit.value)
-    fetchWorkspaces()
-}
-
-watch([limit, offset], fetchWorkspaces)
 watch([openCreateModal], ([create]) => {
     if (!create) {
         formState.value = { name: '' }
         selectedWorkspace.value = null
     }
 })
-watchEffect(async () => {
-    await workspaceStore.list();
-});
 </script>

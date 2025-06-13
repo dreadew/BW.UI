@@ -1,59 +1,37 @@
-export interface Option {
-  value: string | number;
-  label: string;
+import type { BaseDirectoryDto, BaseDirectoryRequest, BaseDto, FileDeleteRequest, ListRequest } from "./request.types";
+
+export type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+
+export type BaseApiContract<T extends BaseDto> = {
+  list: (params: ListRequest) => Promise<T[]>
+  get: (id: string) => Promise<T | null>
 }
 
-export interface FormFieldProps {
-  error?: string;
-  disabled?: boolean;
-  [key: string]: any;
+export interface BaseDataStore<T extends BaseDto> {
+  data: T[]
+  loading: Ref<boolean>
+  limit: Ref<number>
+  offset: Ref<number>
+  includeDeleted: Ref<boolean>
+  totalCount: Ref<number>
+  currentPage: ComputedRef<number>
+  list: () => Promise<T[]>
+  nextPage: () => void
+  prevPage: () => void
+  reset: () => void
 }
 
-export interface DialogOptions {
-  initialOpen?: boolean;
-  fullScreen?: boolean;
-  onClose?: () => void;
+export interface BaseDirectoryStore<T extends BaseDirectoryDto>
+  extends BaseDataStore<T> {
+  create: (item: BaseDirectoryRequest) => Promise<void>
+  update: (item: BaseDirectoryRequest) => Promise<void>
+  delete: (id: string) => Promise<void>
+  get: (id: string) => Promise<T | null>
+  uploadArtifact: (id: string, file: File) => Promise<void>
+  deleteArtifact: (objectId: string, dto: FileDeleteRequest) => Promise<void>
 }
 
-export interface DialogControlOptions {
-  id: string;
-  initialState?: boolean;
-  onOpen?: () => void;
-  onClose?: () => void;
-  onConfirm?: (data: any) => void;
-}
-
-export interface KeyOptions {
-  ctrl?: boolean;
-  shift?: boolean;
-  alt?: boolean;
-  meta?: boolean;
-  preventDefault?: boolean;
-  stopPropagation?: boolean;
-  repeat?: boolean;
-  global?: boolean;
-  keyup?: boolean;
-}
-
-export type KeyHandler = (ev: KeyboardEvent) => void;
-
-export interface KeyBinding {
-  keys: string[];
-  handler: KeyHandler;
-  options: KeyOptions;
-}
-
-export interface ConfirmationDialogProps {
-  message: string;
-  zIndex?: number;
-}
-
-export interface GrpcUserDto {
-  id: string;
-  username: string;
-  email: string;
-  phoneNumber: string;
-  photoPath: string;
-  createdAt: string;
-  modifiedAt?: string;
+export type Option = {
+  label: string
+  value: string
 }

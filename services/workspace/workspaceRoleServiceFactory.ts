@@ -1,5 +1,5 @@
 import { WORKSPACE_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import type { CreateWorkspaceRoleRequest, ListRequest, UpdateWorkspaceRoleRequest, WorkspaceRoleDto } from "~/types/request.types";
 
@@ -7,7 +7,7 @@ export const workspaceRoleServiceFactory = {
     listWorkspaceRoles: (workspaceId: string, dto: ListRequest) => apiContractBuilderHelper.get(`/api/WorkspaceRole/${workspaceId}/list`)
         .withService(WORKSPACE_SERVICE)
         .withQueryParams<ListRequest>(dto)
-        .withResponse<WorkspaceRoleDto[]>()
+        .withResponse<ListResponse<WorkspaceRoleDto[]>>()
         .build(),
 
     getWorkspaceRole: (id: string) => apiContractBuilderHelper.get(`/api/WorkspaceRole/${id}`)

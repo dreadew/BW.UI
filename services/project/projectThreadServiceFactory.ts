@@ -1,6 +1,6 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import type { CreateProjectThreadRequest, ListRequest, ProjectThreadDto, UpdateProjectThreadRequest } from "~/types/request.types";
 
 export const projectThreadServiceFactory = {
@@ -25,7 +25,7 @@ export const projectThreadServiceFactory = {
       .get(`/api/ProjectThreads/by-project/${projectId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(dto)
-      .withResponse<ProjectThreadDto[]>()
+      .withResponse<ListResponse<ProjectThreadDto[]>>()
       .build(),
 
   get: (threadId: string) =>

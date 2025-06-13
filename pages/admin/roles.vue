@@ -1,84 +1,50 @@
 <template>
     <div>
-        <UiHeading size="2xl" class="mb-6">Роли</UiHeading>
-        <div class="flex items-center gap-4 mb-4">
-            <UInput v-model="search" placeholder="Поиск по названию..." class="w-64" />
-            <UButton color="primary" @click="openCreateModal = true">Создать роль</UButton>
-        </div>
-        <UTable :data="filteredAndSortedRoles" :columns="columns" class="w-full" @sort="onSort">
-            <template #action-cell="{ row }">
-                <UButton size="sm" variant="soft" color="primary" @click="onEdit(row.original)">Редактировать</UButton>
-                <UButton size="sm" variant="soft" color="error" class="ml-2" @click="onDelete(row.original)">Удалить
-                </UButton>
+        <BaseGrid :store="roleStore" :columns="columns" editable show-include-deleted @create="openCreateModal = true"
+            @edit="(item) => onEdit(item as RoleDto)" @delete="item => onDelete(item as RoleDto)">
+            <template #title>
+                Роли
             </template>
-        </UTable>
-        <div class="flex items-center justify-between mt-4">
-            <div>
-                <span>Показано {{ offset + 1 }}-{{ Math.min(offset + limit, roles.length) }} из {{ roles.length }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <label>На странице:</label>
-                <select v-model.number="limit" class="border rounded px-2 py-1">
-                    <option :value="10">10</option>
-                    <option :value="20">20</option>
-                    <option :value="50">50</option>
-                </select>
-                <UButton size="xs" :disabled="offset === 0" @click="prevPage">Назад</UButton>
-                <UButton size="xs" :disabled="roles.length < limit" @click="nextPage">Вперёд</UButton>
-            </div>
-        </div>
+        </BaseGrid>
         <UModal v-model:open="openCreateModal" title="Создать роль">
-            <template #header>
-                <div class="flex justify-between items-center w-full">
-                    <span>Создать роль</span>
-                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openCreateModal = false"
-                        size="sm" />
-                </div>
-            </template>
             <template #body>
-                <UForm :state="formState" :schema="createFormSchema" @submit="onSubmitCreate">
+                <UForm :state="formState" @submit="onSubmitCreate">
                     <UFormField label="Название" name="name" required>
                         <UInput v-model="formState.name" required placeholder="Название роли" class="w-full" />
                     </UFormField>
                     <div class="flex justify-end mt-4">
-                        <UButton type="submit" color="primary" :loading="formLoading">Создать</UButton>
+                        <UButton type="button" color="neutral" variant="ghost" @click="openCreateModal = false">Отмена
+                        </UButton>
+                        <UButton type="submit" color="primary" variant="solid" :loading="formLoading">Создать</UButton>
                     </div>
                 </UForm>
             </template>
         </UModal>
         <UModal v-model:open="openEditModal" title="Редактировать роль">
-            <template #header>
-                <div class="flex justify-between items-center w-full">
-                    <span>Редактировать роль</span>
-                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openEditModal = false" size="sm" />
-                </div>
-            </template>
             <template #body>
-                <UForm :state="formState" :schema="editFormSchema" @submit="onSubmitEdit">
+                <UForm :state="formState" @submit="onSubmitEdit">
                     <UFormField label="Название" name="name" required>
                         <UInput v-model="formState.name" required placeholder="Название роли" class="w-full" />
                     </UFormField>
                     <div class="flex justify-end mt-4">
-                        <UButton type="submit" color="primary" :loading="formLoading">Сохранить</UButton>
+                        <UButton type="button" color="neutral" variant="ghost" @click="openCreateModal = false">Отмена
+                        </UButton>
+                        <UButton type="submit" color="primary" variant="solid" :loading="formLoading">Обновить</UButton>
                     </div>
                 </UForm>
             </template>
         </UModal>
         <UModal v-model:open="openDeleteModal" title="Удаление роли">
-            <template #header>
-                <div class="flex justify-between items-center w-full">
-                    <span>Удаление роли</span>
-                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" @click="openDeleteModal = false"
-                        size="sm" />
-                </div>
-            </template>
             <template #body>
-                <UiText color="error">Вы уверены, что хотите удалить роль "{{ selectedRole?.name }}"?</UiText>
+                <UiText color="darker-neutral">Вы уверены, что хотите удалить роль <b>"{{ selectedRole?.name }}"</b>?
+                </UiText>
             </template>
             <template #footer>
-                <div class="flex justify-end gap-2">
-                    <UButton color="neutral" @click="openDeleteModal = false">Отмена</UButton>
-                    <UButton color="error" @click="confirmDelete" :loading="formLoading">Удалить</UButton>
+                <div class="w-full flex justify-end gap-2">
+                    <UButton type="button" color="neutral" variant="ghost" @click="openDeleteModal = false">Отмена
+                    </UButton>
+                    <UButton type="button" color="error" variant="solid" @click="confirmDelete" :loading="formLoading">
+                        Удалить</UButton>
                 </div>
             </template>
         </UModal>
@@ -86,103 +52,55 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { storeToRefs } from 'pinia'
+import { ref, watch } from 'vue'
 import { useRoleStore } from '~/stores/useRoleStore'
-import { createUserRoleRequestSchema, updateUserRoleRequestSchema } from '~/schemas/generated.schema'
 import { DateUtils } from '~/utils/date.utils'
-import UiHeading from '~/components/Ui/Heading.vue'
-import UiText from '~/components/Ui/Text.vue'
-import type { UserRole } from '~/types/response.types'
+import type { CreateRoleRequest, RoleDto } from '~/types/request.types'
+import type { TableRow } from '@nuxt/ui'
 useHead({ title: 'Роли' })
 
 const roleStore = useRoleStore()
-const { roles, isLoading } = storeToRefs(roleStore)
-
-const search = ref('')
-const sortKey = ref('createdAt')
-const sortOrder = ref<'asc' | 'desc'>('desc')
-const limit = ref(20)
-const offset = ref(0)
 
 const openCreateModal = ref(false)
 const openEditModal = ref(false)
 const openDeleteModal = ref(false)
-const selectedRole = ref<any>(null)
-const formState = ref<any>({ name: '' })
+const selectedRole = ref<RoleDto | null>(null)
+const formState = ref<CreateRoleRequest>({ name: '' })
 const formLoading = ref(false)
-
-const createFormSchema = createUserRoleRequestSchema;
-const editFormSchema = updateUserRoleRequestSchema;
 
 const columns = [
     {
         accessorKey: 'id',
         header: 'ID',
-        cell: ({ row }) => row.original.id,
-        enableSorting: true
+        cell: ({ row }: { row: TableRow<RoleDto> }) => row.original.id
     },
     {
         accessorKey: 'name',
         header: 'Название',
-        cell: ({ row }) => row.original.name,
-        enableSorting: true
+        cell: ({ row }: { row: TableRow<RoleDto> }) => row.original.name
     },
     {
         accessorKey: 'createdAt',
         header: 'Дата создания',
-        cell: ({ row }) => row.original.createdAt ? new Date(DateUtils.deserialize(row.original.createdAt)!).toLocaleString() : '',
-        enableSorting: true
+        cell: ({ row }: { row: TableRow<RoleDto> }) => row.original.createdAt ? new Date(DateUtils.deserialize(row.original.createdAt)!).toLocaleString() : ''
     },
     {
         accessorKey: 'updatedAt',
         header: 'Дата обновления',
-        cell: ({ row }) => row.original.updatedAt ? new Date(DateUtils.deserialize(row.original.updatedAt)!).toLocaleString() : 'Отсутствует',
-        enableSorting: true
+        cell: ({ row }: { row: TableRow<RoleDto> }) => row.original.updatedAt ? new Date(DateUtils.deserialize(row.original.updatedAt)!).toLocaleString() : 'Отсутствует'
     },
     {
         id: 'action',
     }
 ]
 
-async function fetchRoles() {
-    await roleStore.list({
-        limit: limit.value,
-        offset: offset.value,
-        includeDeleted: true
-    })
-}
-
-function nextPage() {
-    offset.value += limit.value
-    fetchRoles()
-}
-function prevPage() {
-    offset.value = Math.max(0, offset.value - limit.value)
-    fetchRoles()
-}
-
-watch([search, sortKey, sortOrder, limit, offset], fetchRoles)
-
-const filteredAndSortedRoles = computed(() => roles.value)
-
-function onSort(col) {
-    if (sortKey.value === col.accessorKey) {
-        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-    } else {
-        sortKey.value = col.accessorKey
-        sortOrder.value = 'asc'
-    }
-    offset.value = 0
-}
-
-function onEdit(role: UserRole) {
+function onEdit(role: RoleDto) {
     selectedRole.value = role
-    formState.value = { id: role.id, name: role.name }
+    formState.value = { name: role.name }
     openEditModal.value = true
 }
 
-function onDelete(role: UserRole) {
+function onDelete(role: RoleDto) {
     selectedRole.value = role
     openDeleteModal.value = true
 }
@@ -206,7 +124,10 @@ async function onSubmitCreate() {
 
 async function onSubmitEdit() {
     formLoading.value = true
-    await roleStore.update(formState.value)
+    await roleStore.update({
+        ...formState.value,
+        id: selectedRole.value?.id || ''
+    })
     openEditModal.value = false
     formLoading.value = false
     await roleStore.list()
@@ -218,12 +139,4 @@ watch([openCreateModal, openEditModal], ([create, edit]) => {
         selectedRole.value = null
     }
 })
-
-watchEffect(async () => {
-    await roleStore.list({
-        limit: limit.value,
-        offset: offset.value,
-        includeDeleted: true
-    });
-});
 </script>

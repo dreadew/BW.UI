@@ -12,58 +12,69 @@ export const useTaskActivityStore = defineStore("taskActivity", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const activities = ref<TaskActivityDto[]>([]);
-  const isLoading = ref(false);
+  const userId = ref<string | null>(null);
+  const taskId = ref<string | null>(null);
+  const data = ref<TaskActivityDto[]>([]);
+  const loading = ref(false);
   const error = ref<string | null>(null);
+  const limit = ref(20);
+  const offset = ref(0);
+  const includeDeleted = ref(false);
+  const totalCount = ref(0);
 
   function resetState() {
-    isLoading.value = false;
+    loading.value = false;
     error.value = null;
   }
 
-  async function listByTask(
-    taskId: string,
-    params: ListRequest = { limit: 20, offset: 0, includeDeleted: false }
-  ) {
-    isLoading.value = true;
+  async function list() {
+    loading.value = true;
     try {
-      const res = await taskActivityServiceFactory
-        .listByTask(taskId)
-        .execute();
-      if (!res || res.length === 0) {
+      if (!taskId.value) {
+        error.value = "Task ID is not set";
         return [];
       }
-      activities.value = res;
-      return activities.value;
+      const res = await taskActivityServiceFactory
+        .listByTask(taskId.value, {
+          limit: limit.value,
+          offset: offset.value,
+          includeDeleted: includeDeleted.value,
+        })
+        .execute();
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return data.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function listByUser(userId: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       const res = await taskActivityServiceFactory
-        .listByUser(userId)
+        .listByUser(userId, {
+          limit: limit.value,
+          offset: offset.value,
+          includeDeleted: includeDeleted.value,
+        })
         .execute();
-      if (!res || res.length === 0) {
-        return [];
-      }
-      activities.value = res;
-      return activities.value;
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return data.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function get(taskActivityId: string) {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       return await taskActivityServiceFactory
@@ -73,13 +84,13 @@ export const useTaskActivityStore = defineStore("taskActivity", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function create(request: CreateTaskActivityRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskActivityServiceFactory
@@ -90,13 +101,13 @@ export const useTaskActivityStore = defineStore("taskActivity", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function update(request: UpdateTaskActivityRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskActivityServiceFactory
@@ -107,13 +118,13 @@ export const useTaskActivityStore = defineStore("taskActivity", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteTaskActivity(activityId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskActivityServiceFactory
@@ -124,15 +135,28 @@ export const useTaskActivityStore = defineStore("taskActivity", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    list()
+  })
+
   return {
-    activities,
-    isLoading,
+    data,
+    userId,
+    currentPage,
+    limit,
+    offset,
+    includeDeleted,
+    totalCount,
+    loading,
     error,
-    listByTask,
+    taskId,
+    list,
     listByUser,
     get,
     create,

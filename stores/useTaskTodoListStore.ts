@@ -1,51 +1,55 @@
 import { defineStore } from "pinia";
 import { taskTodoListServiceFactory } from "~/services/project/taskTodoListServiceFactory";
-import type { CreateTaskTodoListItemRequest, CreateTaskTodoListRequest, ListRequest, UpdateTaskTodoListItemRequest, UpdateTaskTodoListRequest } from "~/types/request.types";
-import type { TaskTodoListDto } from "~/types/response.types";
+import type { CreateTaskTodoListItemRequest, CreateTaskTodoListRequest, ListRequest, TaskTodoListDto, UpdateTaskTodoListItemRequest, UpdateTaskTodoListRequest } from "~/types/request.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useTaskTodoListStore = defineStore("taskTodoList", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const todoLists = ref<TaskTodoListDto[]>([]);
+  const taskId = ref<string | null>(null);
+  const data = ref<TaskTodoListDto[]>([]);
   const currentTodoList = ref<TaskTodoListDto | null>(null);
-  const isLoading = ref(false);
+  const loading = ref(false);
   const error = ref<string | null>(null);
   const limit = ref(20);
   const offset = ref(0);
+  const includeDeleted = ref(false);
+  const totalCount = ref(0);
 
   function resetState() {
-    isLoading.value = false;
+    loading.value = false;
     error.value = null;
   }
 
-  async function list(taskId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-    isLoading.value = true;
+  async function list() {
+    loading.value = true;
     try {
-      const req: ListRequest = {
-        limit: params.limit ?? limit.value,
-        offset: params.offset ?? offset.value,
-        includeDeleted: params.includeDeleted ?? false
-      };
-      const res = await taskTodoListServiceFactory
-        .list(taskId, req)
-        .execute();
-      if (!res || res.length === 0) {
+      if (!taskId.value) {
+        error.value = "Task ID is not set";
         return [];
       }
-      todoLists.value = res;
-      return todoLists.value;
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value,
+      };
+      const res = await taskTodoListServiceFactory
+        .list(taskId.value, req)
+        .execute();
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return data.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function get(todoListId: string) {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       return await taskTodoListServiceFactory
@@ -55,13 +59,13 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function createTodoList(request: CreateTaskTodoListRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskTodoListServiceFactory
@@ -72,13 +76,13 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function updateTodoList(request: UpdateTaskTodoListRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskTodoListServiceFactory
@@ -89,13 +93,13 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       errorHandler.handleError(err);
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteTodoList(todoListId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskTodoListServiceFactory
@@ -106,13 +110,13 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function createTodoListItem(request: CreateTaskTodoListItemRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskTodoListServiceFactory
@@ -123,13 +127,13 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function updateTodoListItem(request: UpdateTaskTodoListItemRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskTodoListServiceFactory
@@ -140,13 +144,13 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteTodoListItem(itemId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskTodoListServiceFactory
@@ -157,13 +161,13 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function restore(itemId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskTodoListServiceFactory
@@ -174,32 +178,53 @@ export const useTaskTodoListStore = defineStore("taskTodoList", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
-  function setPaging(newLimit: number, newOffset: number) {
-    limit.value = newLimit;
+  async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
+  }
+
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
     offset.value = newOffset;
   }
 
-  function nextPage() {
-    offset.value += limit.value;
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
   }
 
-  function prevPage() {
-    offset.value = Math.max(0, offset.value - limit.value);
-  }
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    list()
+  })
 
   return {
-    todoLists,
+    data,
     currentTodoList,
-    isLoading,
+    taskId,
+    currentPage,
+    loading,
     error,
     limit,
     offset,
     list,
-    setPaging,
+    includeDeleted,
+    totalCount,
+    reset,
     nextPage,
     prevPage,
     get,

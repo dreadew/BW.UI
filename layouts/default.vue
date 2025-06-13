@@ -1,11 +1,11 @@
 <template>
-    <UContainer>
-      <CommonNavigation />
-      <slot />
-      <CommonFooter />
-    </UContainer>
+  <UContainer>
+    <CommonNavigation />
+    <slot />
+    <CommonFooter />
+    <CommonTutorialDisclaimerModal />
+  </UContainer>
 </template>
 
 <script lang="ts">
-import { CommonNavigation, CommonFooter, UContainer } from '#components';
 </script>

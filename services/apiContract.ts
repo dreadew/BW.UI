@@ -4,11 +4,13 @@ import type { IRequestConfig } from "~/types/api.types";
 export class ApiContract<TResponse> {
   constructor(private config: IRequestConfig<any, any, any>) { }
 
-  async execute(): Promise<TResponse> {
+  async execute(signal?: AbortSignal): Promise<TResponse> {
     const url = this.config.endpoint;
-    const options: RequestInit = {
+    const headers: Record<string, string> = this.config.headers ? { ...this.config.headers } : {};
+    const options: RequestInit & { signal?: AbortSignal } = {
       method: this.config.method,
-      headers: this.config.headers ? { ...this.config.headers } : {},
+      headers,
+      signal,
     };
 
     // const token = tokenManager.getAccessToken();
@@ -38,20 +40,20 @@ export class ApiContract<TResponse> {
         options.body = formData;
       } else {
         options.body = JSON.stringify(this.config.body);
-        if (!options.headers["Content-Type"]) {
-          options.headers["Content-Type"] = "application/json";
+        if (!headers["Content-Type"]) {
+          headers["Content-Type"] = "application/json";
         }
       }
     }
     return await httpClient.request<TResponse>(url, options);
   }
 
-  async ensured(successMessage?: string): Promise<TResponse | null> {
+  async ensured(successMessage?: string, signal?: AbortSignal): Promise<TResponse | null> {
     const toast = useToast();
     const errorHandler = useApiErrorHandler();
 
     try {
-      const result = await this.execute();
+      const result = await this.execute(signal);
       toast.add({
         color: 'success',
         title: 'Успешно!',

@@ -1,6 +1,6 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import type { CreateTaskTodoListItemRequest, CreateTaskTodoListRequest, ListRequest, TaskTodoListDto, TaskTodoListItemDto, UpdateTaskTodoListItemRequest, UpdateTaskTodoListRequest } from "~/types/request.types";
 
 export const taskTodoListServiceFactory = {
@@ -25,7 +25,7 @@ export const taskTodoListServiceFactory = {
       .get(`/api/TaskTodoList/by-task/${taskId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(dto)
-      .withResponse<TaskTodoListDto[]>()
+      .withResponse<ListResponse<TaskTodoListDto[]>>()
       .build(),
 
   get: (todoListId: string) =>

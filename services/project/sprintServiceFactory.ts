@@ -1,6 +1,7 @@
 import { PROJECT_SERVICE } from "~/constants/services.constants";
 import type { ListRequest, CreateSprintRequest, UpdateSprintRequest, SprintDto } from "~/types/request.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
+import type { ListResponse } from "~/types/api.types";
 
 export const sprintServiceFactory = {
     create: (dto: CreateSprintRequest) =>
@@ -26,7 +27,7 @@ export const sprintServiceFactory = {
             .get(`/api/Sprint`)
             .withService(PROJECT_SERVICE)
             .withQueryParams<ListRequest>(params)
-            .withResponse<SprintDto[]>()
+            .withResponse<ListResponse<SprintDto[]>>()
             .build(),
     delete: (id: string) =>
         apiContractBuilderHelper

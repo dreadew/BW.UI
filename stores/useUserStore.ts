@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { GenerateVerificationCodeRequest, RecoverPasswordRequest, SignInRequest, SignUpRequest, SkillRequest, UpdateUserRequest, RoleRequest, UserDto } from '~/types/request.types';
+import type { GenerateVerificationCodeRequest, RecoverPasswordRequest, SignInRequest, SignUpRequest, SkillRequest, UpdateUserRequest, RoleRequest, UserDto, VerifyRequest } from '~/types/request.types';
 import * as signalR from "@microsoft/signalr";
 import { NotificationLevel, type WebNotificationDto } from "../types/api.types";
 import { userServiceFactory } from "~/services/identity/userServiceFactory";
@@ -12,9 +12,15 @@ export const useUserStore = defineStore("user", () => {
   const errorHandler = useApiErrorHandler();
 
   const user = ref<UserDto | null>(null);
-  const isLoading = ref(false);
+  const loading = ref(false);
   const error = ref<string | null>(null);
   const validationErrors = ref<Record<string, string>>({});
+
+  const data = ref<UserDto[]>([]);
+  const totalCount = ref(0);
+  const offset = ref(0);
+  const limit = ref(20);
+  const includeDeleted = ref(false);
 
   const accessToken = ref(tokenManager.getAccessToken());
   const refreshToken = ref(tokenManager.getRefreshToken());
@@ -35,7 +41,7 @@ export const useUserStore = defineStore("user", () => {
   const userId = computed(() => user.value?.id ?? storedUserId.value ?? tokenManager.getUserId());
 
   function resetState() {
-    isLoading.value = false;
+    loading.value = false;
     error.value = null;
     validationErrors.value = {};
   }
@@ -68,7 +74,7 @@ export const useUserStore = defineStore("user", () => {
       return;
     }
 
-    isLoading.value = true;
+    loading.value = true;
     error.value = null;
 
     try {
@@ -80,7 +86,7 @@ export const useUserStore = defineStore("user", () => {
       user.value = null;
       tokenManager.clearTokens();
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
@@ -105,13 +111,13 @@ export const useUserStore = defineStore("user", () => {
 
   async function login(credentials: SignInRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     const { isValid, errors } = await validate(signInRequestSchema, credentials);
 
     if (!isValid) {
       validationErrors.value = errors || {};
-      isLoading.value = false;
+      loading.value = false;
       return false;
     }
 
@@ -130,17 +136,19 @@ export const useUserStore = defineStore("user", () => {
 
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function connect() {
+    const config = useRuntimeConfig();
+
     if (connection.value) return;
 
     if (!accessToken.value) return;
 
     connection.value = new signalR.HubConnectionBuilder()
-      .withUrl("http://100.70.254.29:5000" + "/hubs/notification", {
+      .withUrl(config.public.identityApiUrl + "/hubs/notification", {
         accessTokenFactory: () => `Bearer ${accessToken.value!}`,
         withCredentials: true,
       })
@@ -172,13 +180,13 @@ export const useUserStore = defineStore("user", () => {
 
   async function register(userData: SignUpRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     /*const { isValid, errors } = await validate(signUpRequestSchema, userData);
 
     if (!isValid) {
       validationErrors.value = errors || {};
-      isLoading.value = false;
+      loading.value = false;
       return false;
     }*/
 
@@ -190,13 +198,13 @@ export const useUserStore = defineStore("user", () => {
         );
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function updateProfile(id: string, dto: UpdateUserRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
@@ -205,13 +213,13 @@ export const useUserStore = defineStore("user", () => {
       await fetchCurrentUser();
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function uploadProfilePhoto(id: string, file: File) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
@@ -220,13 +228,13 @@ export const useUserStore = defineStore("user", () => {
       await fetchCurrentUser();
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteProfilePhoto(id: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
@@ -235,26 +243,40 @@ export const useUserStore = defineStore("user", () => {
       await fetchCurrentUser();
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function generateVerificationCode(
     body: GenerateVerificationCodeRequest
   ) {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
         .generateVerificationCode(body)
         .ensured("Код подтверждения успешно отправлен на ваш email!");
     } finally {
-      isLoading.value = false;
+      loading.value = false;
+    }
+  }
+
+  async function verify(
+    body: VerifyRequest 
+  ) {
+    loading.value = true;
+
+    try {
+      await userServiceFactory
+        .verify(body)
+        .ensured("Аккаунт успешно подтвержден");
+    } finally {
+      loading.value = false;
     }
   }
 
   async function recoverPassword(id: string, body: RecoverPasswordRequest) {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
@@ -262,12 +284,12 @@ export const useUserStore = defineStore("user", () => {
         .ensured("Вы успешно изменили пароль!");
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteUser() {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
@@ -275,12 +297,12 @@ export const useUserStore = defineStore("user", () => {
         .ensured("Вы успешно удалили аккаунт!");
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function restoreUser() {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
@@ -288,12 +310,12 @@ export const useUserStore = defineStore("user", () => {
         .ensured("Вы успешно восстановили аккаунт!");
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function addSkill(dto: SkillRequest) {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
@@ -301,12 +323,12 @@ export const useUserStore = defineStore("user", () => {
         .ensured("Вы успешно добавили навык!");
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function removeSkill(dto: SkillRequest) {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await userServiceFactory
@@ -314,12 +336,12 @@ export const useUserStore = defineStore("user", () => {
         .ensured("Вы успешно удалили навык!");
       return true;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function addRole(dto: RoleRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await userServiceFactory
         .addRole(dto)
@@ -329,12 +351,12 @@ export const useUserStore = defineStore("user", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function removeRole(dto: RoleRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await userServiceFactory
         .removeRole(dto)
@@ -344,8 +366,49 @@ export const useUserStore = defineStore("user", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
+  }
+
+  async function list() {
+    loading.value = true;
+    try {
+      const res = await userServiceFactory
+        .listUsers({limit: limit.value, offset: offset.value, includeDeleted: includeDeleted.value})
+        .execute()
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return res;
+    } catch (err) {
+      errorHandler.handleError(err);
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
+  }
+
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
   }
 
   async function ensureUserLoaded() {
@@ -357,7 +420,7 @@ export const useUserStore = defineStore("user", () => {
   return {
     user,
     userId,
-    isLoading,
+    loading,
     error,
     validationErrors,
     isAuthenticated,
@@ -369,7 +432,9 @@ export const useUserStore = defineStore("user", () => {
     ensureUserLoaded,
     updateProfile,
     uploadProfilePhoto,
-    // generateVerificationCode,
+    list,
+    generateVerificationCode,
+    verify,
     recoverPassword,
     deleteProfilePhoto,
     deleteUser,
@@ -379,5 +444,11 @@ export const useUserStore = defineStore("user", () => {
     addRole,
     removeRole,
     resetState,
+    data,
+    offset,
+    limit,
+    totalCount,
+    prevPage,
+    nextPage
   };
 });

@@ -15,69 +15,105 @@ export const useTaskStore = defineStore("task", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const tasks = ref<TaskDto[]>([]);
-  const isLoading = ref(false);
+  const sectionId = ref<string | null>(null);
+  const userId = ref<string | null>(null);
+  const projectId = ref<string | null>(null);
+  const data = ref<TaskDto[]>([]);
+  const loading = ref(false);
   const error = ref<string | null>(null);
   const limit = ref(20);
   const offset = ref(0);
+  const includeDeleted = ref(false);
+  const totalCount = ref(0);
 
   function resetState() {
-    isLoading.value = false;
+    loading.value = false;
     error.value = null;
   }
 
-  async function listByProject(projectId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
+  async function listByProject() {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
     try {
-      const req: ListRequest = {
-        limit: params.limit ?? limit.value,
-        offset: params.offset ?? offset.value,
-        includeDeleted: params.includeDeleted ?? false
-      };
-      const res = await taskServiceFactory
-        .listByProject(projectId, req)
-        .execute();
-      if (!res || res.length === 0) {
+      if (!projectId.value) {
+        error.value = "Project ID is not set";
         return [];
       }
-      tasks.value = res;
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
+      };
+      const res = await taskServiceFactory
+        .listByProject(projectId.value, req)
+        .execute();
+      data.value = res.data;
+      totalCount.value = res.totalCount;
       return res;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
-  async function listBySection(sectionId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
+  async function listBySection() {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
     try {
-      const req: ListRequest = {
-        limit: params.limit ?? limit.value,
-        offset: params.offset ?? offset.value,
-        includeDeleted: params.includeDeleted ?? false
-      };
-      const res = await taskServiceFactory
-        .listBySection(sectionId, req)
-        .execute();
-      if (!res || res.length === 0) {
+      if (!sectionId.value) {
+        error.value = "Section ID is not set";
         return [];
       }
-      tasks.value = res;
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
+      };
+      const res = await taskServiceFactory
+        .listBySection(sectionId.value, req)
+        .execute();
+      data.value = res.data;
+      totalCount.value = res.totalCount;
       return res;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
+    }
+  }
+
+  async function listByUser() {
+    resetState();
+    loading.value = true;
+    try {
+      if (!userId.value) {
+        error.value = "User ID is not set";
+        return [];
+      }
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
+      };
+      const res = await taskServiceFactory
+        .listByUser(userId.value, req)
+        .execute();
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return res;
+    } catch (err) {
+      errorHandler.handleError(err);
+      return [];
+    } finally {
+      loading.value = false;
     }
   }
 
   async function get(taskId: string) {
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       return await taskServiceFactory.get(taskId).execute();
@@ -85,13 +121,13 @@ export const useTaskStore = defineStore("task", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function createTask(request: CreateTaskRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskServiceFactory.create(request).ensured("Задача успешно создана");
@@ -100,13 +136,13 @@ export const useTaskStore = defineStore("task", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function updateTask(request: UpdateTaskRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskServiceFactory.update(request).ensured("Задача успешно обновлена");
@@ -116,13 +152,13 @@ export const useTaskStore = defineStore("task", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteTask(taskId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskServiceFactory.delete(taskId).ensured("Задача успешно удалена");
@@ -132,13 +168,13 @@ export const useTaskStore = defineStore("task", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function restoreTask(taskId: string) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskServiceFactory.restore(taskId).ensured("Задача успешно восстановлена");
@@ -148,13 +184,13 @@ export const useTaskStore = defineStore("task", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function addTaskAssignee(request: AddTaskAssigneeRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskServiceFactory
@@ -166,13 +202,13 @@ export const useTaskStore = defineStore("task", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function removeTaskAssignee(request: RemoveTaskAssigneeRequest) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskServiceFactory
@@ -184,13 +220,13 @@ export const useTaskStore = defineStore("task", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function changePosition(request: TaskPositionDto) {
     resetState();
-    isLoading.value = true;
+    loading.value = true;
 
     try {
       await taskServiceFactory
@@ -202,32 +238,56 @@ export const useTaskStore = defineStore("task", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
-  function setPaging(newLimit: number, newOffset: number) {
-    limit.value = newLimit;
+  async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
+  }
+
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
     offset.value = newOffset;
   }
 
-  function nextPage() {
-    offset.value += limit.value;
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
   }
 
-  function prevPage() {
-    offset.value = Math.max(0, offset.value - limit.value);
-  }
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    if (sectionId.value) listBySection();
+    if (userId.value) listByUser();
+    if (projectId.value) listByProject();
+  })
 
   return {
-    tasks,
-    isLoading,
+    data,
+    loading,
     error,
     limit,
     offset,
+    includeDeleted,
+    currentPage,
+    totalCount,
+    projectId,
     listByProject,
     listBySection,
-    setPaging,
+    listByUser,
+    reset,
     nextPage,
     prevPage,
     get,

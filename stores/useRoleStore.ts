@@ -2,40 +2,41 @@ import { defineStore } from "pinia";
 import { roleServiceFactory } from "~/services/identity/roleServiceFactory";
 import { useApiErrorHandler } from "#imports";
 import type { CreateRoleRequest, UpdateRoleRequest, ListRequest, RoleDto } from "~/types/request.types";
-import type { UserRole } from "~/types/response.types";
-import type { PagingParams } from "~/types/api.types";
 
 export const useRoleStore = defineStore("role", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const roles: Ref<UserRole[]> = ref([]);
-  const isLoading = ref(false);
+  const data: Ref<RoleDto[]> = ref([]);
+  const loading = ref(false);
   const error = ref(null);
   const limit = ref(20);
   const offset = ref(0);
+  const includeDeleted = ref(false);
+  const totalCount = ref(0);
 
-  async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-    isLoading.value = true;
+  async function list() {
+    loading.value = true;
     try {
       const req: ListRequest = {
-        limit: params.limit ?? limit.value,
-        offset: params.offset ?? offset.value,
-        includeDeleted: params.includeDeleted ?? false
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
       };
       const res = await roleServiceFactory.list(req).execute();
-      roles.value = res as any;
-      return roles.value;
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return data.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function get(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       return await roleServiceFactory
         .get(id)
@@ -44,12 +45,12 @@ export const useRoleStore = defineStore("role", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function create(request: CreateRoleRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await roleServiceFactory
         .create(request)
@@ -59,12 +60,12 @@ export const useRoleStore = defineStore("role", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function update(request: UpdateRoleRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await roleServiceFactory
         .update(request)
@@ -74,12 +75,12 @@ export const useRoleStore = defineStore("role", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteRole(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await roleServiceFactory
         .deleteRole(id)
@@ -89,12 +90,12 @@ export const useRoleStore = defineStore("role", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function restore(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await roleServiceFactory
         .restore(id)
@@ -104,31 +105,51 @@ export const useRoleStore = defineStore("role", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
-  function setPaging(newLimit: number, newOffset: number) {
-    limit.value = newLimit;
+    async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
+  }
+
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
     offset.value = newOffset;
   }
 
-  function nextPage() {
-    offset.value += limit.value;
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
   }
 
-  function prevPage() {
-    offset.value = Math.max(0, offset.value - limit.value);
-  }
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    list()
+  })
 
   return {
-    roles,
-    isLoading,
+    data,
+    loading,
+    totalCount,
+    currentPage,
+    includeDeleted,
     error,
     limit,
     offset,
     list,
-    setPaging,
+    reset,
     nextPage,
     prevPage,
     get,

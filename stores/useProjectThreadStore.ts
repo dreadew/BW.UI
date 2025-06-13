@@ -7,75 +7,43 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
 
-  const threads: Ref<ProjectThreadDto[]> = ref([]);
-  const isLoading = ref(false);
-  const error = ref(null);
+  const projectId = ref<string | null>(null);
+  const data: Ref<ProjectThreadDto[]> = ref([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
   const limit = ref(20);
   const offset = ref(0);
+  const includeDeleted = ref(false);
+  const totalCount = ref(0);
 
-  async function list(projectId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-    isLoading.value = true;
+  async function list() {
+    loading.value = true;
     try {
-      const req: ListRequest = {
-        limit: params.limit ?? limit.value,
-        offset: params.offset ?? offset.value,
-        includeDeleted: params.includeDeleted ?? false
-      };
-      const res = await projectThreadServiceFactory
-        .listByProject(projectId, req)
-        .execute();
-      if (!res || res.length === 0) {
+      if (!projectId.value) {
+        error.value = "Project ID is not set";
         return [];
       }
-      threads.value = res;
-      return threads.value;
+      const req: ListRequest = {
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: includeDeleted.value
+      };
+      const res = await projectThreadServiceFactory
+        .listByProject(projectId.value, req)
+        .execute();
+      data.value = res.data;
+      totalCount.value = res.totalCount;
+      return data.value;
     } catch (err) {
       errorHandler.handleError(err);
       return [];
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
-  }
-
-  async function listByProject(projectId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-    isLoading.value = true;
-    try {
-      const req: ListRequest = {
-        limit: params.limit ?? limit.value,
-        offset: params.offset ?? offset.value,
-        includeDeleted: params.includeDeleted ?? false
-      };
-      const res = await projectThreadServiceFactory
-        .listByProject(projectId, req)
-        .execute();
-      if (!res || res.length === 0) {
-        return [];
-      }
-      threads.value = res;
-      return threads.value;
-    } catch (err) {
-      errorHandler.handleError(err);
-      return [];
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  function setPaging(newLimit: number, newOffset: number) {
-    limit.value = newLimit;
-    offset.value = newOffset;
-  }
-
-  function nextPage() {
-    offset.value += limit.value;
-  }
-
-  function prevPage() {
-    offset.value = Math.max(0, offset.value - limit.value);
   }
 
   async function get(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       return await projectThreadServiceFactory
         .get(id)
@@ -84,12 +52,12 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function create(data: CreateProjectThreadRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await projectThreadServiceFactory
         .create(data)
@@ -99,12 +67,12 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function update(data: UpdateProjectThreadRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await projectThreadServiceFactory
         .update(data)
@@ -114,12 +82,12 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteThread(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await projectThreadServiceFactory
         .deleteThread(id)
@@ -129,12 +97,12 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function restore(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await projectThreadServiceFactory
         .restore(id)
@@ -144,18 +112,52 @@ export const useProjectThreadStore = defineStore("projectThread", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
+  async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
+  }
+
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const currentPage = computed(() => offset.value / limit.value + 1);
+
+  watch(() => [offset.value, includeDeleted.value], () => {
+    list()
+  })
+
   return {
-    threads,
-    isLoading,
+    projectId,
+    currentPage,
+    data,
+    loading,
     error,
     limit,
     offset,
+    includeDeleted,
+    totalCount,
     list,
-    setPaging,
+    reset,
     nextPage,
     prevPage,
     get,

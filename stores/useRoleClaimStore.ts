@@ -6,12 +6,16 @@ import type { ListRequest, CreateRoleClaimsRequest, RoleClaimsDto } from "~/type
 export const useRoleClaimStore = defineStore("roleClaim", () => {
   const toast = useToast();
   const errorHandler = useApiErrorHandler();
-  const roleClaims: Ref<RoleClaimsDto[]> = ref([]);
-  const isLoading = ref(false);
-  const error = ref(null);
+
+  const data: Ref<RoleClaimsDto[]> = ref([]);
+  const roleId = ref<string | null>(null);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+  const limit = ref(20);
+  const offset = ref(0);
 
   async function createRoleClaim(data: CreateRoleClaimsRequest) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await roleClaimServiceFactory.create(data)
         .ensured("Разрешение успешно создано");
@@ -20,12 +24,12 @@ export const useRoleClaimStore = defineStore("roleClaim", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function deleteRoleClaim(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       await roleClaimServiceFactory
         .deleteRoleClaim(id)
@@ -35,12 +39,12 @@ export const useRoleClaimStore = defineStore("roleClaim", () => {
       errorHandler.handleError(err);
       return false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   async function get(id: string) {
-    isLoading.value = true;
+    loading.value = true;
     try {
       const res = await roleClaimServiceFactory.get(id);
       return res;
@@ -48,33 +52,40 @@ export const useRoleClaimStore = defineStore("roleClaim", () => {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
-  async function list(roleId: string, params: ListRequest = { limit: 20, offset: 0, includeDeleted: false }) {
-    isLoading.value = true;
+  async function list() {
+    loading.value = true;
     try {
+      if (!roleId.value) {
+        error.value = "Role ID is required";
+        return;
+      }
       const req: ListRequest = {
-        limit: params.limit ?? 20,
-        offset: params.offset ?? 0,
-        includeDeleted: params.includeDeleted ?? false
+        limit: limit.value,
+        offset: offset.value,
+        includeDeleted: false
       };
       const res = await roleClaimServiceFactory
-        .list(roleId, req).execute();
-      roleClaims.value = res as RoleClaimsDto[];
+        .list(roleId.value, req).execute();
+      data.value = res.data;
     } catch (err) {
       errorHandler.handleError(err);
       return null;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
 
   return {
-    roleClaims,
-    isLoading,
+    data,
+    loading,
     error,
+    limit,
+    offset,
+    roleId,
     createRoleClaim,
     deleteRoleClaim,
     get,

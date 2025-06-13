@@ -9,67 +9,48 @@ export const useProjectRoleClaimsStore = defineStore(
     const toast = useToast();
     const errorHandler = useApiErrorHandler();
 
-    const roleClaims = ref<ProjectRoleClaimsDto[]>([]);
-    const isLoading = ref(false);
+    const data = ref<ProjectRoleClaimsDto[]>([]);
+    const roleId = ref<string | null>(null);
+    const loading = ref(false);
     const error = ref<string | null>(null);
     const limit = ref(20);
     const offset = ref(0);
+    const includeDeleted = ref(false);
+    const totalCount = ref(0);
 
     function resetState() {
-      isLoading.value = false;
+      loading.value = false;
       error.value = null;
     }
 
-    async function list(roleId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-      isLoading.value = true;
+    async function list() {
+      loading.value = true;
       try {
-        const req: ListRequest = {
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          includeDeleted: params.includeDeleted ?? false
-        };
-        const res = await projectRoleClaimsServiceFactory
-          .listByRole(roleId, req)
-          .execute();
-        if (!res || res.length === 0) {
+        if (!roleId.value) {
+          error.value = "Role ID is not set";
           return [];
         }
-        roleClaims.value = res;
-        return roleClaims.value;
+        const req: ListRequest = {
+          limit: limit.value,
+          offset: offset.value,
+          includeDeleted: includeDeleted.value
+        };
+        const res = await projectRoleClaimsServiceFactory
+          .listByRole(roleId.value, req)
+          .execute();
+        data.value = res.data;
+        totalCount.value = res.totalCount;
+        return data.value;
       } catch (err) {
         errorHandler.handleError(err);
         return [];
       } finally {
-        isLoading.value = false;
-      }
-    }
-
-    async function listByRole(roleId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-      isLoading.value = true;
-      try {
-        const req: ListRequest = {
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          includeDeleted: params.includeDeleted ?? false
-        };
-        const res = await projectRoleClaimsServiceFactory
-          .listByRole(roleId, req)
-          .execute();
-        if (!res || res.length === 0) {
-          return [];
-        }
-        roleClaims.value = res;
-        return roleClaims.value;
-      } catch (err) {
-        errorHandler.handleError(err);
-        return [];
-      } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function get(id: string) {
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         return await projectRoleClaimsServiceFactory.get(id).execute();
@@ -77,13 +58,13 @@ export const useProjectRoleClaimsStore = defineStore(
         errorHandler.handleError(err);
         return [];
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function create(request: CreateProjectRoleClaimsRequest) {
       resetState();
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         await projectRoleClaimsServiceFactory
@@ -94,13 +75,13 @@ export const useProjectRoleClaimsStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function update(request: UpdateProjectRoleClaimsRequest) {
       resetState();
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         await projectRoleClaimsServiceFactory
@@ -111,13 +92,13 @@ export const useProjectRoleClaimsStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function deleteClaim(claimId: string) {
       resetState();
-      isLoading.value = true;
+      loading.value = true;
 
       try {
         await projectRoleClaimsServiceFactory
@@ -128,31 +109,45 @@ export const useProjectRoleClaimsStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
-    function setPaging(newLimit: number, newOffset: number) {
-      limit.value = newLimit;
-      offset.value = newOffset;
-    }
+  async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
+  }
 
-    function nextPage() {
-      offset.value += limit.value;
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
     }
+    offset.value = newOffset;
+  }
 
-    function prevPage() {
-      offset.value = Math.max(0, offset.value - limit.value);
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
     }
+    offset.value = newOffset;
+  }
 
     return {
-      roleClaims,
-      isLoading,
+      data,
+      loading,
       error,
       limit,
       offset,
+      includeDeleted,
+      totalCount,
+      roleId,
       list,
-      setPaging,
+      reset,
       nextPage,
       prevPage,
       get,

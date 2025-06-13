@@ -1,3 +1,4 @@
+import type { BaseDto } from "./request.types";
 import type { FieldTransformer } from "./transformers.types";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -69,4 +70,9 @@ export interface WebNotificationDto {
   level: NotificationLevel;
   title: string;
   message: string;
+}
+
+export interface ListResponse<T> {
+  data: T;
+  totalCount: number;
 }

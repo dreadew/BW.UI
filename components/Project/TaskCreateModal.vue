@@ -1,109 +1,141 @@
 <template>
-  <UModal v-model:open="open" title="Создать задачу">
+  <UModal :open="open" @update:open="emit('update:open', $event)" title="Создать задачу">
     <template #body>
-      <UForm :state="formState" :schema="formSchema" @submit="onSubmit">
-        <UFormField label="ID" name="id" required>
-          <UInput v-model="formState.id" required placeholder="ID задачи" />
-        </UFormField>
+      <UForm class="space-y-4" :state="formState" :schema="formSchema" @submit="onSubmit">
         <UFormField label="Название" name="name" required>
-          <UInput v-model="formState.name" required placeholder="Название задачи" />
+          <UInput class="w-full" v-model="formState.name" required placeholder="Название задачи" />
         </UFormField>
-        <UFormField label="Архивировать?" name="isArchived" required>
-          <UCheckbox v-model="formState.isArchived" label="Архивировать" />
+        <UFormField label="Описание" name="content" required>
+          <UInput class="w-full" v-model="formState.content" required placeholder="Описание задачи" />
         </UFormField>
-        <UFormField label="Дата начала" name="startedDate" required>
-          <UInput v-model="formState.startedDate" required placeholder="Дата начала (YYYY-MM-DD)" />
+        <UFormField label="Секция" name="sectionId" required>
+          <USelect :loading="sectionStore.loading" :disabled="sectionStore.loading" v-model="formState.sectionId"
+            :items="sectionOptions" placeholder="Выберите секцию" class="w-full" />
         </UFormField>
-        <UFormField label="Дата окончания" name="endDate" required>
-          <UInput v-model="formState.endDate" required placeholder="Дата окончания (YYYY-MM-DD)" />
+        <UFormField label="Приоритет" name="priorityTypeId" required>
+          <USelect :loading="isPrioritiesLoading" :disabled="isPrioritiesLoading" v-model="formState.priorityTypeId"
+            :items="priorityOptions" placeholder="Выберите приоритет" class="w-full" />
         </UFormField>
-        <UFormField label="Тип приоритета" name="priorityTypeId">
-          <select v-model="formState.priorityTypeId" class="u-input">
-            <option value="">Не выбран</option>
-            <option v-for="option in priorityTypeOptions" :key="option.id" :value="option.id">
-              {{ option.name }}
-            </option>
-          </select>
+        <UFormField label="Исполнитель" name="userId" required>
+          <USelect v-model="formState.userId" :loading="userStore.loading" :disabled="userStore.loading"
+            :items="userOptions" placeholder="Выберите пользователя" class="w-full" />
         </UFormField>
-        <UFormField label="Тип активности" name="activityTypeId">
-          <select v-model="formState.activityTypeId" class="u-input">
-            <option value="">Не выбран</option>
-            <option v-for="option in activityTypeOptions" :key="option.id" :value="option.id">
-              {{ option.name }}
-            </option>
-          </select>
+        <UFormField label="Дата начала" name="startedDate">
+          <UPopover class="w-full">
+            <UButton color="neutral" icon="i-lucide-calendar">
+              {{ startedDateModel ? (startedDateModel ? df.format(startedDateModel.toDate(getLocalTimeZone())) :
+                'Выбрать дату') : 'Выбрать дату' }}
+            </UButton>
+            <template #content>
+              <UCalendar v-model="startedDateModel" class="p-2" />
+            </template>
+          </UPopover>
         </UFormField>
-        <UFormField label="Тип отношения" name="relationTypeId">
-          <select v-model="formState.relationTypeId" class="u-input">
-            <option value="">Не выбран</option>
-            <option v-for="option in relationTypeOptions" :key="option.id" :value="option.id">
-              {{ option.name }}
-            </option>
-          </select>
+        <UFormField label="Дата окончания" name="endDate">
+          <UPopover class="w-full">
+            <UButton color="neutral" icon="i-lucide-calendar">
+              {{ endDateModel ? (endDateModel ? df.format(endDateModel.toDate(getLocalTimeZone())) : 'Выбрать дату') :
+                `Выбрать
+              дату` }}
+            </UButton>
+            <template #content>
+              <UCalendar v-model="endDateModel" class="p-2" />
+            </template>
+          </UPopover>
         </UFormField>
-        <UButton type="submit" color="primary" class="mt-4" :loading="loading">Сохранить</UButton>
+        <UButton type="submit" color="primary" class="mt-4 float-right" :loading="loading">Создать</UButton>
       </UForm>
     </template>
   </UModal>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
-import { createTaskRequestSchema } from '~/schemas/generated.schema'
+import { ref, watch } from 'vue'
+import { z } from 'zod'
+import { useUserStore } from '~/stores/useUserStore'
 import { priorityTypeServiceFactory } from '~/services/project/priorityTypeServiceFactory'
-import { activityTypeServiceFactory } from '~/services/project/activityTypeServiceFactory'
-import { relationTypeServiceFactory } from '~/services/project/relationTypeServiceFactory'
-import type { PriorityTypeDto, ActivityTypeDto, RelationTypeDto } from '~/types/response.types'
-const props = defineProps({
-  open: Boolean,
-  loading: Boolean,
-  onSubmit: Function
-})
-const emit = defineEmits(['update:open', 'submit'])
-const formState = ref({
-  id: '',
-  name: '',
-  isArchived: false,
-  startedDate: '',
-  endDate: '',
-  priorityTypeId: '',
-  activityTypeId: '',
-  relationTypeId: ''
-})
-const formSchema = createTaskRequestSchema;
-const priorityTypeOptions = ref<PriorityTypeDto[]>([])
-const activityTypeOptions = ref<ActivityTypeDto[]>([])
-const relationTypeOptions = ref<RelationTypeDto[]>([])
+import { DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date'
+import { shallowRef } from 'vue'
+import type { BaseSoftDeletableDtoWithName, CreateTaskRequest } from '~/types/request.types'
+import type { Option } from '~/types/common.types'
 
-const loadOptions = async () => {
+const props = defineProps<{
+  open: boolean;
+  loading: boolean;
+  sectionId: string;
+  id: string;
+  onSubmit: (data: CreateTaskRequest) => void;
+}>()
+const route = useRoute()
+const projectId = computed(() => route.params.id as string)
+const emit = defineEmits(['update:open', 'submit'])
+
+const formState = ref<CreateTaskRequest>({
+  id: props.id,
+  sectionId: props.sectionId,
+  name: '',
+  content: '',
+  priorityTypeId: '',
+  userId: '',
+  startedDate: '',
+  endDate: ''
+})
+
+const formSchema = z.object({
+  name: z.string().min(3, 'Минимум 3 символа'),
+  content: z.string().min(3, 'Минимум 3 символа'),
+  sectionId: z.string().min(1, 'Обязательное поле'),
+  priorityTypeId: z.string().min(1, 'Обязательное поле'),
+  userId: z.string().min(1, 'Обязательное поле'),
+  startedDate: z.string().optional(),
+  endDate: z.string().optional()
+})
+
+const userStore = useUserStore()
+const sectionStore = useSectionStore()
+sectionStore.projectId = projectId.value
+
+const isPrioritiesLoading = ref(false)
+const userOptions = computed(() => userStore.data
+  .map(u => formatOptions(u)))
+const priorityOptions = ref<Option[]>([])
+const sectionOptions = computed(() => sectionStore.data
+  .map(s => formatOptions(s)))
+
+async function fetchOptions() {
+  await userStore.list()
+  await sectionStore.listByProject()
+  isPrioritiesLoading.value = true;
   try {
-    const [priorityRes, activityRes, relationRes] = await Promise.all([
-      priorityTypeServiceFactory.list().execute(),
-      activityTypeServiceFactory.list().execute(),
-      relationTypeServiceFactory.list().execute()
-    ])
-    priorityTypeOptions.value = priorityRes || []
-    activityTypeOptions.value = activityRes || []
-    relationTypeOptions.value = relationRes || []
-  } catch (e) {
-    // handle error (optional)
+    const priorities = await priorityTypeServiceFactory.list({ limit: 100, offset: 0, includeDeleted: false }).execute()
+    priorityOptions.value = priorities.map((p: BaseSoftDeletableDtoWithName) => ({
+      label: p.name,
+      value: p.id
+    }))
+  } finally {
+    isPrioritiesLoading.value = false;
   }
 }
-onMounted(loadOptions)
+
+const df = new DateFormatter('ru-RU', { dateStyle: 'medium' })
+const startedDateModel = shallowRef(formState.value.startedDate ? parseDate(formState.value.startedDate) : null)
+const endDateModel = shallowRef(formState.value.endDate ? parseDate(formState.value.endDate) : null)
+
+watch(() => startedDateModel.value, (val) => {
+  formState.value.startedDate = val ? val.toDate(getLocalTimeZone()).toISOString() : ''
+})
+
+watch(() => endDateModel.value, (val) => {
+  formState.value.endDate = val ? val.toDate(getLocalTimeZone()).toISOString() : ''
+})
+
 watch(() => props.open, (val) => {
+  if (val) fetchOptions()
   if (!val) {
-    formState.value = {
-      id: '',
-      name: '',
-      isArchived: false,
-      startedDate: '',
-      endDate: '',
-      priorityTypeId: '',
-      activityTypeId: '',
-      relationTypeId: ''
-    }
-  } else {
-    loadOptions()
+    formState.value = { ...formState.value, sectionId: props.sectionId || '', name: '', content: '', priorityTypeId: '', userId: '', startedDate: '', endDate: '' }
+    startedDateModel.value = null
+    endDateModel.value = null
   }
 })
+
 const onSubmit = () => emit('submit', formState.value)
 </script>

@@ -1,5 +1,3 @@
-import type { NotificationTypes, } from "./response.types";
-
 /**
  * DTO для получения
  * списков
@@ -33,7 +31,6 @@ export interface ListRequestWithTaskId extends ListRequest {
  */
 export interface FileDeleteRequest {
     id: string;
-    fromId: string;
 }
 
 /**
@@ -77,21 +74,83 @@ export interface BaseDto {
 }
 
 /**
- * Базовое DTO для сущностей
- * с мягким удалением
+ * Базовое DTO
+ * с отслеживанием
  */
-export interface BaseSoftDeletableDto extends BaseDto {
-    isDeleted: boolean;
+export interface BaseAuditableDto extends BaseDto {
     createdAt: string;
     updatedAt?: string;
 }
 
 /**
+ * Базовое ДТО сущностей
+ * с наименованием
+ */
+export interface BaseDtoWithName extends BaseAuditableDto {
+    name: string;
+}
+
+/**
+ * Базовое DTO
+ * с наименованием
+ * и мягким удалением
+ */
+export interface BaseSoftDeletableDtoWithName extends BaseSoftDeletableDto {
+    name: string;
+}
+
+/**
+ * Базовое DTO для сущностей
+ * с мягким удалением
+ */
+export interface BaseSoftDeletableDto extends BaseAuditableDto {
+    isDeleted: boolean;
+}
+
+/**
+ * Базовое ДТО для создания / удаления
+ * сущностей с наименованием
+ */
+export interface BaseRequestDtoWithName extends BaseDto {
+    name: string;
+}
+
+/**
  * Базовое DTO для константных
  * сущностей
+ * @deprecated
  */
 export interface BaseConstantDto extends BaseSoftDeletableDto {
     name: string;
+}
+
+/**
+ * Базовое ДТО директории
+ */
+export interface BaseDirectoryDto extends BaseSoftDeletableDtoWithName {
+    children: BaseDirectoryDto[];
+    artifacts: ArtifactDto[];
+}
+
+/**
+ * Базовое DTO для
+ * создания директории
+ */
+export interface BaseDirectoryRequest extends BaseRequestDtoWithName {
+    parentId?: string;
+}
+
+/**
+ * Базовое DTO для 
+ * обновления директории
+ */
+export interface UpdateDirectoryRequest extends BaseRequestDtoWithName { }
+
+/**
+ * DTO артефакта
+ */
+export interface ArtifactDto extends BaseDtoWithName {
+    path: string;
 }
 
 // IDENTITY SERVICE
@@ -160,12 +219,10 @@ export interface RevokeRequest extends BaseDto { }
 /**
  * DTO сессии
  */
-export interface SessionDto extends BaseDto {
+export interface SessionDto extends BaseAuditableDto {
     userId: string;
     location: string;
     isRevoked: string;
-    createdAt: string;
-    updatedAt: string;
 }
 
 // Role DTOs
@@ -180,16 +237,14 @@ export interface CreateRoleRequest {
 /**
  * DTO для обновления роли
  */
-export interface UpdateRoleRequest extends BaseDto {
-    name: string;
+export interface UpdateRoleRequest extends BaseRequestDtoWithName {
     isDeleted?: boolean;
 }
 
 /**
  * DTO глобальной роли
  */
-export interface RoleDto extends BaseSoftDeletableDto {
-    name: string;
+export interface RoleDto extends BaseSoftDeletableDtoWithName {
     claims: RoleClaimsDto[];
 }
 
@@ -226,13 +281,12 @@ export interface CreateSkillRequest {
 /**
  * DTO навыка
  */
-export interface SkillDto extends BaseSoftDeletableDto { }
+export interface SkillDto extends BaseSoftDeletableDtoWithName { }
 
 /**
  * DTO для обновления навыка
  */
-export interface UpdateSkillRequest extends BaseDto {
-    name: string;
+export interface UpdateSkillRequest extends BaseRequestDtoWithName {
     isDeleted?: boolean;
 }
 
@@ -292,14 +346,14 @@ export interface UserDto extends BaseSoftDeletableDto {
     username: string;
     email: string;
     phoneNumber: string;
-    photoPathWithUrl: string;
+    path: string;
     isSuspended: boolean;
     isVerified: boolean;
     phoneNumberConfirmed: boolean;
     roles: RoleDto[];
     skills: SkillDto[];
-    userSchedules: UserScheduleDto[];
-    sessions: SessionDto[];
+    //userSchedules: UserScheduleDto[];
+    //sessions: SessionDto[];
 }
 
 /**
@@ -348,25 +402,9 @@ export interface UserScheduleDto extends BaseSoftDeletableDto {
 // Workspace directory DTOs
 
 /**
- * DTO для создания директории
- * рабочего пространства
- */
-export interface CreateDirectoryRequest extends BaseDto {
-    name: string;
-    parentId: string;
-}
-
-/**
- * DTO для обновления директории
- * рабочего пространства
- */
-export interface UpdateDirectoryRequest extends BaseDto {
-    name?: string;
-}
-
-/**
  * DTO директории рабочего
  * пространства
+ * @deprecated
  */
 export interface DirectoryDto extends BaseSoftDeletableDto {
     name: string;
@@ -375,38 +413,24 @@ export interface DirectoryDto extends BaseSoftDeletableDto {
     artifacts: ArtifactDto[];
 }
 
-/**
- * DTO артефакта
- * рабочего пространства
- */
-export interface ArtifactDto extends BaseDto {
-    name: string;
-    path: string;
-    createdAt: string;
-    updatedAt?: string;
-}
-
 // Position DTOs
 
 /**
  * DTO для создания должности
  * рабочего пространства
  */
-export interface CreatePositionRequest extends BaseDto {
-    name: string;
-}
+export interface CreatePositionRequest extends BaseRequestDtoWithName { }
 
 /**
  * DTO должности рабочего пространства
  */
-export interface PositionDto extends BaseConstantDto { }
+export interface PositionDto extends BaseSoftDeletableDtoWithName { }
 
 /**
  * DTO для обновления должности
  * рабочего пространства
  */
-export interface UpdatePositionRequest extends BaseDto {
-    name: string;
+export interface UpdatePositionRequest extends BaseRequestDtoWithName {
     isDeleted?: boolean;
 }
 
@@ -416,7 +440,7 @@ export interface UpdatePositionRequest extends BaseDto {
  * DTO для создания клейма
  * роли рабочего пространства
  */
-export interface CreateWorkspaceRoleClaimsRequest {
+export interface CreateWorkspaceRoleClaimsRequest extends BaseDto {
     value: string;
 }
 
@@ -440,16 +464,13 @@ export interface WorkspaceRoleClaimsDto extends BaseDto {
  * DTO для создания роли 
  * рабочего пространства
  */
-export interface CreateWorkspaceRoleRequest extends BaseDto {
-    name: string;
-}
+export interface CreateWorkspaceRoleRequest extends BaseRequestDtoWithName { }
 
 /**
  * DTO для обновления роли
  * рабочего пространства
  */
-export interface UpdateWorkspaceRoleRequest extends BaseDto {
-    name: string;
+export interface UpdateWorkspaceRoleRequest extends BaseRequestDtoWithName {
     isDeleted?: boolean;
 }
 
@@ -457,8 +478,7 @@ export interface UpdateWorkspaceRoleRequest extends BaseDto {
  * DTO роли рабочего
  * пространства
  */
-export interface WorkspaceRoleDto extends BaseSoftDeletableDto {
-    name: string;
+export interface WorkspaceRoleDto extends BaseSoftDeletableDtoWithName {
     claims: WorkspaceRoleClaimsDto[];
 }
 
@@ -488,20 +508,18 @@ export interface RestoreWorkspaceRequest extends BaseDto { }
  * DTO для обновления
  * рабочего пространства
  */
-export interface UpdateWorkspaceRequest extends BaseDto {
-    name: string;
+export interface UpdateWorkspaceRequest extends BaseRequestDtoWithName {
     isDeleted?: boolean;
 }
 
 /**
  * DTO рабочего пространства
  */
-export interface WorkspaceDto extends BaseSoftDeletableDto {
-    name: string;
-    pictureUrl: string;
-    roles: WorkspaceRoleDto[];
-    directories: DirectoryDto[];
-    positions: PositionDto[];
+export interface WorkspaceDto extends BaseSoftDeletableDtoWithName {
+    path: string;
+    //roles: WorkspaceRoleDto[];
+    //directories: BaseDirectoryDto[];
+    //positions: PositionDto[];
     users: WorkspaceUserDto[];
 }
 
@@ -509,8 +527,7 @@ export interface WorkspaceDto extends BaseSoftDeletableDto {
  * DTO рабочего пространства
  * без фотографии
  */
-export interface WorkspaceWithAdditionalInfoDto extends BaseSoftDeletableDto {
-    name: string;
+export interface WorkspaceWithAdditionalInfoDto extends BaseSoftDeletableDtoWithName {
     roles: WorkspaceRoleDto[];
     directories: DirectoryDto[];
     positions: PositionDto[];
@@ -559,9 +576,7 @@ export interface WorkspaceUserDto extends BaseDto {
 /**
  * DTO для создания проекта
  */
-export interface CreateProjectRequest extends BaseDto {
-    name: string;
-}
+export interface CreateProjectRequest extends BaseRequestDtoWithName { }
 
 /**
  * DTO для удаления проекта
@@ -571,8 +586,7 @@ export interface DeleteProjectRequest extends BaseDto { }
 /**
  * DTO для обновления проекта
  */
-export interface UpdateProjectRequest extends BaseDto {
-    name: string;
+export interface UpdateProjectRequest extends BaseRequestDtoWithName {
     isDeleted?: boolean;
 }
 
@@ -580,21 +594,20 @@ export interface UpdateProjectRequest extends BaseDto {
  * DTO с краткой информацией
  * о проекте
  */
-export interface ShortProjectDto extends BaseSoftDeletableDto {
-    name: string;
-    pictureUrl: string;
+export interface ShortProjectDto extends BaseSoftDeletableDtoWithName {
+    path: string;
 }
 
 /**
  * DTO с информацией
  * о проекте
  */
-export interface ProjectDto extends BaseSoftDeletableDto {
-    name: string;
-    pictureUrl?: string;
-    threads: ProjectThreadDto[];
-    roles: ProjectRoleDto[];
-    sections: SectionDto[];
+export interface ProjectDto extends BaseSoftDeletableDtoWithName {
+    path: string;
+    users: ProjectUserDto[];
+    // threads: ProjectThreadDto[];
+    // roles: ProjectRoleDto[];
+    // sections: SectionDto[];
 }
 
 // Project Role DTOs
@@ -603,23 +616,18 @@ export interface ProjectDto extends BaseSoftDeletableDto {
  * DTO для создания
  * роли проекта
  */
-export interface CreateProjectRoleRequest extends BaseDto {
-    name: string;
-}
+export interface CreateProjectRoleRequest extends BaseRequestDtoWithName { }
 
 /**
  * DTO для обновления
  * роли проекта
  */
-export interface UpdateProjectRoleRequest extends BaseDto {
-    name: string;
-}
+export interface UpdateProjectRoleRequest extends BaseRequestDtoWithName { }
 
 /**
  * DTO роли проекта
  */
-export interface ProjectRoleDto extends BaseSoftDeletableDto {
-    name: string;
+export interface ProjectRoleDto extends BaseSoftDeletableDtoWithName {
     claims: ProjectRoleClaimsDto[];
 }
 
@@ -674,13 +682,11 @@ export interface UpdateTaskActivityRequest extends BaseDto {
  * DTO записи из
  * журнала активности
  */
-export interface TaskActivityDto extends BaseDto {
+export interface TaskActivityDto extends BaseAuditableDto {
     userId: string;
     date: string;
     workHours: number;
-    activityType: BaseConstantDto;
-    createdAt: string;
-    updatedAt?: string;
+    activityType: BaseSoftDeletableDtoWithName;
 }
 
 // Task DTOs
@@ -689,8 +695,7 @@ export interface TaskActivityDto extends BaseDto {
  * DTO для обновления
  * задачи
  */
-export interface UpdateTaskRequest extends BaseDto {
-    name: string;
+export interface UpdateTaskRequest extends BaseRequestDtoWithName {
     content: string;
     priorityTypeId?: string;
     analyticId?: string;
@@ -705,11 +710,10 @@ export interface UpdateTaskRequest extends BaseDto {
  * DTO для создания
  * задачи
  */
-export interface CreateTaskRequest extends BaseDto {
+export interface CreateTaskRequest extends BaseRequestDtoWithName {
     sectionId: string;
     priorityTypeId: string;
     userId: string;
-    name: string;
     content: string;
     isArchived?: boolean;
     startedDate?: string;
@@ -753,21 +757,21 @@ export interface RemoveTaskSprintRequest extends BaseDto {
 /**
  * DTO задачи
  */
-export interface TaskDto extends BaseSoftDeletableDto {
-    name: string;
+export interface TaskDto extends BaseSoftDeletableDtoWithName {
+    sectionId: string;
     content: string;
     isArchived: boolean;
-    priorityType: BaseConstantDto;
+    priorityType: BaseSoftDeletableDtoWithName;
     author: ProjectUserDto;
     analytic?: ProjectUserDto;
     position: number;
     assignees: TaskAssigneeDto[];
-    directories: TaskDirectoryDto[];
-    activities: TaskActivityDto[];
-    todoLists: TaskTodoListDto[];
-    evaluations: TaskEvaluationDto[];
+    // directories: TaskDirectoryDto[];
+    // activities: TaskActivityDto[];
+    // todoLists: TaskTodoListDto[];
+    // evaluations: TaskEvaluationDto[];
     relations: TaskRelationDto[];
-    comments: TaskCommentDto[];
+    // comments: TaskCommentDto[];
     startedDate?: string;
     endDate?: string;
 }
@@ -775,8 +779,10 @@ export interface TaskDto extends BaseSoftDeletableDto {
 /**
  * Краткое DTO задачи
  */
-export interface ShortTaskDto extends BaseSoftDeletableDto {
-    name: string;
+export interface ShortTaskDto extends BaseSoftDeletableDtoWithName {
+    sectionId: string;
+    content: string;
+    priorityType: BaseSoftDeletableDtoWithName;
     analytic: ProjectUserDto;
     author: ProjectUserDto;
     assignees: TaskAssigneeDto[];
@@ -830,7 +836,8 @@ export interface UpdateTaskCommentRequest extends BaseDto {
  * DTO комментария задачи
  */
 export interface TaskCommentDto extends BaseSoftDeletableDto {
-    author: ProjectUserDto;
+    userId: ProjectUserDto;
+    user: GrpcUserDto;
     content: string;
 }
 
@@ -839,25 +846,24 @@ export interface TaskCommentDto extends BaseSoftDeletableDto {
 /**
  * DTO для создания
  * директории задачи
+ * @deprecated
  */
-export interface CreateTaskDirectoryRequest extends BaseDto {
-    name: string;
-}
+export interface CreateTaskDirectoryRequest extends BaseRequestDtoWithName { }
 
 /**
  * DTO для обновления
  * директории задачи
+ * @deprecated
  */
-export interface UpdateTaskDirectoryRequest extends BaseDto {
-    name?: string;
+export interface UpdateTaskDirectoryRequest extends BaseRequestDtoWithName {
     isDeleted?: boolean;
 }
 
 /**
  * DTO директории задачи
+ * @deprecated
  */
-export interface TaskDirectoryDto extends BaseSoftDeletableDto {
-    name: string;
+export interface TaskDirectoryDto extends BaseRequestDtoWithName {
     artifacts: ArtifactDto[];
 }
 
@@ -885,7 +891,7 @@ export interface UpdateTaskEvaluationRequest extends BaseDto {
  * DTO оценки задачи
  */
 export interface TaskEvaluationDto extends BaseSoftDeletableDto {
-    acivityType: BaseConstantDto;
+    activityType: BaseSoftDeletableDtoWithName;
     hours: number;
 }
 
@@ -913,8 +919,7 @@ export interface TaskTodoListDto extends BaseDto {
 /**
  * DTO подзадачи
  */
-export interface TaskTodoListItemDto extends BaseSoftDeletableDto {
-    name: string;
+export interface TaskTodoListItemDto extends BaseSoftDeletableDtoWithName {
     duration: number;
     isCompleted: boolean;
     completedAt?: string;
@@ -926,10 +931,9 @@ export interface TaskTodoListItemDto extends BaseSoftDeletableDto {
  * DTO для создания
  * подзадачи
  */
-export interface CreateTaskTodoListItemRequest extends BaseDto {
-    name: string;
+export interface CreateTaskTodoListItemRequest extends BaseRequestDtoWithName {
     duration: number;
-    startDate: string;
+    startedDate: string;
     endDate: string;
 }
 
@@ -937,8 +941,7 @@ export interface CreateTaskTodoListItemRequest extends BaseDto {
  * DTO для обновления
  * подзадачи
  */
-export interface UpdateTaskTodoListItemRequest extends BaseDto {
-    name: string;
+export interface UpdateTaskTodoListItemRequest extends BaseRequestDtoWithName {
     duration: number;
     isCompleted: boolean;
     completedAt?: string;
@@ -965,6 +968,8 @@ export interface UpdateProjectThreadRequest extends BaseDto {
     title: string;
     text: string;
     isDeleted?: boolean;
+    isArchived?: boolean;
+    isClosed?: boolean;
 }
 
 /**
@@ -1017,6 +1022,7 @@ export interface UpdateProjectThreadCommentRequest extends BaseDto {
 export interface ProjectThreadCommentDto extends BaseSoftDeletableDto {
     userId: string;
     text: string;
+    user: GrpcUserDto;
 }
 
 // Project DTOs
@@ -1062,25 +1068,21 @@ export interface UpdateProjectUserRequest extends BaseDto {
  * DTO для создания
  * секции
  */
-export interface CreateSectionRequest extends BaseDto {
-    name: string;
-}
+export interface CreateSectionRequest extends BaseRequestDtoWithName { }
 
 /**
  * DTO для обновления
  * секции
  */
-export interface UpdateSectionRequest extends BaseDto {
-    name: string;
+export interface UpdateSectionRequest extends BaseRequestDtoWithName {
     isDeleted?: boolean;
 }
 
 /**
  * DTO секции
  */
-export interface SectionDto extends BaseSoftDeletableDto {
-    name: string;
-    tasks: TaskDto[];
+export interface SectionDto extends BaseSoftDeletableDtoWithName {
+    tasks: ShortTaskDto[];
 }
 
 // Sprint DTOs
@@ -1089,9 +1091,7 @@ export interface SectionDto extends BaseSoftDeletableDto {
  * DTO для создания
  * спринта
  */
-export interface CreateSprintRequest {
-    name: string;
-}
+export interface CreateSprintRequest extends BaseRequestDtoWithName { }
 
 /**
  * DTO для обновления
@@ -1104,6 +1104,14 @@ export interface UpdateSprintRequest extends BaseDto {
 /**
  * DTO спринта
  */
-export interface SprintDto extends BaseDto {
-    name: string;
-}
+export interface SprintDto extends BaseDtoWithName { }
+
+export const notificationTypes = {
+  ACCOUNT_CONFIRMATION: "ACCOUNT_CONFIRMATION",
+  PHONE_CONFIRMATION: "PHONE_CONFIRMATION",
+  RECOVER_PASSWORD: "RECOVER_PASSWORD",
+  RECOVER_LOGIN: "RECOVER_LOGIN",
+} as const;
+
+export type NotificationTypes =
+  (typeof notificationTypes)[keyof typeof notificationTypes];

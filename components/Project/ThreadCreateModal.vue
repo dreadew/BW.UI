@@ -16,21 +16,25 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { createProjectThreadRequestSchema } from '~/schemas/generated.schema'
-const props = defineProps({
-  open: Boolean,
-  loading: Boolean,
-  projectId: String,
-  fromId: String,
-  onSubmit: Function
-})
+import type { CreateProjectThreadRequest } from '~/types/request.types'
+const props = defineProps<{
+  open: boolean;
+  loading: boolean;
+  onSubmit: (data: CreateProjectThreadRequest) => void;
+}>()
+
+const route = useRoute()
+const projectId = computed(() => route.params.id as string)
 const emit = defineEmits(['update:open', 'submit'])
-const formState = ref({
-  projectId: props.projectId || '',
-  fromId: props.fromId || '',
+const formState = ref<CreateProjectThreadRequest>({
+  id: projectId.value || '',
   title: '',
   text: ''
 })
+
 const formSchema = createProjectThreadRequestSchema;
-watch(() => props.open, (val) => { if (!val) formState.value = { projectId: props.projectId || '', fromId: props.fromId || '', title: '', text: '' } })
+
+watch(() => props.open, (val) => { if (!val) formState.value = { id: projectId.value || '', title: '', text: '' } })
+
 const onSubmit = () => emit('submit', formState.value)
 </script>

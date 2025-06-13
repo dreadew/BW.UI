@@ -1,7 +1,7 @@
 import {
   IDENTITY_SERVICE,
 } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import type { CreateRoleRequest, ListRequest, RoleDto, UpdateRoleRequest } from "~/types/request.types";
 
@@ -11,7 +11,7 @@ export const roleServiceFactory = {
       .get('/api/Role/list')
       .withService(IDENTITY_SERVICE)
       .withQueryParams<ListRequest>(dto)
-      .withResponse<RoleDto[]>()
+      .withResponse<ListResponse<RoleDto[]>>()
       .build(),
 
   get: (id: string) =>

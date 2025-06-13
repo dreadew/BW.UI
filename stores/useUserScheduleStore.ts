@@ -1,53 +1,48 @@
 import { defineStore } from "pinia";
 import { userScheduleService } from "~/services/identity/userScheduleServiceFactory";
-import type { PagingParams } from "~/types/api.types";
-import type { CreateUserScheduleRequest, UpdateUserScheduleRequest, ListRequest } from "~/types/request.types";
-import type { UserSchedule } from "~/types/response.types";
+import type { CreateUserScheduleRequest, UpdateUserScheduleRequest, ListRequest, UserScheduleDto } from "~/types/request.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useUserScheduleStore = defineStore("userSchedule", () => {
-    const schedules = ref<UserSchedule[]>([]);
-    const isLoading = ref(false);
+    const data = ref<UserScheduleDto[]>([]);
+    const loading = ref(false);
     const error = ref<string | null>(null);
     const errorHandler = useApiErrorHandler();
 
+    const userId = ref<string | null>(null);
     const limit = ref(20);
     const offset = ref(0);
+    const includeDeleted = ref(false);
+    const totalCount = ref(0);
 
-    async function findByUser(userId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-        isLoading.value = true;
+    async function findByUser() {
+        loading.value = true;
         error.value = null;
         try {
+            if (!userId.value) {
+                throw new Error("User ID is not set");
+            }
             const req: ListRequest = {
-                limit: params.limit ?? limit.value,
-                offset: params.offset ?? offset.value,
-                includeDeleted: params.includeDeleted ?? false
+                limit: limit.value,
+                offset: offset.value,
+                includeDeleted: includeDeleted.value
             };
-            schedules.value = await userScheduleService.findByUser(userId, req).execute();
-            return schedules.value;
+            const res = await userScheduleService
+                .findByUser(userId.value, req)
+                .execute();
+            data.value = res.data;
+            totalCount.value = res.totalCount;
+            return data.value;
         } catch (err) {
             errorHandler.handleError(err);
             return [];
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
-    function setPaging(newLimit: number, newOffset: number) {
-        limit.value = newLimit;
-        offset.value = newOffset;
-    }
-
-    function nextPage() {
-        offset.value += limit.value;
-    }
-
-    function prevPage() {
-        offset.value = Math.max(0, offset.value - limit.value);
-    }
-
     async function getUserSchedule(id: string) {
-        isLoading.value = true;
+        loading.value = true;
         error.value = null;
         try {
             return await userScheduleService.getUserSchedule(id).execute();
@@ -55,12 +50,12 @@ export const useUserScheduleStore = defineStore("userSchedule", () => {
             errorHandler.handleError(err);
             return null;
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
     async function createUserSchedule(body: CreateUserScheduleRequest) {
-        isLoading.value = true;
+        loading.value = true;
         error.value = null;
         try {
             await userScheduleService.createUserSchedule(body).ensured("Расписание успешно создано!");
@@ -69,12 +64,12 @@ export const useUserScheduleStore = defineStore("userSchedule", () => {
             errorHandler.handleError(err);
             return false;
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
     async function updateUserSchedule(body: UpdateUserScheduleRequest) {
-        isLoading.value = true;
+        loading.value = true;
         error.value = null;
         try {
             await userScheduleService.updateUserSchedule(body).ensured("Расписание успешно обновлено!");
@@ -83,12 +78,12 @@ export const useUserScheduleStore = defineStore("userSchedule", () => {
             errorHandler.handleError(err);
             return false;
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
     async function deleteUserSchedule(id: string) {
-        isLoading.value = true;
+        loading.value = true;
         error.value = null;
         try {
             await userScheduleService.deleteUserSchedule(id).ensured("Расписание успешно удалено!");
@@ -97,12 +92,12 @@ export const useUserScheduleStore = defineStore("userSchedule", () => {
             errorHandler.handleError(err);
             return false;
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
     async function restoreUserSchedule(id: string) {
-        isLoading.value = true;
+        loading.value = true;
         error.value = null;
         try {
             await userScheduleService.restoreUserSchedule(id).ensured("Расписание успешно восстановлено!");
@@ -111,18 +106,51 @@ export const useUserScheduleStore = defineStore("userSchedule", () => {
             errorHandler.handleError(err);
             return false;
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
+    async function reset() {
+        offset.value = 0;
+        limit.value = 20;
+        totalCount.value = 0;
+        data.value = [];
+    }
+
+    const prevPage = () => {
+        const newOffset = offset.value - limit.value;
+        if (newOffset < 0) {
+        offset.value = 0;
+        return;
+        }
+        offset.value = newOffset;
+    }
+
+    const nextPage = () => {
+        const newOffset = offset.value + limit.value;
+        if (newOffset >= totalCount.value) {
+        return;
+        }
+        offset.value = newOffset;
+    }
+
+    const currentPage = computed(() => offset.value / limit.value + 1);
+
+    watch(() => [offset.value, includeDeleted.value], () => {
+        findByUser()
+    })
+
     return {
-        schedules,
-        isLoading,
+        data,
+        loading,
+        currentPage,
         error,
         limit,
         offset,
+        totalCount,
+        userId,
         findByUser,
-        setPaging,
+        reset,
         nextPage,
         prevPage,
         getUserSchedule,

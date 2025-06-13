@@ -1,6 +1,6 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import type { CreateSectionRequest, ListRequest, SectionDto, UpdateSectionRequest } from "~/types/request.types";
 
 export const sectionServiceFactory = {
@@ -29,10 +29,10 @@ export const sectionServiceFactory = {
 
   listByProject: (projectId: string, dto: ListRequest) =>
     apiContractBuilderHelper
-      .get(`/api/Section/by-project/${projectId}`)
+      .get(`/api/Sections/by-project/${projectId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(dto)
-      .withResponse<SectionDto[]>()
+      .withResponse<ListResponse<SectionDto[]>>()
       .build(),
 
   deleteSection: (id: string) =>

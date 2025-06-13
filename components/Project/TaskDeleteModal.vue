@@ -1,8 +1,12 @@
 <template>
-  <UModal v-model:open="open" title="Удалить задачу?">
+  <UModal :open="open" @update:open="$emit('update:open', $event)" title="Удалить задачу?">
     <template #body>
-      <UiText>Вы уверены, что хотите удалить задачу <b>{{ task?.title }}</b>?</UiText>
-      <div class="flex justify-end gap-2 mt-4">
+      <UiText color="darker-neutral">
+        Вы уверены, что хотите удалить задачу <b>{{ task?.name }}</b>?
+      </UiText>
+    </template>
+    <template #footer>
+      <div class="w-full flex justify-end gap-2">
         <UButton @click="$emit('update:open', false)">Отмена</UButton>
         <UButton color="error" @click="$emit('confirm')" :loading="loading">Удалить</UButton>
       </div>
@@ -10,9 +14,11 @@
   </UModal>
 </template>
 <script setup lang="ts">
-const props = defineProps({
-  open: Boolean,
-  loading: Boolean,
-  task: Object
-})
+import type { TaskDto } from '~/types/request.types';
+
+defineProps<{
+  open: boolean;
+  loading: boolean;
+  task: TaskDto
+}>()
 </script>

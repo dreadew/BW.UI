@@ -1,45 +1,32 @@
 import { workspaceDirectoryServiceFactory } from "~/services/workspace/workspaceDirectoryServiceFactory";
-import type { CreateDirectoryRequest, UpdateDirectoryRequest, FileDeleteRequest, DirectoryDto, ListRequest } from "~/types/request.types";
-import type { WorkspaceDirectory } from "~/types/response.types";
+import type { BaseDirectoryRequest, FileDeleteRequest, DirectoryDto, ListRequest, BaseDirectoryDto } from "~/types/request.types";
 
 export const useWorkspaceDirectoryStore = defineStore(
   "WorkspaceDirectory",
   () => {
-    const directories: Ref<WorkspaceDirectory[]> = ref([]);
-    const total: Ref<number> = ref(0);
+    const data: Ref<BaseDirectoryDto[]> = ref([]);
     const limit: Ref<number> = ref(20);
     const offset: Ref<number> = ref(0);
+    const includeDeleted: Ref<boolean> = ref(false);
     const loading: Ref<boolean> = ref(false);
+    const workspaceId: Ref<string | null> = ref(null);
 
-    async function list(workspaceId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
+    async function list() {
       loading.value = true;
       try {
         const req: ListRequest = {
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          includeDeleted: params.includeDeleted ?? false
+          limit: limit.value,
+          offset: offset.value,
+          includeDeleted: includeDeleted.value
         };
-        const resp = await workspaceDirectoryServiceFactory.listWorkspaceDirectories(workspaceId, req).execute();
-        directories.value = resp as any; // Приведение к нужному типу, если требуется
-        total.value = resp.length;
+        const resp = await workspaceDirectoryServiceFactory.listWorkspaceDirectories(workspaceId.value!, req).execute();
+        data.value = resp;
+        return resp;
       } catch (error) {
         console.error("Error fetching directories:", error);
       } finally {
         loading.value = false;
       }
-    }
-
-    function setPaging(newLimit: number, newOffset: number) {
-      limit.value = newLimit;
-      offset.value = newOffset;
-    }
-
-    function nextPage() {
-      offset.value += limit.value;
-    }
-
-    function prevPage() {
-      offset.value = Math.max(0, offset.value - limit.value);
     }
 
     async function get(id: string) {
@@ -54,23 +41,25 @@ export const useWorkspaceDirectoryStore = defineStore(
       }
     }
 
-    async function create(body: CreateDirectoryRequest) {
+    async function create(body: BaseDirectoryRequest) {
       loading.value = true;
       try {
         await workspaceDirectoryServiceFactory
           .createWorkspaceDirectory(body)
           .ensured("Вы успешно создали директорию!");
+        await list();
       } finally {
         loading.value = false;
       }
     }
 
-    async function update(body: UpdateDirectoryRequest) {
+    async function update(body: BaseDirectoryRequest) {
       loading.value = true;
       try {
         await workspaceDirectoryServiceFactory
           .updateWorkspaceDirectory(body)
           .ensured("Вы успешно обновили директорию!");
+        await list();
       } finally {
         loading.value = false;
       }
@@ -82,6 +71,7 @@ export const useWorkspaceDirectoryStore = defineStore(
         await workspaceDirectoryServiceFactory
           .deleteWorkspaceDirectory(id)
           .ensured("Вы успешно удалили директорию!");
+        await list();
       } finally {
         loading.value = false;
       }
@@ -93,6 +83,7 @@ export const useWorkspaceDirectoryStore = defineStore(
         await workspaceDirectoryServiceFactory
           .restoreWorkspaceDirectory(id)
           .ensured("Вы успешно восстановили директорию!");
+        await list();
       } finally {
         loading.value = false;
       }
@@ -104,6 +95,7 @@ export const useWorkspaceDirectoryStore = defineStore(
         await workspaceDirectoryServiceFactory
           .uploadArtifact(id, file)
           .ensured("Вы успешно загрузили артефакт!");
+        await list();
       } finally {
         loading.value = false;
       }
@@ -115,29 +107,19 @@ export const useWorkspaceDirectoryStore = defineStore(
         await workspaceDirectoryServiceFactory
           .deleteArtifact(workspaceId, body)
           .ensured("Вы успешно удалили артефакт!");
+        await list();
       } finally {
         loading.value = false;
       }
     }
 
-    async function reset() {
-      directories.value = [];
-      total.value = 0;
-      offset.value = 0;
-      limit.value = 20;
-      loading.value = false;
-    }
-
     return {
-      directories,
-      total,
+      data,
+      workspaceId,
       limit,
       offset,
       loading,
       list,
-      setPaging,
-      nextPage,
-      prevPage,
       get,
       create,
       update,
@@ -145,7 +127,6 @@ export const useWorkspaceDirectoryStore = defineStore(
       restore,
       uploadArtifact,
       deleteArtifact,
-      reset,
     }
   }
 );

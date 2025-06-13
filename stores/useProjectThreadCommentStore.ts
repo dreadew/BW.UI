@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
 import { projectThreadCommentServiceFactory } from "~/services/project/projectThreadCommentServiceFactory";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
-import type { ListRequest, CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest } from "~/types/request.types";
-import type { ProjectThreadCommentDto } from "~/types/response.types";
-import type { PagingParams } from "~/types/api.types";
+import type { ListRequest, CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest, ProjectThreadCommentDto } from "~/types/request.types";
 
 export const useProjectThreadCommentStore = defineStore(
   "projectThreadComment",
@@ -11,37 +9,41 @@ export const useProjectThreadCommentStore = defineStore(
     const toast = useToast();
     const errorHandler = useApiErrorHandler();
 
-    const comments: Ref<ProjectThreadCommentDto[]> = ref([]);
-    const isLoading = ref(false);
-    const error = ref(null);
+    const threadId = ref<string | null>(null);
+    const data: Ref<ProjectThreadCommentDto[]> = ref([]);
+    const loading = ref(false);
+    const error = ref<string | null>(null);
     const limit = ref(20);
     const offset = ref(0);
+    const includeDeleted = ref(false);
+    const totalCount = ref(0);
 
-    // Исправить list: ListRequest с includeDeleted
-    async function list(threadId: string, params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-      isLoading.value = true;
+    async function list() {
+      loading.value = true;
       try {
-        const req: ListRequest = {
-          limit: params.limit ?? limit.value,
-          offset: params.offset ?? offset.value,
-          includeDeleted: params.includeDeleted ?? false
-        };
-        const res = await projectThreadCommentServiceFactory.listByThread(threadId, req).execute();
-        if (!res || res.length === 0) {
+        if (!threadId.value) {
+          error.value = "Thread ID is not set";
           return [];
         }
-        comments.value = res;
-        return comments.value;
+        const req: ListRequest = {
+          limit: limit.value,
+          offset: offset.value,
+          includeDeleted: includeDeleted.value
+        };
+        const res = await projectThreadCommentServiceFactory.listByThread(threadId.value, req).execute();
+        data.value = res.data;
+        totalCount.value = res.totalCount;
+        return data.value;
       } catch (err) {
         errorHandler.handleError(err);
         return [];
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function get(commentId: string) {
-      isLoading.value = true;
+      loading.value = true;
       try {
         return await projectThreadCommentServiceFactory
           .get(commentId)
@@ -50,12 +52,12 @@ export const useProjectThreadCommentStore = defineStore(
         errorHandler.handleError(err);
         return null;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function create(data: CreateProjectThreadCommentRequest) {
-      isLoading.value = true;
+      loading.value = true;
       try {
         await projectThreadCommentServiceFactory
           .create(data)
@@ -65,12 +67,12 @@ export const useProjectThreadCommentStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function update(data: UpdateProjectThreadCommentRequest) {
-      isLoading.value = true;
+      loading.value = true;
       try {
         await projectThreadCommentServiceFactory
           .update(data)
@@ -80,12 +82,12 @@ export const useProjectThreadCommentStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function deleteComment(id: string) {
-      isLoading.value = true;
+      loading.value = true;
       try {
         await projectThreadCommentServiceFactory
           .delete(id)
@@ -95,12 +97,12 @@ export const useProjectThreadCommentStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
     async function restore(id: string) {
-      isLoading.value = true;
+      loading.value = true;
       try {
         await projectThreadCommentServiceFactory
           .restore(id)
@@ -110,31 +112,52 @@ export const useProjectThreadCommentStore = defineStore(
         errorHandler.handleError(err);
         return false;
       } finally {
-        isLoading.value = false;
+        loading.value = false;
       }
     }
 
-    function setPaging(newLimit: number, newOffset: number) {
-      limit.value = newLimit;
+    async function reset() {
+      offset.value = 0;
+      limit.value = 20;
+      totalCount.value = 0;
+      data.value = [];
+    }
+
+    const prevPage = () => {
+      const newOffset = offset.value - limit.value;
+      if (newOffset < 0) {
+        offset.value = 0;
+        return;
+      }
       offset.value = newOffset;
     }
 
-    function nextPage() {
-      offset.value += limit.value;
+    const nextPage = () => {
+      const newOffset = offset.value + limit.value;
+      if (newOffset >= totalCount.value) {
+        return;
+      }
+      offset.value = newOffset;
     }
 
-    function prevPage() {
-      offset.value = Math.max(0, offset.value - limit.value);
-    }
+    const currentPage = computed(() => offset.value / limit.value + 1);
+
+    watch(() => [offset.value, includeDeleted.value], () => {
+      list()
+    })
 
     return {
-      comments,
-      isLoading,
+      threadId,
+      currentPage,
+      data,
+      loading,
       error,
       limit,
       offset,
+      includeDeleted,
+      totalCount,
       list,
-      setPaging,
+      reset,
       nextPage,
       prevPage,
       get,

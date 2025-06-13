@@ -1,6 +1,6 @@
 import { PROJECT_SERVICE } from "~/constants/services.constants";
 import { apiContractBuilderHelper } from "../apiContractBuilder";
-import type { SuccessResponse } from "~/types/api.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
 import type { CreateProjectThreadCommentRequest, ListRequest, ProjectThreadCommentDto, UpdateProjectThreadCommentRequest } from "~/types/request.types";
 
 export const projectThreadCommentServiceFactory = {
@@ -32,7 +32,7 @@ export const projectThreadCommentServiceFactory = {
       .get(`/api/ProjectThreadComments/by-thread/${threadId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(dto)
-      .withResponse<ProjectThreadCommentDto[]>()
+      .withResponse<ListResponse<ProjectThreadCommentDto[]>>()
       .build(),
 
   delete: (commentId: string) =>

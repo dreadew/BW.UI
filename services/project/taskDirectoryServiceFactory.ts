@@ -1,38 +1,38 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
 import type { SuccessResponse } from "~/types/api.types";
-import type { CreateTaskDirectoryRequest, FileDeleteRequest, ListRequest, TaskDirectoryDto, UpdateTaskDirectoryRequest } from "~/types/request.types";
+import type { BaseDirectoryDto, BaseDirectoryRequest, FileDeleteRequest, ListRequest } from "~/types/request.types";
 
 export const taskDirectoryServiceFactory = {
-  create: (request: CreateTaskDirectoryRequest) =>
+  create: (request: BaseDirectoryRequest) =>
     apiContractBuilderHelper
       .post("/api/TaskDirectory")
       .withService(PROJECT_SERVICE)
       .withBody(request)
-      .withResponse<SuccessResponse>()
+      .withResponse<BaseDirectoryDto>()
       .build(),
 
-  update: (request: UpdateTaskDirectoryRequest) =>
+  update: (request: BaseDirectoryRequest) =>
     apiContractBuilderHelper
       .patch(`/api/TaskDirectory/${request.id}`)
       .withService(PROJECT_SERVICE)
       .withBody(request)
-      .withResponse<TaskDirectoryDto>()
+      .withResponse<BaseDirectoryDto>()
       .build(),
 
   get: (directoryId: string) =>
     apiContractBuilderHelper
       .get(`/api/TaskDirectory/${directoryId}`)
       .withService(PROJECT_SERVICE)
-      .withResponse<TaskDirectoryDto>()
+      .withResponse<BaseDirectoryDto>()
       .build(),
 
   list: (taskId: string, dto: ListRequest) =>
     apiContractBuilderHelper
-      .get(`/api/TasksDirectory/by-task/${taskId}`)
+      .get(`/api/TaskDirectory/by-task/${taskId}`)
       .withService(PROJECT_SERVICE)
       .withQueryParams<ListRequest>(dto)
-      .withResponse<TaskDirectoryDto[]>()
+      .withResponse<BaseDirectoryDto[]>()
       .build(),
 
   deleteTaskDirectory: (directoryId: string) =>
@@ -49,16 +49,11 @@ export const taskDirectoryServiceFactory = {
       .withResponse<SuccessResponse>()
       .build(),
 
-  uploadArtifact: (directoryId: string, file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    return apiContractBuilderHelper
-      .post(`/api/TaskDirectory/${directoryId}/file`)
-      .withService(PROJECT_SERVICE)
-      .withBody(formData)
-      .build();
-  },
+  uploadArtifact: (directoryId: string, file: File) => apiContractBuilderHelper
+    .uploadFile(`/api/TaskDirectory/${directoryId}/file`)
+    .withService(PROJECT_SERVICE)
+    .withBody({ file })
+    .build(),
 
   deleteArtifact: (request: FileDeleteRequest) =>
     apiContractBuilderHelper

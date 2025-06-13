@@ -1,56 +1,42 @@
 import { defineStore } from "pinia";
 import { sessionServiceFactory } from "~/services/identity/sessionServiceFactory";
-import type { PagingParams } from "~/types/api.types";
-import type { ListRequest, SessionDto, RevokeRequest, RenewRequest } from "~/types/request.types";
-import type { Session } from "~/types/response.types";
-import type { AccessTokenResponse } from "~/types/response.types";
+import type { ListRequest, RevokeRequest, RenewRequest, SessionDto, AccessTokenResponse } from "~/types/request.types";
 import { useApiErrorHandler } from "~/utils/errorHandler.utils";
 
 export const useSessionStore = defineStore("session", () => {
-    const sessions = ref<Session[]>([]);
-    const isLoading = ref(false);
+    const data = ref<SessionDto[]>([]);
+    const loading = ref(false);
     const error = ref<string | null>(null);
     const errorHandler = useApiErrorHandler();
 
     const limit = ref(20);
     const offset = ref(0);
+    const includeDeleted = ref(false);
+    const totalCount = ref(0);
 
-    // list теперь принимает ListRequest с includeDeleted
-    async function list(params: ListRequest = { limit: limit.value, offset: offset.value, includeDeleted: false }) {
-        isLoading.value = true;
+    async function list() {
+        loading.value = true;
         error.value = null;
         try {
             const req: ListRequest = {
-                limit: params.limit ?? limit.value,
-                offset: params.offset ?? offset.value,
-                includeDeleted: params.includeDeleted ?? false
+                limit: limit.value,
+                offset: offset.value,
+                includeDeleted: includeDeleted.value
             };
             const res = await sessionServiceFactory.list(req).execute();
-            sessions.value = res as any; // Приведение к нужному типу, если требуется
-            return sessions.value;
+            data.value = res.data;
+            totalCount.value = res.totalCount; 
+            return data.value;
         } catch (err) {
             errorHandler.handleError(err);
             return [];
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
-    function setPaging(newLimit: number, newOffset: number) {
-        limit.value = newLimit;
-        offset.value = newOffset;
-    }
-
-    function nextPage() {
-        offset.value += limit.value;
-    }
-
-    function prevPage() {
-        offset.value = Math.max(0, offset.value - limit.value);
-    }
-
     async function revoke(body: RevokeRequest) {
-        isLoading.value = true;
+        loading.value = true;
         error.value = null;
         try {
             await sessionServiceFactory.revoke(body).ensured("Сессия успешно завершена!");
@@ -59,12 +45,12 @@ export const useSessionStore = defineStore("session", () => {
             errorHandler.handleError(err);
             return false;
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
     async function renew(body: RenewRequest): Promise<AccessTokenResponse | null> {
-        isLoading.value = true;
+        loading.value = true;
         error.value = null;
         try {
             return await sessionServiceFactory.renew(body).execute();
@@ -72,18 +58,51 @@ export const useSessionStore = defineStore("session", () => {
             errorHandler.handleError(err);
             return null;
         } finally {
-            isLoading.value = false;
+            loading.value = false;
         }
     }
 
+    async function reset() {
+        offset.value = 0;
+        limit.value = 20;
+        totalCount.value = 0;
+        data.value = [];
+    }
+
+    const prevPage = () => {
+        const newOffset = offset.value - limit.value;
+        if (newOffset < 0) {
+        offset.value = 0;
+        return;
+        }
+        offset.value = newOffset;
+    }
+
+    const nextPage = () => {
+        const newOffset = offset.value + limit.value;
+        if (newOffset >= totalCount.value) {
+        return;
+        }
+        offset.value = newOffset;
+    }
+
+    const currentPage = computed(() => offset.value / limit.value + 1);
+
+    watch(() => [offset.value, includeDeleted.value], () => {
+        list()
+    })
+
     return {
-        sessions,
-        isLoading,
+        data,
+        loading,
+        currentPage,
         error,
         limit,
         offset,
+        includeDeleted,
+        totalCount,
         list,
-        setPaging,
+        reset,
         nextPage,
         prevPage,
         revoke,

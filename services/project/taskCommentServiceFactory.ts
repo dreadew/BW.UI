@@ -1,7 +1,7 @@
 import { apiContractBuilderHelper } from "../apiContractBuilder";
 import { PROJECT_SERVICE } from "~/constants/services.constants";
-import type { SuccessResponse } from "~/types/api.types";
-import type { CreateTaskCommentRequest, ListRequest, TaskCommentDto, UpdateTaskCommentRequest } from "~/types/request.types";
+import type { ListResponse, SuccessResponse } from "~/types/api.types";
+import type { CreateTaskCommentRequest, ListRequest, ListRequestWithTaskId, TaskCommentDto, UpdateTaskCommentRequest } from "~/types/request.types";
 
 export const taskCommentServiceFactory = {
   create: (request: CreateTaskCommentRequest) =>
@@ -31,8 +31,8 @@ export const taskCommentServiceFactory = {
     apiContractBuilderHelper
       .get(`/api/TaskComment/by-task/${taskId}`)
       .withService(PROJECT_SERVICE)
-      .withQueryParams<ListRequest>(dto)
-      .withResponse<TaskCommentDto[]>()
+      .withQueryParams<ListRequestWithTaskId>({ ...dto, taskId })
+      .withResponse<ListResponse<TaskCommentDto[]>>()
       .build(),
 
   delete: (commentId: string) =>
