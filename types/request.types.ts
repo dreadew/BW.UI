@@ -137,6 +137,7 @@ export interface BaseDirectoryDto extends BaseSoftDeletableDtoWithName {
  * создания директории
  */
 export interface BaseDirectoryRequest extends BaseRequestDtoWithName {
+    objectId?: string;
     parentId?: string;
 }
 
@@ -822,14 +823,14 @@ export interface TaskAssigneeDto {
  * к задаче
  */
 export interface CreateTaskCommentRequest extends BaseDto {
-    content: string;
+    text: string;
 }
 
 /**
  * DTO для обновления комментария задачи
  */
 export interface UpdateTaskCommentRequest extends BaseDto {
-    content?: string;
+    text?: string;
 }
 
 /**
@@ -838,7 +839,7 @@ export interface UpdateTaskCommentRequest extends BaseDto {
 export interface TaskCommentDto extends BaseSoftDeletableDto {
     userId: ProjectUserDto;
     user: GrpcUserDto;
-    content: string;
+    text: string;
 }
 
 // Task Directory DTOs

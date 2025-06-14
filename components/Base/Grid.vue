@@ -25,7 +25,7 @@
       </template>
     </UTable>
     <div class="w-full flex justify-center border-t border-default pt-4">
-      <UPagination :default-page="props.store.currentPage.value" :items-per-page="props.store.limit"
+      <UPagination :default-page="props.store.currentPage" :items-per-page="props.store.limit"
         :total="props.store.totalCount" @update:page="(p) => props.store.offset = props.store.limit * (p - 1)" />
     </div>
   </div>
@@ -40,7 +40,7 @@ import type { BaseDto } from '~/types/request.types'
 
 const props = defineProps<{
   store: BaseDataStore<BaseDto>,
-  columns: TableColumn<BaseDto, unknown>[],
+  columns: TableColumn<any>[],
   editable?: boolean,
   searchPlaceholder?: string,
   showIncludeDeleted?: boolean,

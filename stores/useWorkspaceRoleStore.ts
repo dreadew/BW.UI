@@ -1,3 +1,4 @@
+import { defineStore } from "pinia";
 import { workspaceRoleServiceFactory } from "~/services/workspace/workspaceRoleServiceFactory";
 import type { CreateWorkspaceRoleRequest, UpdateWorkspaceRoleRequest, ListRequest, WorkspaceRoleDto } from "~/types/request.types";
 
@@ -5,7 +6,7 @@ export const useWorkspaceRoleStore = defineStore("WorkspaceRole", () => {
   const data = ref<WorkspaceRoleDto[]>([]);
   const workspaceId = ref<string | null>(null);
   const totalCount = ref(0);
-  const offset = ref(1);
+  const offset = ref(0);
   const limit = ref(20);
   const includeDeleted = ref(false);
   const loading = ref(false);

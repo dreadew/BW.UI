@@ -123,7 +123,7 @@ export const useWorkspaceDirectoryStore = defineStore(
       get,
       create,
       update,
-      deleteDirectory,
+      delete: deleteDirectory,
       restore,
       uploadArtifact,
       deleteArtifact,

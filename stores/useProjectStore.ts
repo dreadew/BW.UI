@@ -253,6 +253,7 @@ export const useProjectStore = defineStore("project", () => {
     includeDeleted,
     totalCount,
     currentProject,
+    reset,
     loading,
     error,
     listByUser,

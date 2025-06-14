@@ -17,7 +17,7 @@
     <div v-if="!props.store.loading && filteredData?.length > 0"
         class="max-h-[60vh] overflow-y-scroll flex items-center flex-wrap gap-6 p-2">
         <BaseCard v-for="item in filteredData" :key="item.id" :entity="item" :title="item.name" :image="item.path"
-            :date="DateUtils.deserialize(item.createdAt)?.toLocaleDateString()">
+            :date="item.createdAt">
             <template #actions>
                 <div class="flex items-center gap-2">
                     <UButton size="sm" variant="ghost" color="primary" @click="$emit('openEdit', item)"
@@ -49,7 +49,6 @@ const props = defineProps<{
     type: string;
     title: string;
 }>();
-
 const searchLocal = ref('')
 
 const filteredData = computed(() => {

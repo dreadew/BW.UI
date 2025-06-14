@@ -16,7 +16,12 @@ export class DateUtils {
             return null;
         }
 
-        const parsed = new Date(val);
+        let str = typeof val === 'string' ? val : undefined;
+        if (str && str.includes('.')) {
+            str = str.replace(/\\.(\\d{3})\\d*(Z)?$/, '.$1$2');
+        }
+        
+        const parsed = new Date(str ?? val);
         if (typeof val === 'string' &&
             !val.includes('+') &&
             !val.toLowerCase().includes('z') &&
@@ -25,7 +30,7 @@ export class DateUtils {
             const utcHours = parsed.getHours() - DefaultTimeZoneOffset;
             parsed.setHours(utcHours + TimeZoneOffsetHours);
         }
-
+        
         return isNaN(parsed.getFullYear()) ? null : parsed;
     }
 

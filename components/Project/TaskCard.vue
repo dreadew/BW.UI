@@ -1,17 +1,18 @@
 <template>
   <UCard variant="outline" class="relative group/task">
     <div class="flex items-center justify-between">
-      <div class="space-y-1">
+      <div class="space-y-2">
         <UBadge :color="priorityColor(task.priorityType?.name)" variant="soft" class="">
           {{ priorityLabel(task.priorityType?.name) }}
         </UBadge>
         <ULink :to="`/project/${projectId}/tasks/${task.id}`" class="block">
           <UiHeading class="line-clamp-2" size="xl">{{ task?.name }}</UiHeading>
         </ULink>
-        <UiText size="xs" color="neutral">Исполнители: {{ task?.assignees?.length ?? 'отсутствуют' }}</UiText>
-        <UiText size="xs" color="neutral">Срок: {{ task?.startedDate && task.endDate ? `${new
-          Date(task.startedDate).toLocaleDateString()} - ${new Date(task.endDate).toLocaleDateString()}` : `Не
-          установлен` }}</UiText>
+        <UiText size="xs" color="neutral" class="line-clamp-2">{{ task.content }}</UiText>
+        <UiText size="xs" color="neutral">Срок: {{ task.startedDate ? task.endDate ? `${deserializedStartDate} -
+          ${deserializedEndDate}` :
+          deserializedStartDate : `Не установлен`
+        }}</UiText>
       </div>
       <div class="flex gap-1 opacity-0 group-hover/task:opacity-100 transition">
         <UTooltip text="Редактировать">
@@ -26,10 +27,24 @@
   </UCard>
 </template>
 <script setup lang="ts">
+import { DateUtils } from '~/utils/date.utils';
 import type { ShortTaskDto } from '~/types/request.types';
 
 const route = useRoute()
 const projectId = computed(() => route.params.id as string)
-defineProps<{ sectionId: string, task: ShortTaskDto }>()
+const props = defineProps<{ sectionId: string, task: ShortTaskDto }>()
+
+const deserializedStartDate = computed(() => {
+  return props.task.startedDate ? DateUtils.deserialize(props.task.startedDate)?.toLocaleString('ru-RU', {
+    day: '2-digit', month: '2-digit', year: 'numeric'
+  }) : '';
+})
+
+const deserializedEndDate = computed(() => {
+  return props.task.endDate ? DateUtils.deserialize(props.task.endDate)?.toLocaleString('ru-RU', {
+    day: '2-digit', month: '2-digit', year: 'numeric'
+  }) : '';
+})
+
 const emit = defineEmits(['edit', 'delete'])
 </script>

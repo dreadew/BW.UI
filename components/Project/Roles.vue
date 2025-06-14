@@ -52,6 +52,7 @@ import type { ProjectRoleDto, CreateProjectRoleRequest, UpdateProjectRoleRequest
 import type { AcceptableValue, TableRow } from '@nuxt/ui'
 import { PROJECT_ROLE_CLAIMS } from '~/constants/roleClaims.constants'
 import { useProjectRoleClaimsStore } from '~/stores/useProjectRoleClaimsStore'
+import { DateUtils } from '~/utils/date.utils'
 
 const route = useRoute()
 const projectId = computed(() => route.params.id as string)
@@ -63,13 +64,13 @@ const columns = [
   {
     accessorKey: 'createdAt',
     header: 'Дата создания',
-    cell: ({ row }: { row: TableRow<ProjectRoleDto> }) => row.original.createdAt ? new Date(DateUtils.deserialize(row.original.createdAt)!).toLocaleString() : '',
+    cell: ({ row }: { row: TableRow<ProjectRoleDto> }) => row.original.createdAt ? DateUtils.deserialize(row.original.createdAt)?.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
     enableSorting: true
   },
   {
     accessorKey: 'updatedAt',
     header: 'Дата обновления',
-    cell: ({ row }: { row: TableRow<ProjectRoleDto> }) => row.original.updatedAt ? new Date(DateUtils.deserialize(row.original.updatedAt)!).toLocaleString() : 'Отсутствует',
+    cell: ({ row }: { row: TableRow<ProjectRoleDto> }) => row.original.updatedAt ? DateUtils.deserialize(row.original.updatedAt)?.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Отсутствует',
     enableSorting: true
   },
   { id: 'action', header: 'Действия', cell: undefined }

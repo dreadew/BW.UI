@@ -1,7 +1,7 @@
 <template>
     <div>
-        <BaseGrid :store="activityStore" :columns="activityColumns" editable without-heading
-            @create="openCreateModal = true" @edit="(item) => onEdit(item as TaskActivityDto)"
+        <BaseGrid :store="activityStore as unknown as BaseDataStore<BaseDto>" :columns="activityColumns" editable
+            without-heading @create="openCreateModal = true" @edit="(item) => onEdit(item as TaskActivityDto)"
             @delete="(item) => onDelete(item as TaskActivityDto)" />
         <UModal v-model:open="openCreateModal" title="Добавить активность">
             <template #body>
@@ -60,7 +60,10 @@
         <UModal v-model:open="openDeleteModal" title="Удаление активности">
             <template #body>
                 <UiText color="darker-neutral">Вы уверены, что хотите удалить активность за <b>{{ selectedActivity?.date
-                    ? new Date(selectedActivity.date).toLocaleDateString() : '' }}</b>?</UiText>
+                    ? DateUtils.deserialize(selectedActivity.date)?.toLocaleString('ru-RU', {
+                        day: '2-digit', month:
+                            '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    }) : '' }}</b>?</UiText>
             </template>
             <template #footer>
                 <div class="w-full flex justify-end gap-2">
@@ -74,6 +77,8 @@
     </div>
 </template>
 <script setup lang="ts">
+import { DateUtils } from '~/utils/date.utils';
+import { DATE_DISPLAY_FORMAT } from '~/constants/date.constants';
 import type { TableRow } from '@nuxt/ui'
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -82,6 +87,8 @@ import { useTaskActivityStore } from '~/stores/useTaskActivityStore'
 import type { TaskActivityDto } from '~/types/request.types'
 import type { CreateTaskActivityRequest, UpdateTaskActivityRequest } from '~/types/request.types'
 import { DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date'
+import type { BaseDataStore } from '~/types/common.types';
+import type { BaseDto } from '~/types/request.types';
 
 const route = useRoute()
 const taskId = computed(() => route.params.taskId as string)
@@ -101,7 +108,7 @@ const df = new DateFormatter('ru-RU', { dateStyle: 'medium' })
 const activityColumns = [
     { accessorKey: 'userId', header: 'Пользователь', cell: ({ row }: { row: TableRow<TaskActivityDto> }) => row.original.userId },
     { accessorKey: 'type', header: 'Тип', cell: ({ row }: { row: TableRow<TaskActivityDto> }) => row.original.activityType.name, enableSorting: true },
-    { accessorKey: 'date', header: 'Дата', cell: ({ row }: { row: TableRow<TaskActivityDto> }) => row.original.date ? new Date(row.original.date).toLocaleDateString() : '', enableSorting: true },
+    { accessorKey: 'date', header: 'Дата', cell: ({ row }: { row: TableRow<TaskActivityDto> }) => row.original.date ? DateUtils.deserialize(row.original.date)?.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '', enableSorting: true },
     { accessorKey: 'workHours', header: 'Часы', cell: ({ row }: { row: TableRow<TaskActivityDto> }) => row.original.workHours, enableSorting: true },
     { id: 'action' }
 ]

@@ -136,6 +136,30 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
     }
   }
 
+  async function reset() {
+    offset.value = 0;
+    limit.value = 20;
+    totalCount.value = 0;
+    data.value = [];
+  }
+
+  const prevPage = () => {
+    const newOffset = offset.value - limit.value;
+    if (newOffset < 0) {
+      offset.value = 0;
+      return;
+    }
+    offset.value = newOffset;
+  }
+
+  const nextPage = () => {
+    const newOffset = offset.value + limit.value;
+    if (newOffset >= totalCount.value) {
+      return;
+    }
+    offset.value = newOffset;
+  }
+
   const currentPage = computed(() => offset.value / limit.value + 1);
 
   watch(() => [offset.value, includeDeleted.value], () => {
@@ -159,5 +183,8 @@ export const useProjectRoleStore = defineStore("projectRole", () => {
     deleteRole,
     restore,
     resetState,
+    nextPage,
+    prevPage,
+    reset
   };
 });

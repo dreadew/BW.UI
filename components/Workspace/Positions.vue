@@ -1,7 +1,8 @@
 <template>
     <div>
         <BaseGrid :store="positionStore" :columns="columns" editable show-include-deleted without-heading
-            @create="openCreateModal = true" @edit="onEdit" @delete="onDelete"></BaseGrid>
+            @create="openCreateModal = true" @edit="(item) => onEdit(item as PositionDto)"
+            @delete="(item) => onDelete(item as PositionDto)"></BaseGrid>
         <UModal v-model:open="openCreateModal" title="Создать должность">
             <template #body>
                 <UForm :state="formState" @submit="onSubmitCreate">
@@ -33,7 +34,7 @@
         <UModal v-model:open="openDeleteModal" title="Удаление должности">
             <template #body>
                 <UiText color="darker-neutral">Вы уверены, что хотите удалить должность <b>"{{ selectedPosition?.name
-                }}"</b>?</UiText>
+                        }}"</b>?</UiText>
             </template>
             <template #footer>
                 <div class="w-full flex justify-end gap-2">
@@ -52,46 +53,52 @@ import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useWorkspacePositionStore } from '~/stores/useWorkspacePositionStore'
 import type { CreatePositionRequest, PositionDto } from '~/types/request.types'
-import type { TableRow } from '@nuxt/ui'
+import type { TableColumn, TableRow } from '@nuxt/ui'
+import { DateUtils } from '~/utils/date.utils'
 
 useHead({ title: 'Должности рабочего пространства' })
 const route = useRoute()
 const workspaceId = computed(() => route.params.id as string)
 const positionStore = useWorkspacePositionStore()
 positionStore.workspaceId = workspaceId.value
+
 const openCreateModal = ref(false)
 const openEditModal = ref(false)
 const openDeleteModal = ref(false)
 const selectedPosition = ref<PositionDto | null>(null)
 const formState = ref<CreatePositionRequest>({ id: workspaceId.value, name: '' })
 const formLoading = ref(false)
+
 const columns = [
     { accessorKey: 'name', header: 'Название', cell: ({ row }: { row: TableRow<PositionDto> }) => row.original.name },
     {
         accessorKey: 'createdAt',
         header: 'Дата создания',
-        cell: ({ row }: { row: TableRow<PositionDto> }) => row.original.createdAt ? new Date(DateUtils.deserialize(row.original.createdAt)!).toLocaleString() : '',
+        cell: ({ row }: { row: TableRow<PositionDto> }) => row.original.createdAt ? DateUtils.deserialize(row.original.createdAt)?.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
         enableSorting: true
     },
     {
         accessorKey: 'updatedAt',
         header: 'Дата обновления',
-        cell: ({ row }: { row: TableRow<PositionDto> }) => row.original.updatedAt ? new Date(DateUtils.deserialize(row.original.updatedAt)!).toLocaleString() : 'Отсутствует',
+        cell: ({ row }: { row: TableRow<PositionDto> }) => row.original.updatedAt ? DateUtils.deserialize(row.original.updatedAt)?.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Отсутствует',
         enableSorting: true
     },
     {
         id: 'action',
     }
 ]
+
 function onEdit(position: PositionDto) {
     selectedPosition.value = position
     formState.value = { id: position.id, name: position.name }
     openEditModal.value = true
 }
+
 function onDelete(position: PositionDto) {
     selectedPosition.value = position
     openDeleteModal.value = true
 }
+
 async function confirmDelete() {
     if (!selectedPosition.value) return
     formLoading.value = true
@@ -100,6 +107,7 @@ async function confirmDelete() {
     openDeleteModal.value = false
     await positionStore.list()
 }
+
 async function onSubmitCreate() {
     formLoading.value = true
     await positionStore.create({
@@ -110,6 +118,7 @@ async function onSubmitCreate() {
     formLoading.value = false
     await positionStore.list()
 }
+
 async function onSubmitEdit() {
     formLoading.value = true
     await positionStore.update({
@@ -120,6 +129,7 @@ async function onSubmitEdit() {
     formLoading.value = false
     await positionStore.list()
 }
+
 watch([openCreateModal, openEditModal], ([create, edit]) => {
     if (!create && !edit) {
         formState.value = {

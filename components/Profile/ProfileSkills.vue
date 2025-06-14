@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="mt-4">
         <UiHeading size="md" class="mb-2">Навыки</UiHeading>
         <BaseDataGrid without-editing without-search :data="skillsWithId" :columns="columns" without-heading
             @create="openAddModal = true" @delete="onDeleteSkill" />

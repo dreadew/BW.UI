@@ -38,10 +38,25 @@
                             placeholder="Длительность" />
                     </UFormField>
                     <UFormField label="Дата начала" name="startedDate" required>
-                        <UInput class="w-full" v-model="formState.startedDate" type="date" required />
+                        <UPopover class="w-full">
+                            <UButton color="neutral" icon="i-lucide-calendar">
+                                {{ startedDateModel ? df.format(startedDateModel.toDate(getLocalTimeZone())) : `Выбрать
+                                дату` }}
+                            </UButton>
+                            <template #content>
+                                <UCalendar v-model="startedDateModel" class="p-2" />
+                            </template>
+                        </UPopover>
                     </UFormField>
                     <UFormField label="Дата окончания" name="endDate" required>
-                        <UInput class="w-full" v-model="formState.endDate" type="date" required />
+                        <UPopover class="w-full">
+                            <UButton color="neutral" icon="i-lucide-calendar">
+                                {{ endDateModel ? df.format(endDateModel.toDate(getLocalTimeZone())) : 'Выбрать дату' }}
+                            </UButton>
+                            <template #content>
+                                <UCalendar v-model="endDateModel" class="p-2" />
+                            </template>
+                        </UPopover>
                     </UFormField>
                     <UButton type="submit" color="primary" class="float-right" :loading="loading">Сохранить</UButton>
                 </UForm>
@@ -58,10 +73,25 @@
                             placeholder="Длительность" />
                     </UFormField>
                     <UFormField label="Дата начала" name="startedDate" required>
-                        <UInput class="w-full" v-model="formState.startedDate" type="date" required />
+                        <UPopover class="w-full">
+                            <UButton color="neutral" icon="i-lucide-calendar">
+                                {{ startedDateModel ? df.format(startedDateModel.toDate(getLocalTimeZone())) : `Выбрать
+                                дату` }}
+                            </UButton>
+                            <template #content>
+                                <UCalendar v-model="startedDateModel" class="p-2" />
+                            </template>
+                        </UPopover>
                     </UFormField>
                     <UFormField label="Дата окончания" name="endDate" required>
-                        <UInput class="w-full" v-model="formState.endDate" type="date" required />
+                        <UPopover class="w-full">
+                            <UButton color="neutral" icon="i-lucide-calendar">
+                                {{ endDateModel ? df.format(endDateModel.toDate(getLocalTimeZone())) : 'Выбрать дату' }}
+                            </UButton>
+                            <template #content>
+                                <UCalendar v-model="endDateModel" class="p-2" />
+                            </template>
+                        </UPopover>
                     </UFormField>
                     <UButton type="submit" color="primary" class="float-right" :loading="loading">Сохранить</UButton>
                 </UForm>
@@ -80,10 +110,11 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, shallowRef, watch } from 'vue'
 import { useTaskTodoListStore } from '~/stores/useTaskTodoListStore'
 import { useRoute } from 'vue-router'
 import type { CreateTaskTodoListItemRequest, TaskTodoListItemDto } from '~/types/request.types'
+import { parseDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 
 const route = useRoute()
 const taskId = computed(() => route.params.taskId as string)
@@ -99,6 +130,11 @@ const formState = ref<CreateTaskTodoListItemRequest>({ id: taskId.value, name: '
 
 const selectedItem = ref<TaskTodoListItemDto | null>(null)
 const todoListId = ref<string | null>(null)
+
+const df = new DateFormatter('ru-RU', { dateStyle: 'medium' })
+
+const startedDateModel = shallowRef(formState.value.startedDate ? parseDate(toISODateString(formState.value.startedDate)!) : null)
+const endDateModel = shallowRef(formState.value.endDate ? parseDate(toISODateString(formState.value.endDate)!) : null)
 
 onMounted(async () => {
     const lists = await todoListStore.list()
@@ -186,4 +222,26 @@ async function createTodoList() {
     loading.value = false
     await refreshItems()
 }
+
+watch(startedDateModel, (val) => {
+    formState.value.startedDate = val ? val.toDate(getLocalTimeZone()).toISOString().split('T')[0] : ''
+})
+
+watch(endDateModel, (val) => {
+    formState.value.endDate = val ? val.toDate(getLocalTimeZone()).toISOString().split('T')[0] : ''
+})
+
+watch(() => openEditModal.value, (val) => {
+    if (val && selectedItem.value) {
+        startedDateModel.value = selectedItem.value.startedDate ? parseDate(toISODateString(selectedItem.value.startedDate)!) : null
+        endDateModel.value = selectedItem.value.endDate ? parseDate(toISODateString(selectedItem.value.endDate)!) : null
+    }
+})
+
+watch(() => openCreateModal.value, (val) => {
+    if (val) {
+        startedDateModel.value = null
+        endDateModel.value = null
+    }
+})
 </script>

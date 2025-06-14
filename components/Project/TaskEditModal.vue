@@ -95,10 +95,6 @@ async function fetchOptions() {
 }
 
 const df = new DateFormatter('ru-RU', { dateStyle: 'medium' })
-function toISODateString(dateStr: string | undefined | null): string | null {
-  if (!dateStr) return null
-  return dateStr.split('T')[0]
-}
 
 const startedDateModel = shallowRef(formState.value.startedDate ? parseDate(toISODateString(formState.value.startedDate)!) : null)
 const endDateModel = shallowRef(formState.value.endDate ? parseDate(toISODateString(formState.value.endDate)!) : null)

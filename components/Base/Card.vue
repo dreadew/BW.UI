@@ -21,5 +21,5 @@ import { computed } from 'vue'
 import { DateUtils } from '~/utils/date.utils'
 
 const props = defineProps<{ entity: any, title: string, subtitle?: string, image?: string, date?: string }>()
-const formattedDate = computed(() => props.date ? DateUtils.deserialize(props.date)?.toLocaleDateString() : '')
+const formattedDate = computed(() => props.date ? DateUtils.deserialize(props.date)?.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '')
 </script>

@@ -12,11 +12,13 @@
             <UCard v-for="comment in props.store.data" :key="comment.id"
                 class="mb-2 flex justify-between items-start gap-3">
                 <div class="space-y-4">
-                    <UiHeading level="4">{{ comment?.text ?? comment?.content }}</UiHeading>
-                    <UiText color="neutral" size="sm" class="mt-1">Автор: {{ comment?.user?.username ??
-                        comment?.author?.user?.username }} | {{
-                            DateUtils.deserialize(comment.createdAt)?.toLocaleDateString() }}
-                    </UiText>
+                    <UiHeading level="4">{{ comment?.text }}</UiHeading>
+                    <UiText color="neutral" size="sm" class="mt-1">Автор: `{{ comment?.user?.username }} | {{
+                        DateUtils.deserialize(comment.createdAt)?.toLocaleString('ru-RU', {
+                            day: '2-digit', month:
+                                '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })
+                    }}``</UiText>
                 </div>
                 <div class="mt-4 flex gap-1">
                     <UTooltip text="Редактировать">
@@ -40,12 +42,13 @@
     </div>
 
     <div class="w-full flex justify-center pt-4">
-        <UPagination :default-page="props.store.currentPage.value" :items-per-page="props.store.limit"
+        <UPagination :default-page="props.store.currentPage" :items-per-page="props.store.limit"
             :total="props.store.totalCount" @update:page="(p) => props.store.offset = props.store.limit * (p - 1)" />
     </div>
 </template>
 
 <script setup lang="ts">
+import { DateUtils } from '~/utils/date.utils';
 import type { BaseDataStore } from '~/types/common.types';
 import type { ProjectThreadCommentDto } from '~/types/request.types';
 

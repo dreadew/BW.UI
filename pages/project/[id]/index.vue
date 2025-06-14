@@ -21,7 +21,9 @@
         <div class="flex flex-col">
           <UiHeading size="lg">{{ project?.name }}</UiHeading>
           <UiText size="sm" color="darker-neutral">Дата создания: {{
-            DateUtils.deserialize(project?.createdAt)?.toLocaleDateString() }}</UiText>
+            DateUtils.deserialize(project?.createdAt)?.toLocaleDateString('ru-RU', {
+              day: '2-digit', month: '2-digit',
+              year: 'numeric' }) }}</UiText>
           <UiText size="xs" color="neutral">ID: {{ project?.id }}</UiText>
         </div>
         <div class="ml-auto flex gap-2">

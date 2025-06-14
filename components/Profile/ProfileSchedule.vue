@@ -66,20 +66,22 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, shallowRef, computed } from 'vue'
+import { ref, shallowRef, computed } from 'vue'
 import { useUserScheduleStore } from '~/stores/useUserScheduleStore'
 import { useUserStore } from '~/stores/useUserStore'
 import { DateFormatter, getLocalTimeZone, parseDate, type CalendarDate } from '@internationalized/date'
 import type { UserScheduleDto } from '~/types/request.types'
+import { DateUtils } from '~/utils/date.utils'
+import type { TableRow } from '@nuxt/ui'
 
 const userStore = useUserStore()
 const userScheduleStore = useUserScheduleStore()
 const userId = computed(() => userStore.user?.id || '')
 userScheduleStore.userId = userId.value
 const columns = [
-  { accessorKey: 'date', header: 'Дата' },
-  { accessorKey: 'startAt', header: 'Начало' },
-  { accessorKey: 'endAt', header: 'Окончание' },
+  { accessorKey: 'date', header: 'Дата', cell: ({ row }: { row: TableRow<UserScheduleDto> }) => row.original.date ? DateUtils.deserialize(row.original.date)?.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '' },
+  { accessorKey: 'startAt', header: 'Начало', cell: ({ row }: { row: TableRow<UserScheduleDto> }) => row.original.startAt ? row.original.startAt : '' },
+  { accessorKey: 'endAt', header: 'Окончание', cell: ({ row }: { row: TableRow<UserScheduleDto> }) => row.original.endAt ? row.original.endAt : '' },
   { id: 'action' }
 ]
 

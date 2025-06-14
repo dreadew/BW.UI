@@ -77,6 +77,7 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       await taskDirectoryServiceFactory
         .create(request)
         .ensured("Директория успешно создана");
+      await list();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -94,6 +95,7 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       await taskDirectoryServiceFactory
         .update(request)
         .ensured("Директория успешно обновлена");
+      await list();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -111,6 +113,7 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       await taskDirectoryServiceFactory
         .deleteTaskDirectory(directoryId)
         .ensured("Директория успешно удалена");
+      await list();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -128,6 +131,7 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       await taskDirectoryServiceFactory
         .restore(directoryId)
         .ensured("Директория успешно восстановлена");
+      await list();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -144,6 +148,7 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       await taskDirectoryServiceFactory
         .uploadArtifact(directoryId, file)
         .ensured("Файл успешно загружен");
+      await list();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -160,6 +165,7 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
       await taskDirectoryServiceFactory
         .deleteArtifact(request)
         .ensured("Файл успешно удален");
+      await list();
       return true;
     } catch (err) {
       errorHandler.handleError(err);
@@ -196,7 +202,7 @@ export const useTaskDirectoryStore = defineStore("taskDirectory", () => {
     get,
     create,
     update,
-    deleteTaskDirectory,
+    delete: deleteTaskDirectory,
     restore,
     uploadArtifact,
     deleteArtifact,

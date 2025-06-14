@@ -53,6 +53,7 @@ import { WORKSPACE_ROLE_CLAIMS } from '~/constants/roleClaims.constants'
 import { useWorkspaceRoleClaimsStore } from '~/stores/useWorkspaceRoleClaimsStore'
 import type { CreateWorkspaceRoleRequest, WorkspaceRoleDto } from '~/types/request.types'
 import type { AcceptableValue, TableRow } from '@nuxt/ui'
+import { DateUtils } from '~/utils/date.utils'
 
 useHead({ title: 'Роли рабочего пространства' })
 const route = useRoute()
@@ -60,6 +61,7 @@ const workspaceId = computed(() => route.params.id as string)
 const roleStore = useWorkspaceRoleStore()
 roleStore.workspaceId = workspaceId.value
 const claimsStore = useWorkspaceRoleClaimsStore()
+
 const openCreateModal = ref(false)
 const openEditModal = ref(false)
 const openDeleteModal = ref(false)
@@ -68,31 +70,35 @@ const formState = ref<CreateWorkspaceRoleRequest>({ id: workspaceId.value, name:
 const formLoading = ref(false)
 const claimLoading = ref(false)
 const checkedClaims = ref<string[]>([])
+
 const columns = [
     { accessorKey: 'name', header: 'Название', cell: ({ row }: { row: TableRow<WorkspaceRoleDto> }) => row.original.name },
     {
         accessorKey: 'createdAt',
         header: 'Дата создания',
-        cell: ({ row }: { row: TableRow<WorkspaceRoleDto> }) => row.original.createdAt ? new Date(DateUtils.deserialize(row.original.createdAt)!).toLocaleString() : '',
+        cell: ({ row }: { row: TableRow<WorkspaceRoleDto> }) => row.original.createdAt ? DateUtils.deserialize(row.original.createdAt)?.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
         enableSorting: true
     },
     {
         accessorKey: 'updatedAt',
         header: 'Дата обновления',
-        cell: ({ row }: { row: TableRow<WorkspaceRoleDto> }) => row.original.updatedAt ? new Date(DateUtils.deserialize(row.original.updatedAt)!).toLocaleString() : 'Отсутствует',
+        cell: ({ row }: { row: TableRow<WorkspaceRoleDto> }) => row.original.updatedAt ? DateUtils.deserialize(row.original.updatedAt)?.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Отсутствует',
         enableSorting: true
     },
     { id: 'action', header: 'Действия', cell: undefined }
 ]
+
 function onEdit(role: WorkspaceRoleDto) {
     selectedRole.value = role
     formState.value = { id: role.id, name: role.name }
     openEditModal.value = true
 }
+
 function onDelete(role: WorkspaceRoleDto) {
     selectedRole.value = role
     openDeleteModal.value = true
 }
+
 async function confirmDelete() {
     if (!selectedRole.value) return
     formLoading.value = true
@@ -101,6 +107,7 @@ async function confirmDelete() {
     openDeleteModal.value = false
     await roleStore.list()
 }
+
 async function onSubmitCreate() {
     formLoading.value = true
     await roleStore.create({ ...formState.value })
@@ -108,6 +115,7 @@ async function onSubmitCreate() {
     formLoading.value = false
     await roleStore.list()
 }
+
 async function onSubmitEdit() {
     formLoading.value = true
     await roleStore.update({ ...formState.value })
@@ -115,12 +123,14 @@ async function onSubmitEdit() {
     formLoading.value = false
     await roleStore.list()
 }
+
 watch([openCreateModal, openEditModal], ([create, edit]) => {
     if (!create && !edit) {
         formState.value = { ...formState.value, name: '' }
         selectedRole.value = null
     }
 })
+
 watch(selectedRole, async (role) => {
     if (role) {
         claimsStore.roleId = role.id

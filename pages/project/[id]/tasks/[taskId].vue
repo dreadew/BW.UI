@@ -68,7 +68,7 @@
       <template #body>
         <UForm class="space-y-4" :state="editFormState" @submit="onSubmitEditComment">
           <UFormField label="Текст" name="text" required>
-            <UInput v-model="editFormState.content" required placeholder="Текст комментария" class="w-full" />
+            <UInput v-model="editFormState.text" required placeholder="Текст комментария" class="w-full" />
           </UFormField>
           <UButton type="submit" color="primary" class="mt-4" :loading="formLoading">Сохранить</UButton>
         </UForm>
@@ -131,7 +131,7 @@ const tabs = [
   { label: 'Исполнители', value: 'assignees', slot: 'assignees' },
 ]
 const selectedComment = ref<TaskCommentDto | null>(null)
-const editFormState = ref<UpdateTaskCommentRequest>({ id: '', content: '' })
+const editFormState = ref<UpdateTaskCommentRequest>({ id: '', text: '' })
 
 onMounted(async () => {
   const result = await taskStore.get(taskId.value)
@@ -142,23 +142,22 @@ onMounted(async () => {
 const onSubmitComment = async (comment: CreateTaskCommentRequest) => {
   if (!comment?.text) return
   formLoading.value = true
-  await commentStore.create({ id: taskId.value, content: comment.text })
+  await commentStore.create({ id: taskId.value, text: comment.text })
   await commentStore.list()
-  comment.content = ''
   comment.text = ''
   formLoading.value = false
 }
 
 function onEditComment(comment: TaskCommentDto) {
   selectedComment.value = comment
-  editFormState.value = { id: comment.id, content: comment.content }
+  editFormState.value = { id: comment.id, text: comment.text }
   openCommentEditModal.value = true
 }
 
 async function onSubmitEditComment() {
   if (!selectedComment.value) return
   formLoading.value = true
-  await commentStore.update({ id: selectedComment.value.id, content: editFormState.value.content })
+  await commentStore.update({ id: selectedComment.value.id, text: editFormState.value.text })
   openCommentEditModal.value = false
   formLoading.value = false
   await commentStore.list()

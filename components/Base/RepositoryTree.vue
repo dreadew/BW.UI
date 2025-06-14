@@ -170,9 +170,10 @@ function onOpenDeleteFile(payload: { artifact: ArtifactDto; directory: BaseDirec
 }
 
 async function handleCreate() {
-  if (!newDirName.value || !parentDirId.value) return
+  if (!newDirName.value) return
   await props.store.create({
-    id: props.objectId,
+    id: undefined,
+    objectId: props.objectId,
     name: newDirName.value,
     parentId: parentDirId.value
   })
@@ -184,7 +185,8 @@ async function handleCreate() {
 async function handleRename() {
   if (!selectedDir.value || !renameDirName.value) return
   await props.store.update({
-    ...selectedDir.value,
+    id: selectedDir.value.id,
+    objectId: props.objectId,
     name: renameDirName.value
   })
   showRename.value = false

@@ -31,7 +31,9 @@
                 <div class="flex flex-col">
                     <UiHeading size="lg">{{ workspace?.name }}</UiHeading>
                     <UiText size="sm" color="darker-neutral">Дата создания: {{
-                        DateUtils.deserialize(workspace?.createdAt)?.toLocaleDateString() }}</UiText>
+                        DateUtils.deserialize(workspace?.createdAt)?.toLocaleDateString('ru-RU', {
+                            day: '2-digit',
+                            month: '2-digit', year: 'numeric' }) }}</UiText>
                 </div>
                 <div class="ml-auto flex gap-2">
                     <UButton icon="i-lucide-pencil" variant="subtle" color="primary" size="sm"
