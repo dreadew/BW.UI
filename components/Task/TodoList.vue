@@ -20,7 +20,12 @@
                 <UiHeading size="2xl" weight="semibold">{{ item.name }}</UiHeading>
                 <UiText size="sm" color="neutral">Длительность: {{ item.duration }} ч</UiText>
                 <UiText size="sm" color="neutral">Статус: {{ item.isCompleted ? 'Выполнено' : 'В процессе' }}</UiText>
-                <UiText size="sm" color="neutral">Срок: {{ item.startedDate }} - {{ item.endDate }}</UiText>
+                <UiText size="sm" color="neutral">Срок: {{
+                    DateUtils.deserialize(item.startedDate)?.toLocaleDateString('ru-RU', {
+                        day: '2-digit', month: '2-digit',
+                    year: 'numeric' }) }} - {{ DateUtils.deserialize(item.endDate)?.toLocaleDateString('ru-RU', {
+                        day: '2-digit', month: '2-digit',
+                        year: 'numeric' }) }}</UiText>
             </div>
             <div class="flex gap-2">
                 <UButton size="xs" color="primary" variant="subtle" @click="onEdit(item)">Редактировать</UButton>
