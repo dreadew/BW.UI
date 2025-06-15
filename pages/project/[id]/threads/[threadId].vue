@@ -82,9 +82,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useProjectThreadStore } from '/Users/artur/Documents/repos/proj/hxnd/ui/stores/useProjectThreadStore'
-import { useProjectThreadCommentStore } from '/Users/artur/Documents/repos/proj/hxnd/ui/stores/useProjectThreadCommentStore'
-import type { ProjectThreadCommentDto, ProjectThreadDto, CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest, UpdateProjectThreadRequest } from '/Users/artur/Documents/repos/proj/hxnd/ui/types/request.types'
+import { useProjectThreadStore } from '~/stores/useProjectThreadStore'
+import { useProjectThreadCommentStore } from '~/stores/useProjectThreadCommentStore'
+import type { ProjectThreadCommentDto, ProjectThreadDto, CreateProjectThreadCommentRequest, UpdateProjectThreadCommentRequest, UpdateProjectThreadRequest } from '~/types/request.types'
 
 definePageMeta({
   layout: 'project',
